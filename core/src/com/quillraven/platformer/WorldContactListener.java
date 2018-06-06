@@ -22,6 +22,7 @@ package com.quillraven.platformer;
  * SOFTWARE.
  */
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -45,8 +46,10 @@ public class WorldContactListener implements ContactListener {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
 
-        if ("foot".equals(fixtureA.getUserData()) || "foot".equals(fixtureB.getUserData())) {
-            gsGame.onGroundCollision();
+        if ("foot".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            gsGame.onGroundCollision((Entity) fixtureA.getBody().getUserData());
+        } else if ("foot".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            gsGame.onGroundCollision((Entity) fixtureB.getBody().getUserData());
         }
     }
 
@@ -55,8 +58,10 @@ public class WorldContactListener implements ContactListener {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
 
-        if ("foot".equals(fixtureA.getUserData()) || "foot".equals(fixtureB.getUserData())) {
-            gsGame.onLeaveGround();
+        if ("foot".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            gsGame.onLeaveGround((Entity) fixtureA.getBody().getUserData());
+        } else if ("foot".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            gsGame.onLeaveGround((Entity) fixtureB.getBody().getUserData());
         }
     }
 

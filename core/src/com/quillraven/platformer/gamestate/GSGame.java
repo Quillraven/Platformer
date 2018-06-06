@@ -22,7 +22,9 @@ package com.quillraven.platformer.gamestate;
  * SOFTWARE.
  */
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -38,6 +40,10 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
+import com.quillraven.platformer.ecs.EntityEngine;
+import com.quillraven.platformer.ecs.components.ComponentBox2D;
+import com.quillraven.platformer.ecs.components.ComponentJump;
+import com.quillraven.platformer.ecs.components.ComponentMove;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -48,16 +54,14 @@ import static com.quillraven.platformer.Platformer.PPM;
 public class GSGame extends GameState {
     private final World world;
     private final Box2DDebugRenderer box2DRenderer;
-    private final Body box;
+    private final EntityEngine entityEngine;
 
-    private int numFootContacts;
-    private int move;
+    private final Entity player;
 
     public GSGame(final Platformer game) {
         super(game);
 
-        numFootContacts = 0;
-        move = 0;
+        entityEngine = new EntityEngine();
 
         this.world = new World(new Vector2(0, -9.81f), true);
         world.setContactListener(new WorldContactListener(this));
@@ -87,31 +91,22 @@ public class GSGame extends GameState {
             shape.dispose();
         }
 
-        // create box
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(160 / PPM, 200 / PPM);
-        box = world.createBody(bodyDef);
-
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(5 / PPM, 5 / PPM);
-        fixtureDef.friction = 1;
-        fixtureDef.shape = shape;
-        fixtureDef.filter.categoryBits = Platformer.BIT_BOX;
-        fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
-        box.createFixture(fixtureDef).setUserData("box");
-        shape.dispose();
+        // create player
+        player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_BOX, 160 / PPM, 200 / PPM, 10 / PPM, 10 / PPM);
 
         // create foot sensor for box
-
-        shape = new PolygonShape();
+        PolygonShape shape = new PolygonShape();
         shape.setAsBox(5 / PPM, 2 / PPM, new Vector2(0, -5 / PPM), 0);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
-        box.createFixture(fixtureDef).setUserData("foot");
+        fixtureDef.filter.categoryBits = Platformer.BIT_BOX;
+        fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
+        player.getComponent(ComponentBox2D.class).body.createFixture(fixtureDef).setUserData("foot");
         shape.dispose();
 
         // create circle
         bodyDef.position.set(167 / PPM, 230 / PPM);
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
         body = world.createBody(bodyDef);
 
         CircleShape shape2 = new CircleShape();
@@ -141,21 +136,15 @@ public class GSGame extends GameState {
     public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener.InputKeys key) {
         switch (key) {
             case JUMP: {
-                if (numFootContacts > 0) {
-                    // impulse = velocity * mass / time
-                    // since we want instant movement we ignore the time factor
-                    // therefore if we want to move our objects with a constant speed of 5 units/seconds our impulse will be:
-                    // impulse = 5 - velocity.x * mass <-- the - velocity.x will adjust the impulse so that the result velocity.x will be 5
-                    box.applyLinearImpulse(0, (3 - box.getLinearVelocity().y) * box.getMass(), box.getWorldCenter().x, box.getWorldCenter().y, true);
-                }
+                player.getComponent(ComponentJump.class).jump = true;
                 break;
             }
             case LEFT: {
-                move = -1;
+                player.getComponent(ComponentMove.class).speed = -1;
                 break;
             }
             case RIGHT: {
-                move = 1;
+                player.getComponent(ComponentMove.class).speed = 1;
                 break;
             }
         }
@@ -167,8 +156,9 @@ public class GSGame extends GameState {
         switch (key) {
             case RIGHT:
             case LEFT: {
-                move = 0;
-                box.applyLinearImpulse(-box.getLinearVelocity().x * box.getMass(), 0, box.getWorldCenter().x, box.getWorldCenter().y, true);
+                if (!Gdx.input.isKeyPressed(Input.Keys.D) && !Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    player.getComponent(ComponentMove.class).speed = 0;
+                }
                 break;
             }
             case EXIT: {
@@ -181,10 +171,8 @@ public class GSGame extends GameState {
 
     @Override
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
-        if (move != 0) {
-            box.applyLinearImpulse((move - box.getLinearVelocity().x) * box.getMass(), 0, box.getWorldCenter().x, box.getWorldCenter().y, true);
-        }
         world.step(fixedTimeStep, 6, 2);
+        entityEngine.update(fixedTimeStep);
     }
 
     @Override
@@ -203,17 +191,11 @@ public class GSGame extends GameState {
     }
 
 
-    public void onGroundCollision() {
-        ++numFootContacts;
-        if (numFootContacts > 0) {
-            System.out.println("CAN JUMP");
-        }
+    public void onGroundCollision(Entity entity) {
+        ++entity.getComponent(ComponentBox2D.class).numGroundContacts;
     }
 
-    public void onLeaveGround() {
-        --numFootContacts;
-        if (numFootContacts <= 0) {
-            System.out.println("CANNOT JUMP");
-        }
+    public void onLeaveGround(Entity entity) {
+        --entity.getComponent(ComponentBox2D.class).numGroundContacts;
     }
 }
