@@ -27,18 +27,18 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
-import com.quillraven.platformer.ecs.components.ComponentBox2D;
-import com.quillraven.platformer.ecs.components.ComponentMove;
+import com.quillraven.platformer.ecs.components.Box2DComponent;
+import com.quillraven.platformer.ecs.components.MoveComponent;
 
 /**
  * TODO add class description
  */
-public class SystemMove extends IteratingSystem {
-    private final ComponentMapper<ComponentBox2D> b2dCmpMapper;
-    private final ComponentMapper<ComponentMove> moveCmpMapper;
+public class MoveSystem extends IteratingSystem {
+    private final ComponentMapper<Box2DComponent> b2dCmpMapper;
+    private final ComponentMapper<MoveComponent> moveCmpMapper;
 
-    public SystemMove(final ComponentMapper<ComponentBox2D> b2dCmpMapper, final ComponentMapper<ComponentMove> moveCmpMapper) {
-        super(Family.all(ComponentBox2D.class, ComponentMove.class).get());
+    public MoveSystem(final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<MoveComponent> moveCmpMapper) {
+        super(Family.all(Box2DComponent.class, MoveComponent.class).get());
 
         this.b2dCmpMapper = b2dCmpMapper;
         this.moveCmpMapper = moveCmpMapper;
@@ -46,8 +46,8 @@ public class SystemMove extends IteratingSystem {
 
     @Override
     protected void processEntity(final Entity entity, final float deltaTime) {
-        final ComponentMove moveCmp = moveCmpMapper.get(entity);
-        final ComponentBox2D b2dCmp = b2dCmpMapper.get(entity);
+        final MoveComponent moveCmp = moveCmpMapper.get(entity);
+        final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
         final Vector2 worldCenter = b2dCmp.body.getWorldCenter();
 
         // cap movement speed by min/max

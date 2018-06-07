@@ -1,8 +1,6 @@
 package com.quillraven.platformer.ecs.components;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 /*
@@ -31,18 +29,13 @@ import com.badlogic.gdx.utils.Pool;
 /**
  * TODO add class description
  */
-public class ComponentBox2D implements Component, Pool.Poolable {
-    public final Array<Body> contacts = new Array<>();
-    public Body body = null;
-    public int numGroundContacts;
+public class MoveComponent implements Component, Pool.Poolable {
+    public float maxSpeed;
+    public float speed;
 
     @Override
     public void reset() {
-        if (body != null) {
-            body.getWorld().destroyBody(body);
-            body = null;
-        }
-        numGroundContacts = 0;
-        contacts.clear();
+        maxSpeed = 0;
+        speed = 0;
     }
 }

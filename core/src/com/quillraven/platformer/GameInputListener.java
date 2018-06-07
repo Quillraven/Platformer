@@ -30,46 +30,58 @@ import com.quillraven.platformer.gamestate.GameStateManager;
  * TODO add class description
  */
 public class GameInputListener extends InputAdapter {
-    public enum InputKeys {
-        JUMP,
-        RIGHT,
-        LEFT,
-        EXIT
-    }
+    private final GameKeys[] keyMapping;
 
     private final GameStateManager gsManager;
+    private final boolean keyState[];
 
     public GameInputListener(final GameStateManager gsManager) {
         this.gsManager = gsManager;
+        this.keyMapping = new GameKeys[256];
+        for (GameKeys key : GameKeys.values()) {
+            keyMapping[key.keyCode] = key;
+        }
+        this.keyState = new boolean[GameKeys.values().length];
     }
 
     @Override
     public boolean keyDown(final int keycode) {
-        switch (keycode) {
-            case Input.Keys.A:
-                return gsManager.onKeyPressed(InputKeys.LEFT);
-            case Input.Keys.D:
-                return gsManager.onKeyPressed(InputKeys.RIGHT);
-            case Input.Keys.SPACE:
-                return gsManager.onKeyPressed(InputKeys.JUMP);
-            case Input.Keys.ESCAPE:
-                return gsManager.onKeyPressed(InputKeys.EXIT);
+        final GameKeys gKey = keyMapping[keycode];
+        if (gKey == null) {
+            // no relevant key for game
+            return false;
         }
-        return false;
+
+        keyState[gKey.ordinal()] = true;
+        return gsManager.onKeyPressed(this, gKey);
     }
 
     @Override
     public boolean keyUp(final int keycode) {
-        switch (keycode) {
-            case Input.Keys.A:
-                return gsManager.onKeyReleased(InputKeys.LEFT);
-            case Input.Keys.D:
-                return gsManager.onKeyReleased(InputKeys.RIGHT);
-            case Input.Keys.SPACE:
-                return gsManager.onKeyReleased(InputKeys.JUMP);
-            case Input.Keys.ESCAPE:
-                return gsManager.onKeyReleased(InputKeys.EXIT);
+        final GameKeys gKey = keyMapping[keycode];
+        if (gKey == null) {
+            // no relevant key for game
+            return false;
         }
-        return false;
+
+        keyState[gKey.ordinal()] = false;
+        return gsManager.onKeyReleased(this, gKey);
+    }
+
+    public boolean isKeyPressed(final GameKeys key) {
+        return keyState[key.ordinal()];
+    }
+
+    public enum GameKeys {
+        JUMP(Input.Keys.SPACE),
+        RIGHT(Input.Keys.D),
+        LEFT(Input.Keys.A),
+        EXIT(Input.Keys.ESCAPE);
+
+        private final int keyCode;
+
+        GameKeys(final int keyCode) {
+            this.keyCode = keyCode;
+        }
     }
 }

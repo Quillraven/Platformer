@@ -119,12 +119,12 @@ public class GameStateManager {
         nextGSToPush = getState(gsType);
     }
 
-    public boolean onKeyPressed(final GameInputListener.InputKeys key) {
-        return stateStack.peek().onKeyPressed(this, key);
+    public boolean onKeyPressed(final GameInputListener inputListener, final GameInputListener.GameKeys key) {
+        return stateStack.peek().onKeyPressed(this, inputListener, key);
     }
 
-    public boolean onKeyReleased(final GameInputListener.InputKeys key) {
-        return stateStack.peek().onKeyReleased(this, key);
+    public boolean onKeyReleased(final GameInputListener inputListener, final GameInputListener.GameKeys key) {
+        return stateStack.peek().onKeyReleased(this, inputListener, key);
     }
 
     public boolean update(final float fixedTimeStep) {

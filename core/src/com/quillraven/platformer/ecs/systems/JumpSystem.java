@@ -27,19 +27,20 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
-import com.quillraven.platformer.ecs.components.ComponentBox2D;
-import com.quillraven.platformer.ecs.components.ComponentJump;
-import com.quillraven.platformer.ecs.components.ComponentMove;
+import com.quillraven.platformer.WorldContactListener;
+import com.quillraven.platformer.ecs.components.Box2DComponent;
+import com.quillraven.platformer.ecs.components.JumpComponent;
+import com.quillraven.platformer.ecs.components.MoveComponent;
 
 /**
  * TODO add class description
  */
-public class SystemJump extends IteratingSystem {
-    private final ComponentMapper<ComponentBox2D> b2dCmpMapper;
-    private final ComponentMapper<ComponentJump> jumpCmpMapper;
+public class JumpSystem extends IteratingSystem implements WorldContactListener.GameContactListener {
+    private final ComponentMapper<Box2DComponent> b2dCmpMapper;
+    private final ComponentMapper<JumpComponent> jumpCmpMapper;
 
-    public SystemJump(final ComponentMapper<ComponentBox2D> b2dCmpMapper, final ComponentMapper<ComponentJump> jumpCmpMapper) {
-        super(Family.all(ComponentBox2D.class, ComponentMove.class).get());
+    public JumpSystem(final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<JumpComponent> jumpCmpMapper) {
+        super(Family.all(Box2DComponent.class, MoveComponent.class).get());
 
         this.b2dCmpMapper = b2dCmpMapper;
         this.jumpCmpMapper = jumpCmpMapper;
@@ -47,8 +48,8 @@ public class SystemJump extends IteratingSystem {
 
     @Override
     protected void processEntity(final Entity entity, final float deltaTime) {
-        final ComponentJump jumpCmp = jumpCmpMapper.get(entity);
-        final ComponentBox2D b2dCmp = b2dCmpMapper.get(entity);
+        final JumpComponent jumpCmp = jumpCmpMapper.get(entity);
+        final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
         final Vector2 worldCenter = b2dCmp.body.getWorldCenter();
 
         if (jumpCmp.jump && b2dCmp.numGroundContacts > 0) {
@@ -60,5 +61,27 @@ public class SystemJump extends IteratingSystem {
         }
 
         jumpCmp.jump = false;
+    }
+
+    @Override
+    public void onBeginGroundContact(final Entity entity) {
+        ++b2dCmpMapper.get(entity).numGroundContacts;
+    }
+
+    @Override
+    public void onEndGroundContact(final Entity entity) {
+        --b2dCmpMapper.get(entity).numGroundContacts;
+    }
+
+    @Override
+    public void onBeginEntityContact(final Entity entityA, final Entity entityB) {
+        b2dCmpMapper.get(entityA).contacts.add(entityB);
+        b2dCmpMapper.get(entityB).contacts.add(entityA);
+    }
+
+    @Override
+    public void onEndEntityContact(final Entity entityA, final Entity entityB) {
+        b2dCmpMapper.get(entityA).contacts.removeValue(entityB, false);
+        b2dCmpMapper.get(entityB).contacts.removeValue(entityA, false);
     }
 }

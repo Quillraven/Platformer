@@ -24,16 +24,13 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ChainShape;
-import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -41,9 +38,9 @@ import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
 import com.quillraven.platformer.ecs.EntityEngine;
-import com.quillraven.platformer.ecs.components.ComponentBox2D;
-import com.quillraven.platformer.ecs.components.ComponentJump;
-import com.quillraven.platformer.ecs.components.ComponentMove;
+import com.quillraven.platformer.ecs.components.Box2DComponent;
+import com.quillraven.platformer.ecs.components.JumpComponent;
+import com.quillraven.platformer.ecs.components.MoveComponent;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -61,11 +58,12 @@ public class GSGame extends GameState {
     public GSGame(final Platformer game) {
         super(game);
 
-        entityEngine = new EntityEngine();
-
         this.world = new World(new Vector2(0, -9.81f), true);
-        world.setContactListener(new WorldContactListener(this));
+        final WorldContactListener contactListener = new WorldContactListener();
+        world.setContactListener(contactListener);
         this.box2DRenderer = new Box2DDebugRenderer();
+
+        entityEngine = new EntityEngine(contactListener);
 
         // create platform
         final BodyDef bodyDef = new BodyDef();
@@ -86,37 +84,16 @@ public class GSGame extends GameState {
             fixtureDef.shape = shape;
             fixtureDef.friction = 0;
             fixtureDef.filter.categoryBits = Platformer.BIT_GROUND;
-            fixtureDef.filter.maskBits = Platformer.BIT_BALL | Platformer.BIT_BOX;
+            fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
             body.createFixture(fixtureDef).setUserData("platform");
             shape.dispose();
         }
 
         // create player
-        player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_BOX, 160 / PPM, 200 / PPM, 10 / PPM, 10 / PPM);
+        player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 160, 200, 10, 10);
 
-        // create foot sensor for box
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(5 / PPM, 2 / PPM, new Vector2(0, -5 / PPM), 0);
-        fixtureDef.shape = shape;
-        fixtureDef.isSensor = true;
-        fixtureDef.filter.categoryBits = Platformer.BIT_BOX;
-        fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
-        player.getComponent(ComponentBox2D.class).body.createFixture(fixtureDef).setUserData("foot");
-        shape.dispose();
-
-        // create circle
-        bodyDef.position.set(167 / PPM, 230 / PPM);
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        body = world.createBody(bodyDef);
-
-        CircleShape shape2 = new CircleShape();
-        shape2.setRadius(7 / PPM);
-        fixtureDef.shape = shape2;
-        fixtureDef.isSensor = false;
-        fixtureDef.filter.categoryBits = Platformer.BIT_BALL;
-        fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
-        body.createFixture(fixtureDef).setUserData("circle");
-        shape2.dispose();
+        // create second entity
+        entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 167, 230, 14, 14);
     }
 
     @Override
@@ -133,18 +110,18 @@ public class GSGame extends GameState {
     }
 
     @Override
-    public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener.InputKeys key) {
+    public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key) {
         switch (key) {
             case JUMP: {
-                player.getComponent(ComponentJump.class).jump = true;
+                player.getComponent(JumpComponent.class).jump = true;
                 break;
             }
             case LEFT: {
-                player.getComponent(ComponentMove.class).speed = -1;
+                player.getComponent(MoveComponent.class).speed = -1;
                 break;
             }
             case RIGHT: {
-                player.getComponent(ComponentMove.class).speed = 1;
+                player.getComponent(MoveComponent.class).speed = 1;
                 break;
             }
         }
@@ -152,12 +129,12 @@ public class GSGame extends GameState {
     }
 
     @Override
-    public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener.InputKeys key) {
+    public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key) {
         switch (key) {
             case RIGHT:
             case LEFT: {
-                if (!Gdx.input.isKeyPressed(Input.Keys.D) && !Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    player.getComponent(ComponentMove.class).speed = 0;
+                if (!inputListener.isKeyPressed(GameInputListener.GameKeys.RIGHT) && !inputListener.isKeyPressed(GameInputListener.GameKeys.LEFT)) {
+                    player.getComponent(MoveComponent.class).speed = 0;
                 }
                 break;
             }
@@ -171,6 +148,11 @@ public class GSGame extends GameState {
 
     @Override
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
+        // save position before update for interpolated rendering
+        for (Entity entity : entityEngine.getBox2DEntities()) {
+            final Box2DComponent b2dCmp = entityEngine.getBox2DComponent(entity);
+            b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
+        }
         world.step(fixedTimeStep, 6, 2);
         entityEngine.update(fixedTimeStep);
     }
@@ -182,20 +164,19 @@ public class GSGame extends GameState {
         spriteBatch.begin();
         box2DRenderer.render(world, camera.combined);
         spriteBatch.end();
+
+        /*
+                     final float invertAlpha = 1.0f - alpha;
+
+                     // calculate interpolated position for rendering
+                     aniCmp.position.x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - radius;
+                     aniCmp.position.y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - radius;
+         */
     }
 
     @Override
     public void onDispose() {
         box2DRenderer.dispose();
         world.dispose();
-    }
-
-
-    public void onGroundCollision(Entity entity) {
-        ++entity.getComponent(ComponentBox2D.class).numGroundContacts;
-    }
-
-    public void onLeaveGround(Entity entity) {
-        --entity.getComponent(ComponentBox2D.class).numGroundContacts;
     }
 }

@@ -13,8 +13,7 @@ public class Platformer extends ApplicationAdapter {
     public static final float PPM = 100f;
 
     public static final short BIT_GROUND = 1 << 1;
-    public static final short BIT_BOX = 1 << 2;
-    public static final short BIT_BALL = 1 << 3;
+    public static final short BIT_PLAYER = 1 << 2;
 
     private static final float FIXED_TIME_STEP = 1 / 60f;
     private float accumulator;

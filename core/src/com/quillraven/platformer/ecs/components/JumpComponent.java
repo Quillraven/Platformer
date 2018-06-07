@@ -1,8 +1,4 @@
 package com.quillraven.platformer.ecs.components;
-
-import com.badlogic.ashley.core.Component;
-import com.badlogic.gdx.utils.Pool;
-
 /*
  * Created by Quillraven on 06.06.2018.
  *
@@ -26,16 +22,19 @@ import com.badlogic.gdx.utils.Pool;
  * SOFTWARE.
  */
 
+import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.utils.Pool;
+
 /**
  * TODO add class description
  */
-public class ComponentMove implements Component, Pool.Poolable {
-    public float maxSpeed;
-    public float speed;
+public class JumpComponent implements Component, Pool.Poolable {
+    public boolean jump;
+    public float jumpSpeed;
 
     @Override
     public void reset() {
-        maxSpeed = 0;
-        speed = 0;
+        jump = false;
+        jumpSpeed = 0;
     }
 }

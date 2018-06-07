@@ -33,9 +33,9 @@ import com.quillraven.platformer.Platformer;
  */
 
 abstract public class GameState {
-    final Platformer game;
+    private final Platformer game;
     final SpriteBatch spriteBatch;
-    final Viewport viewport;
+    private final Viewport viewport;
     final Camera camera;
 
     GameState(final Platformer game) {
@@ -51,9 +51,9 @@ abstract public class GameState {
 
     abstract public void onDeactivation();
 
-    abstract public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener.InputKeys key);
+    abstract public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
 
-    abstract public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener.InputKeys key);
+    abstract public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
 
     abstract public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep);
 

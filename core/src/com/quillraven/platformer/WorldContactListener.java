@@ -28,17 +28,25 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import com.quillraven.platformer.gamestate.GSGame;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * TODO add class description
  */
 
 public class WorldContactListener implements ContactListener {
-    private final GSGame gsGame;
+    private final Array<GameContactListener> listeners;
 
-    public WorldContactListener(final GSGame gsGame) {
-        this.gsGame = gsGame;
+    public WorldContactListener() {
+        this.listeners = new Array<>();
+    }
+
+    public void addGameContactListener(final GameContactListener listener) {
+        this.listeners.add(listener);
+    }
+
+    public void removeGameContactListener(final GameContactListener listener) {
+        this.listeners.removeValue(listener, false);
     }
 
     @Override
@@ -47,9 +55,17 @@ public class WorldContactListener implements ContactListener {
         final Fixture fixtureB = contact.getFixtureB();
 
         if ("foot".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
-            gsGame.onGroundCollision((Entity) fixtureA.getBody().getUserData());
+            for (GameContactListener listener : listeners) {
+                listener.onBeginGroundContact((Entity) fixtureA.getBody().getUserData());
+            }
         } else if ("foot".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
-            gsGame.onGroundCollision((Entity) fixtureB.getBody().getUserData());
+            for (GameContactListener listener : listeners) {
+                listener.onBeginGroundContact((Entity) fixtureB.getBody().getUserData());
+            }
+        } else if ("hitbox".equals(fixtureA.getUserData()) && "hitbox".equals(fixtureB.getUserData())) {
+            for (GameContactListener listener : listeners) {
+                listener.onBeginEntityContact((Entity) fixtureA.getBody().getUserData(), (Entity) fixtureB.getBody().getUserData());
+            }
         }
     }
 
@@ -59,10 +75,28 @@ public class WorldContactListener implements ContactListener {
         final Fixture fixtureB = contact.getFixtureB();
 
         if ("foot".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
-            gsGame.onLeaveGround((Entity) fixtureA.getBody().getUserData());
+            for (GameContactListener listener : listeners) {
+                listener.onEndGroundContact((Entity) fixtureA.getBody().getUserData());
+            }
         } else if ("foot".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
-            gsGame.onLeaveGround((Entity) fixtureB.getBody().getUserData());
+            for (GameContactListener listener : listeners) {
+                listener.onEndGroundContact((Entity) fixtureB.getBody().getUserData());
+            }
+        } else if ("hitbox".equals(fixtureA.getUserData()) && "hitbox".equals(fixtureB.getUserData())) {
+            for (GameContactListener listener : listeners) {
+                listener.onEndEntityContact((Entity) fixtureA.getBody().getUserData(), (Entity) fixtureB.getBody().getUserData());
+            }
         }
+    }
+
+    public interface GameContactListener {
+        void onBeginGroundContact(final Entity entity);
+
+        void onEndGroundContact(final Entity entity);
+
+        void onBeginEntityContact(final Entity entityA, final Entity entityB);
+
+        void onEndEntityContact(final Entity entityA, final Entity entityB);
     }
 
     @Override
