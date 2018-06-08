@@ -22,34 +22,30 @@ package com.quillraven.platformer.gamestate;
  * SOFTWARE.
  */
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputListener;
-import com.quillraven.platformer.Platformer;
 
 /**
  * TODO add class description
  */
 
 abstract public class GameState {
-    private final Platformer game;
-    final SpriteBatch spriteBatch;
     private final Viewport viewport;
     final Camera camera;
 
-    GameState(final Platformer game) {
-        this.game = game;
-        this.spriteBatch = game.getSpriteBatch();
+    GameState() {
         this.viewport = getViewport();
         this.camera = viewport.getCamera();
     }
 
     abstract Viewport getViewport();
 
-    abstract public void onActivation();
+    abstract public void onActivation(final AssetManager assetManager);
 
-    abstract public void onDeactivation();
+    abstract public void onDeactivation(final AssetManager assetManager);
 
     abstract public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
 
@@ -57,7 +53,7 @@ abstract public class GameState {
 
     abstract public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep);
 
-    abstract public void onRender(final float alpha);
+    abstract public void onRender(final SpriteBatch spriteBatch, final float alpha);
 
     public void onResize(final int width, final int height) {
         viewport.update(width, height, true);

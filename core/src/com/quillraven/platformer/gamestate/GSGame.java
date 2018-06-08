@@ -24,7 +24,10 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -55,8 +58,8 @@ public class GSGame extends GameState {
 
     private final Entity player;
 
-    public GSGame(final Platformer game) {
-        super(game);
+    public GSGame() {
+        super();
 
         this.world = new World(new Vector2(0, -9.81f), true);
         final WorldContactListener contactListener = new WorldContactListener();
@@ -102,11 +105,13 @@ public class GSGame extends GameState {
     }
 
     @Override
-    public void onActivation() {
+    public void onActivation(final AssetManager assetManager) {
+        assetManager.load("hud/switchLeft.png", Texture.class);
+        assetManager.load("hud/switchRight.png", Texture.class);
     }
 
     @Override
-    public void onDeactivation() {
+    public void onDeactivation(final AssetManager assetManager) {
     }
 
     @Override
@@ -158,7 +163,7 @@ public class GSGame extends GameState {
     }
 
     @Override
-    public void onRender(final float alpha) {
+    public void onRender(final SpriteBatch spriteBatch, final float alpha) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         spriteBatch.begin();

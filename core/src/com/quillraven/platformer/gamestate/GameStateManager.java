@@ -23,11 +23,12 @@ package com.quillraven.platformer.gamestate;
  */
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.quillraven.platformer.GameInputListener;
-import com.quillraven.platformer.Platformer;
 
 /**
  * GameStateManager is responsible to manage the states of a game like a main menu, game, game over screen, etc..
@@ -44,17 +45,21 @@ import com.quillraven.platformer.Platformer;
 public class GameStateManager {
     private final static String TAG = GameStateManager.class.getSimpleName();
 
-    public enum GameStateType {
-        GAME(GSGame.class);
+    private final SpriteBatch spriteBatch;
+    private final AssetManager assetManager;
 
-        private final Class<? extends GSGame> gsClass;
+    public GameStateManager(final GameStateType initialGS) {
+        this.assetManager = new AssetManager();
+        this.spriteBatch = new SpriteBatch();
 
-        GameStateType(final Class<? extends GSGame> gsClass) {
-            this.gsClass = gsClass;
-        }
+        this.gameStateCache = new ObjectMap<>();
+        this.stateStack = new Array<>();
+        this.popState = false;
+
+        Gdx.input.setInputProcessor(new GameInputListener(this));
+
+        activateGameState(getState(initialGS));
     }
-
-    private final Platformer game;
 
     private final ObjectMap<GameStateType, GameState> gameStateCache;
     private final Array<GameState> stateStack;
@@ -62,26 +67,13 @@ public class GameStateManager {
     private GameState nextGSToPush;
     private boolean popState;
 
-    public GameStateManager(final Platformer game, final GameStateType initialGS) {
-        this.game = game;
-        this.gameStateCache = new ObjectMap<>();
-        this.stateStack = new Array<>();
-        this.nextGSToPush = null;
-        this.popState = false;
-        Gdx.input.setInputProcessor(new GameInputListener(this));
-
-        final GameState state = getState(initialGS);
-        stateStack.add(state);
-        state.onActivation();
-    }
-
     // retrieve state instance by type enum and if it does not exist then create it
     private GameState getState(final GameStateType gsType) {
         GameState gameState = gameStateCache.get(gsType);
         if (gameState == null) {
             try {
                 Gdx.app.debug(TAG, "Creating new gamestate " + gsType);
-                gameState = gsType.gsClass.getConstructor(Platformer.class).newInstance(game);
+                gameState = gsType.gsClass.getConstructor().newInstance();
                 gameStateCache.put(gsType, gameState);
             } catch (Exception e) {
                 Gdx.app.error(TAG, "Could not create gamestate " + gsType, e);
@@ -89,6 +81,37 @@ public class GameStateManager {
             }
         }
         return gameState;
+    }
+
+    public boolean update(final float fixedTimeStep) {
+        if (popState) {
+            // pop current state
+            Gdx.app.debug(TAG, "Popping current gamestate " + stateStack.peek().getClass().getSimpleName());
+            if (stateStack.size > 0) {
+                stateStack.pop().onDeactivation(assetManager);
+            }
+            popState = false;
+        }
+
+        if (nextGSToPush != null) {
+            // push next state
+            activateGameState(nextGSToPush);
+        }
+
+        if (stateStack.size == 0) {
+            // no more states to process -> exit game
+            Gdx.app.debug(TAG, "No more gamestates left --> EXIT");
+            return false;
+        }
+
+        if (assetManager.getProgress() != 1 && !(stateStack.peek() instanceof GSLoading)) {
+            // assets need to be loaded -> change to loading state
+            activateGameState(getState(GameStateType.LOADING));
+        }
+
+        stateStack.peek().onUpdate(this, fixedTimeStep);
+
+        return true;
     }
 
     /**
@@ -127,36 +150,27 @@ public class GameStateManager {
         return stateStack.peek().onKeyReleased(this, inputListener, key);
     }
 
-    public boolean update(final float fixedTimeStep) {
-        if (popState) {
-            // pop current state
-            Gdx.app.debug(TAG, "Popping current gamestate");
-            if (stateStack.size > 0) {
-                stateStack.pop().onDeactivation();
-            }
-            popState = false;
-        }
-
-        if (nextGSToPush != null) {
-            // push next state
-            Gdx.app.debug(TAG, "Pushing new gamestate");
-            stateStack.add(nextGSToPush);
-            nextGSToPush.onActivation();
-            nextGSToPush = null;
-        }
-
-        if (stateStack.size == 0) {
-            // no more states to process -> exit game
-            Gdx.app.debug(TAG, "No more gamestates left --> EXIT");
-            return false;
-        }
-
-        stateStack.peek().onUpdate(this, fixedTimeStep);
-        return true;
+    private void activateGameState(final GameState gameState) {
+        Gdx.app.debug(TAG, "Pushing new gamestate " + gameState.getClass().getSimpleName());
+        stateStack.add(gameState);
+        // call resize in case gamestate was not active during window resize event
+        gameState.onResize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        gameState.onActivation(assetManager);
+        nextGSToPush = null;
     }
 
     public void render(final float alpha) {
-        stateStack.peek().onRender(alpha);
+        stateStack.peek().onRender(spriteBatch, alpha);
+    }
+
+    public void dispose() {
+        Gdx.app.debug(TAG, "Disposing all gamestates: " + gameStateCache.size);
+        for (final GameState gs : gameStateCache.values()) {
+            gs.onDeactivation(assetManager);
+            gs.onDispose();
+        }
+        spriteBatch.dispose();
+        assetManager.dispose();
     }
 
     public void resize(final int width, final int height) {
@@ -164,11 +178,14 @@ public class GameStateManager {
         stateStack.peek().onResize(width, height);
     }
 
-    public void dispose() {
-        Gdx.app.debug(TAG, "Disposing all gamestates: " + gameStateCache.size);
-        for (final GameState gs : gameStateCache.values()) {
-            gs.onDeactivation();
-            gs.onDispose();
+    public enum GameStateType {
+        GAME(GSGame.class),
+        LOADING(GSLoading.class);
+
+        private final Class<? extends GameState> gsClass;
+
+        GameStateType(final Class<? extends GameState> gsClass) {
+            this.gsClass = gsClass;
         }
     }
 }

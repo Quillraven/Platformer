@@ -2,7 +2,6 @@ package com.quillraven.platformer;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.quillraven.platformer.gamestate.GameStateManager;
 
 public class Platformer extends ApplicationAdapter {
@@ -18,20 +17,13 @@ public class Platformer extends ApplicationAdapter {
     private static final float FIXED_TIME_STEP = 1 / 60f;
     private float accumulator;
 
-    private SpriteBatch spriteBatch;
-
     private GameStateManager gsManager;
 
     @Override
     public void create() {
         Gdx.app.setLogLevel(Gdx.app.LOG_DEBUG);
 
-        spriteBatch = new SpriteBatch();
-        gsManager = new GameStateManager(this, GameStateManager.GameStateType.GAME);
-    }
-
-    public SpriteBatch getSpriteBatch() {
-        return spriteBatch;
+        gsManager = new GameStateManager(GameStateManager.GameStateType.GAME);
     }
 
     @Override
@@ -54,7 +46,7 @@ public class Platformer extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        spriteBatch.dispose();
         gsManager.dispose();
     }
+
 }
