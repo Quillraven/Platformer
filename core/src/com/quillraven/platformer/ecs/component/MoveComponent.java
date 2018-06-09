@@ -1,4 +1,4 @@
-package com.quillraven.platformer.ecs.components;
+package com.quillraven.platformer.ecs.component;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;

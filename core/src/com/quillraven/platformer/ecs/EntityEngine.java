@@ -12,11 +12,11 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
-import com.quillraven.platformer.ecs.components.Box2DComponent;
-import com.quillraven.platformer.ecs.components.JumpComponent;
-import com.quillraven.platformer.ecs.components.MoveComponent;
-import com.quillraven.platformer.ecs.systems.JumpSystem;
-import com.quillraven.platformer.ecs.systems.MoveSystem;
+import com.quillraven.platformer.ecs.component.Box2DComponent;
+import com.quillraven.platformer.ecs.component.JumpComponent;
+import com.quillraven.platformer.ecs.component.MoveComponent;
+import com.quillraven.platformer.ecs.system.JumpSystem;
+import com.quillraven.platformer.ecs.system.MoveSystem;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -123,12 +123,12 @@ public class EntityEngine extends PooledEngine {
 
         // jump component
         final JumpComponent jumpCmp = this.createComponent(JumpComponent.class);
-        jumpCmp.jumpSpeed = 3;
+        jumpCmp.jumpSpeed = 8;
         entity.add(jumpCmp);
 
         // move component
         final MoveComponent moveCmp = this.createComponent(MoveComponent.class);
-        moveCmp.maxSpeed = 1;
+        moveCmp.maxSpeed = 6;
         entity.add(moveCmp);
 
         this.addEntity(entity);

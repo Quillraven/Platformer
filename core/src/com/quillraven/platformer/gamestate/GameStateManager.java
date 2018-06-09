@@ -24,7 +24,11 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.FileHandleResolver;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -48,8 +52,17 @@ public class GameStateManager {
     private final SpriteBatch spriteBatch;
     private final AssetManager assetManager;
 
+    private final ObjectMap<GameStateType, GameState> gameStateCache;
+    private final Array<GameState> stateStack;
+
+    private GameState nextGSToPush;
+    private boolean popState;
+
     public GameStateManager(final GameStateType initialGS) {
+        final FileHandleResolver resolver = new InternalFileHandleResolver();
         this.assetManager = new AssetManager();
+        assetManager.setLoader(TiledMap.class, new TmxMapLoader(resolver));
+
         this.spriteBatch = new SpriteBatch();
 
         this.gameStateCache = new ObjectMap<>();
@@ -61,19 +74,13 @@ public class GameStateManager {
         activateGameState(getState(initialGS));
     }
 
-    private final ObjectMap<GameStateType, GameState> gameStateCache;
-    private final Array<GameState> stateStack;
-
-    private GameState nextGSToPush;
-    private boolean popState;
-
     // retrieve state instance by type enum and if it does not exist then create it
     private GameState getState(final GameStateType gsType) {
         GameState gameState = gameStateCache.get(gsType);
         if (gameState == null) {
             try {
                 Gdx.app.debug(TAG, "Creating new gamestate " + gsType);
-                gameState = gsType.gsClass.getConstructor().newInstance();
+                gameState = gsType.gsClass.getConstructor(AssetManager.class).newInstance(assetManager);
                 gameStateCache.put(gsType, gameState);
             } catch (Exception e) {
                 Gdx.app.error(TAG, "Could not create gamestate " + gsType, e);
@@ -88,7 +95,11 @@ public class GameStateManager {
             // pop current state
             Gdx.app.debug(TAG, "Popping current gamestate " + stateStack.peek().getClass().getSimpleName());
             if (stateStack.size > 0) {
-                stateStack.pop().onDeactivation(assetManager);
+                stateStack.pop().onDeactivation();
+                if (stateStack.size > 0) {
+                    stateStack.peek().onResize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+                    stateStack.peek().onActivation();
+                }
             }
             popState = false;
         }
@@ -155,7 +166,7 @@ public class GameStateManager {
         stateStack.add(gameState);
         // call resize in case gamestate was not active during window resize event
         gameState.onResize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        gameState.onActivation(assetManager);
+        gameState.onActivation();
         nextGSToPush = null;
     }
 
@@ -166,7 +177,7 @@ public class GameStateManager {
     public void dispose() {
         Gdx.app.debug(TAG, "Disposing all gamestates: " + gameStateCache.size);
         for (final GameState gs : gameStateCache.values()) {
-            gs.onDeactivation(assetManager);
+            gs.onDeactivation();
             gs.onDispose();
         }
         spriteBatch.dispose();

@@ -1,4 +1,4 @@
-package com.quillraven.platformer.ecs.systems;
+package com.quillraven.platformer.ecs.system;
 /*
  * Created by Quillraven on 06.06.2018.
  *
@@ -28,9 +28,9 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.quillraven.platformer.WorldContactListener;
-import com.quillraven.platformer.ecs.components.Box2DComponent;
-import com.quillraven.platformer.ecs.components.JumpComponent;
-import com.quillraven.platformer.ecs.components.MoveComponent;
+import com.quillraven.platformer.ecs.component.Box2DComponent;
+import com.quillraven.platformer.ecs.component.JumpComponent;
+import com.quillraven.platformer.ecs.component.MoveComponent;
 
 /**
  * TODO add class description

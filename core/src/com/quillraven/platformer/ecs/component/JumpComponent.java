@@ -1,12 +1,4 @@
-package com.quillraven.platformer.ecs.components;
-
-import com.badlogic.ashley.core.Component;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
-
+package com.quillraven.platformer.ecs.component;
 /*
  * Created by Quillraven on 06.06.2018.
  *
@@ -30,23 +22,19 @@ import com.badlogic.gdx.utils.Pool;
  * SOFTWARE.
  */
 
+import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.utils.Pool;
+
 /**
  * TODO add class description
  */
-public class Box2DComponent implements Component, Pool.Poolable {
-    public final Array<Entity> contacts = new Array<>();
-    public Body body = null;
-    public int numGroundContacts;
-    public Vector2 positionBeforeUpdate = new Vector2(0, 0);
+public class JumpComponent implements Component, Pool.Poolable {
+    public boolean jump;
+    public float jumpSpeed;
 
     @Override
     public void reset() {
-        if (body != null) {
-            body.getWorld().destroyBody(body);
-            body = null;
-        }
-        numGroundContacts = 0;
-        contacts.clear();
-        positionBeforeUpdate.set(0, 0);
+        jump = false;
+        jumpSpeed = 0;
     }
 }

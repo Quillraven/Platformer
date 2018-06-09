@@ -41,13 +41,11 @@ public class GSLoading extends GameState {
 
     private long timeStartLoading;
     private Texture texture;
-    private AssetManager assetManager;
 
-    public GSLoading() {
-        super();
+    public GSLoading(final AssetManager assetManager) {
+        super(assetManager);
 
         texture = null;
-        assetManager = null;
     }
 
     @Override
@@ -56,8 +54,7 @@ public class GSLoading extends GameState {
     }
 
     @Override
-    public void onActivation(final AssetManager assetManager) {
-        this.assetManager = assetManager;
+    public void onActivation() {
         timeStartLoading = TimeUtils.millis();
         Gdx.app.debug(TAG, "Loading assets");
 
@@ -67,7 +64,7 @@ public class GSLoading extends GameState {
     }
 
     @Override
-    public void onDeactivation(final AssetManager assetManager) {
+    public void onDeactivation() {
 
     }
 

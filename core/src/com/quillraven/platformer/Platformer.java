@@ -6,10 +6,10 @@ import com.quillraven.platformer.gamestate.GameStateManager;
 
 public class Platformer extends ApplicationAdapter {
     public static final String TITLE = "Platformer";
-    public static final int V_WIDTH = 320;
-    public static final int V_HEIGHT = 240;
+    public static final int V_WIDTH = 700;
+    public static final int V_HEIGHT = 350;
 
-    public static final float PPM = 100f;
+    public static final float PPM = 70f;
 
     public static final short BIT_GROUND = 1 << 1;
     public static final short BIT_PLAYER = 1 << 2;

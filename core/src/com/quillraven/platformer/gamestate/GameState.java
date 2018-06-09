@@ -23,7 +23,7 @@ package com.quillraven.platformer.gamestate;
  */
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputListener;
@@ -34,18 +34,20 @@ import com.quillraven.platformer.GameInputListener;
 
 abstract public class GameState {
     private final Viewport viewport;
-    final Camera camera;
+    final OrthographicCamera camera;
+    final AssetManager assetManager;
 
-    GameState() {
+    GameState(final AssetManager assetManager) {
         this.viewport = getViewport();
-        this.camera = viewport.getCamera();
+        this.camera = (OrthographicCamera) viewport.getCamera();
+        this.assetManager = assetManager;
     }
 
     abstract Viewport getViewport();
 
-    abstract public void onActivation(final AssetManager assetManager);
+    abstract public void onActivation();
 
-    abstract public void onDeactivation(final AssetManager assetManager);
+    abstract public void onDeactivation();
 
     abstract public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
 

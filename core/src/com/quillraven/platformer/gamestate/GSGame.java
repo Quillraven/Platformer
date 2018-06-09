@@ -26,14 +26,12 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.ChainShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -41,9 +39,12 @@ import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
 import com.quillraven.platformer.ecs.EntityEngine;
-import com.quillraven.platformer.ecs.components.Box2DComponent;
-import com.quillraven.platformer.ecs.components.JumpComponent;
-import com.quillraven.platformer.ecs.components.MoveComponent;
+import com.quillraven.platformer.ecs.component.Box2DComponent;
+import com.quillraven.platformer.ecs.component.JumpComponent;
+import com.quillraven.platformer.ecs.component.MoveComponent;
+import com.quillraven.platformer.map.Map;
+import com.quillraven.platformer.map.MapManager;
+import com.quillraven.platformer.map.MapObjectHandler;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -51,16 +52,23 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 
-public class GSGame extends GameState {
+public class GSGame extends GameState implements MapManager.MapListener {
     private final World world;
     private final Box2DDebugRenderer box2DRenderer;
+
     private final EntityEngine entityEngine;
+    private final OrthogonalTiledMapRenderer mapRenderer;
+    private final MapManager mapManager;
+    private Entity player;
+    private float minCameraWidth;
+    private float minCameraHeight;
+    private float maxCameraWidth;
+    private float maxCameraHeight;
 
-    private final Entity player;
+    public GSGame(final AssetManager assetManager) {
+        super(assetManager);
 
-    public GSGame() {
-        super();
-
+        Box2D.init();
         this.world = new World(new Vector2(0, -9.81f), true);
         final WorldContactListener contactListener = new WorldContactListener();
         world.setContactListener(contactListener);
@@ -68,35 +76,11 @@ public class GSGame extends GameState {
 
         entityEngine = new EntityEngine(contactListener);
 
-        // create platform
-        final BodyDef bodyDef = new BodyDef();
-        final FixtureDef fixtureDef = new FixtureDef();
-        Body body;
-        for (int i = 0; i < 10; ++i) {
-            bodyDef.type = BodyDef.BodyType.StaticBody;
-            bodyDef.position.set((100 + i * 10) / PPM, 120 / PPM);
-            body = world.createBody(bodyDef);
-
-            ChainShape shape = new ChainShape();
-            Vector2[] vertices = new Vector2[4];
-            vertices[0] = new Vector2(5 / PPM, 5 / PPM);
-            vertices[1] = new Vector2(-5 / PPM, 5 / PPM);
-            vertices[2] = new Vector2(-5 / PPM, -5 / PPM);
-            vertices[3] = new Vector2(5 / PPM, -5 / PPM);
-            shape.createLoop(vertices);
-            fixtureDef.shape = shape;
-            fixtureDef.friction = 0;
-            fixtureDef.filter.categoryBits = Platformer.BIT_GROUND;
-            fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
-            body.createFixture(fixtureDef).setUserData("platform");
-            shape.dispose();
-        }
-
-        // create player
-        player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 160, 200, 10, 10);
-
-        // create second entity
-        entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 167, 230, 14, 14);
+        // create tile map renderer
+        mapRenderer = new OrthogonalTiledMapRenderer(null, 1 / PPM);
+        this.mapManager = new MapManager();
+        this.mapManager.addMapListener(new MapObjectHandler(world, entityEngine));
+        this.mapManager.addMapListener(this);
     }
 
     @Override
@@ -105,13 +89,18 @@ public class GSGame extends GameState {
     }
 
     @Override
-    public void onActivation(final AssetManager assetManager) {
-        assetManager.load("hud/switchLeft.png", Texture.class);
-        assetManager.load("hud/switchRight.png", Texture.class);
+    public void onActivation() {
+        if (mapManager.changeMap(assetManager, MapManager.MapType.TEST)) {
+            // create player
+            player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 77, 150, 72, 96);
+
+            // create second entity
+            entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 217, 150, 72, 96);
+        }
     }
 
     @Override
-    public void onDeactivation(final AssetManager assetManager) {
+    public void onDeactivation() {
     }
 
     @Override
@@ -122,11 +111,11 @@ public class GSGame extends GameState {
                 break;
             }
             case LEFT: {
-                player.getComponent(MoveComponent.class).speed = -1;
+                player.getComponent(MoveComponent.class).speed = -6;
                 break;
             }
             case RIGHT: {
-                player.getComponent(MoveComponent.class).speed = 1;
+                player.getComponent(MoveComponent.class).speed = 6;
                 break;
             }
         }
@@ -160,12 +149,22 @@ public class GSGame extends GameState {
         }
         world.step(fixedTimeStep, 6, 2);
         entityEngine.update(fixedTimeStep);
+        final Vector2 playerPos = entityEngine.getBox2DComponent(player).body.getPosition();
+        camera.position.set(Math.min(maxCameraWidth, Math.max(playerPos.x, minCameraWidth)), Math.min(maxCameraHeight, Math.max(playerPos.y, minCameraHeight)), 0);
+        camera.update();
     }
 
     @Override
     public void onRender(final SpriteBatch spriteBatch, final float alpha) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0.7f, 0.9f, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // AnimatedTiledMapTile.updateAnimationBaseTime();
+        if (mapRenderer.getMap() != null) {
+            mapRenderer.setView(camera);
+            mapRenderer.render();
+        }
+
         spriteBatch.begin();
         box2DRenderer.render(world, camera.combined);
         spriteBatch.end();
@@ -183,5 +182,14 @@ public class GSGame extends GameState {
     public void onDispose() {
         box2DRenderer.dispose();
         world.dispose();
+    }
+
+    @Override
+    public void onMapChanged(final Map currentMap, final Map newMap) {
+        maxCameraWidth = newMap.getWidth() - camera.viewportWidth * 0.5f;
+        maxCameraHeight = newMap.getHeight() - camera.viewportHeight * 0.5f;
+        minCameraWidth = camera.viewportWidth * 0.5f;
+        minCameraHeight = camera.viewportHeight * 0.5f;
+        mapRenderer.setMap(newMap.getTiledMap());
     }
 }

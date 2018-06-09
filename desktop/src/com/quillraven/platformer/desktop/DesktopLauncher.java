@@ -9,7 +9,7 @@ class DesktopLauncher {
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.title = Platformer.TITLE;
         config.width = 1024;
-        config.height = 768;
+        config.height = 1024 / (Platformer.V_WIDTH / Platformer.V_HEIGHT);
         new LwjglApplication(new Platformer(), config);
     }
 }
