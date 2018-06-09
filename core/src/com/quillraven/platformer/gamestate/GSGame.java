@@ -23,28 +23,28 @@ package com.quillraven.platformer.gamestate;
  */
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
 import com.quillraven.platformer.ecs.EntityEngine;
+import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.map.MapObjectHandler;
+import com.quillraven.platformer.ui.GameView;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -52,12 +52,9 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 
-public class GSGame extends GameState implements MapManager.MapListener {
+public class GSGame extends GameState<GameView> implements MapManager.MapListener {
     private final World world;
-    private final Box2DDebugRenderer box2DRenderer;
-
     private final EntityEngine entityEngine;
-    private final OrthogonalTiledMapRenderer mapRenderer;
     private final MapManager mapManager;
     private Entity player;
     private float minCameraWidth;
@@ -65,27 +62,24 @@ public class GSGame extends GameState implements MapManager.MapListener {
     private float maxCameraWidth;
     private float maxCameraHeight;
 
-    public GSGame(final AssetManager assetManager) {
-        super(assetManager);
+    public GSGame(final AssetManager assetManager, final GameView view) {
+        super(assetManager, view);
 
+        // init box2d
         Box2D.init();
         this.world = new World(new Vector2(0, -70), true);
         final WorldContactListener contactListener = new WorldContactListener();
         world.setContactListener(contactListener);
-        this.box2DRenderer = new Box2DDebugRenderer();
+        view.debugBox2D(world);
 
+        // init ashley entity component system
         entityEngine = new EntityEngine(contactListener);
 
         // create tile map renderer
-        mapRenderer = new OrthogonalTiledMapRenderer(null, 1 / PPM);
         this.mapManager = new MapManager();
         this.mapManager.addMapListener(new MapObjectHandler(world, entityEngine));
         this.mapManager.addMapListener(this);
-    }
-
-    @Override
-    Viewport getViewport() {
-        return new FitViewport(Platformer.V_WIDTH / PPM, Platformer.V_HEIGHT / PPM);
+        this.mapManager.addMapListener(view);
     }
 
     @Override
@@ -93,9 +87,13 @@ public class GSGame extends GameState implements MapManager.MapListener {
         if (mapManager.changeMap(assetManager, MapManager.MapType.TEST)) {
             // create player
             player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 77, 150, 72, 96);
+            entityEngine.getAnimationComponent(player).texture = new Sprite(assetManager.get("characters/slimeDead.png", Texture.class));
 
             // create second entity
-            entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 217, 150, 72, 96);
+            final Entity entity = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 217, 150, 72, 96);
+            entityEngine.getAnimationComponent(entity).texture = new Sprite(assetManager.get("characters/slimeDead.png", Texture.class));
+        } else {
+            assetManager.load("characters/slimeDead.png", Texture.class);
         }
     }
 
@@ -156,47 +154,62 @@ public class GSGame extends GameState implements MapManager.MapListener {
         }
         world.step(fixedTimeStep, 6, 2);
         entityEngine.update(fixedTimeStep);
+
+        // update camera position
         final Vector2 playerPos = entityEngine.getBox2DComponent(player).body.getPosition();
-        camera.position.set(Math.min(maxCameraWidth, Math.max(playerPos.x, minCameraWidth)), Math.min(maxCameraHeight, Math.max(playerPos.y, minCameraHeight)), 0);
-        camera.update();
+        view.setGameCameraPosition(Math.min(maxCameraWidth, Math.max(playerPos.x, minCameraWidth)), Math.min(maxCameraHeight, Math.max(playerPos.y, minCameraHeight)));
+        view.onUpdate(fixedTimeStep);
     }
 
     @Override
     public void onRender(final SpriteBatch spriteBatch, final float alpha) {
-        Gdx.gl.glClearColor(0.7f, 0.9f, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        for (final Entity entity : entityEngine.getAnimatedEntites()) {
+            final Box2DComponent b2dCmp = entityEngine.getBox2DComponent(entity);
+            final Vector2 position = b2dCmp.body.getPosition();
+            final AnimationComponent aniCmp = entityEngine.getAnimationComponent(entity);
+            final float radius = b2dCmp.body.getFixtureList().first().getShape().getRadius();
+            final float invertAlpha = 1.0f - alpha;
 
-        // AnimatedTiledMapTile.updateAnimationBaseTime();
-        if (mapRenderer.getMap() != null) {
-            mapRenderer.setView(camera);
-            mapRenderer.render();
+            // calculate interpolated position for rendering
+            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (72f / PPM / 2);
+            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (96f / PPM / 2);
+
+            aniCmp.texture.setColor(Color.WHITE);
+            aniCmp.texture.setFlip(false, false);
+            aniCmp.texture.setOriginCenter();
+            aniCmp.texture.setRotation(b2dCmp.body.getAngle() * MathUtils.radiansToDegrees);
+            aniCmp.texture.setBounds(x, y, 72 / PPM, 96 / PPM);
+
+            view.addVertices(aniCmp.texture.getTexture(), aniCmp.texture.getVertices(), 0);
         }
 
-        spriteBatch.begin();
-        box2DRenderer.render(world, camera.combined);
-        spriteBatch.end();
-
-        /*
-                     final float invertAlpha = 1.0f - alpha;
-
-                     // calculate interpolated position for rendering
-                     aniCmp.position.x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - radius;
-                     aniCmp.position.y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - radius;
-         */
+        super.onRender(spriteBatch, alpha);
     }
 
     @Override
     public void onDispose() {
-        box2DRenderer.dispose();
         world.dispose();
+        super.onDispose();
+    }
+
+    @Override
+    public void onResize(final int width, final int height) {
+        super.onResize(width, height);
+        updateCameraBoundaries(mapManager.getCurrentMap());
     }
 
     @Override
     public void onMapChanged(final Map currentMap, final Map newMap) {
-        maxCameraWidth = newMap.getWidth() - camera.viewportWidth * 0.5f;
-        maxCameraHeight = newMap.getHeight() - camera.viewportHeight * 0.5f;
-        minCameraWidth = camera.viewportWidth * 0.5f;
-        minCameraHeight = camera.viewportHeight * 0.5f;
-        mapRenderer.setMap(newMap.getTiledMap());
+        updateCameraBoundaries(newMap);
+    }
+
+    private void updateCameraBoundaries(final Map map) {
+        if (map == null) {
+            return;
+        }
+        maxCameraWidth = map.getWidth() - view.getGameViewportWidth() * 0.5f;
+        maxCameraHeight = map.getHeight() - view.getGameViewportHeight() * 0.5f;
+        minCameraWidth = view.getGameViewportWidth() * 0.5f;
+        minCameraHeight = view.getGameViewportHeight() * 0.5f;
     }
 }

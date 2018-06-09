@@ -1,6 +1,6 @@
-package com.quillraven.platformer.gamestate;
+package com.quillraven.platformer.ui;
 /*
- * Created by Quillraven on 04.06.2018.
+ * Created by Quillraven on 09.06.2018.
  *
  * MIT License
  *
@@ -22,46 +22,50 @@ package com.quillraven.platformer.gamestate;
  * SOFTWARE.
  */
 
-import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.quillraven.platformer.GameInputListener;
-import com.quillraven.platformer.ui.View;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
  * TODO add class description
  */
+public abstract class View {
+    final Skin skin;
+    final Table table;
+    final Viewport hudViewport;
+    final Stage stage;
 
-abstract class GameState<T extends View> {
-    final AssetManager assetManager;
-    final T view;
-
-    GameState(final AssetManager assetManager, final T view) {
-        this.view = view;
-
-        this.assetManager = assetManager;
+    View(final Skin skin, final SpriteBatch spriteBatch) {
+        this.skin = skin;
+        this.hudViewport = getHudViewport();
+        this.stage = new Stage(hudViewport, spriteBatch);
+        this.table = new Table();
+        this.table.setFillParent(true);
+        this.stage.addActor(table);
     }
 
-    abstract public void onActivation();
+    abstract Viewport getHudViewport();
 
-    abstract public void onDeactivation();
-
-    abstract public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
-
-    abstract public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
-
-    public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
-        view.onUpdate(fixedTimeStep);
+    public void onUpdate(final float fixedPhysicsSteps) {
+        stage.act(fixedPhysicsSteps);
     }
 
     public void onRender(final SpriteBatch spriteBatch, final float alpha) {
-        view.onRender(spriteBatch, alpha);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        hudViewport.apply();
+        stage.draw();
     }
 
     public void onResize(final int width, final int height) {
-        view.onResize(width, height);
+        hudViewport.update(width, height, true);
     }
 
     public void onDispose() {
-        view.onDispose();
+        stage.dispose();
     }
 }

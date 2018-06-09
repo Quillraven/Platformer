@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
+import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
@@ -51,11 +52,15 @@ public class EntityEngine extends PooledEngine {
     private final FixtureDef fixtureDef;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final Family b2dFamily;
+    private final ComponentMapper<AnimationComponent> aniCmpMapper;
+    private final Family animationFamily;
 
     public EntityEngine(final WorldContactListener contactListener) {
         super(20, 200, 10, 100);
 
         this.b2dFamily = Family.all(Box2DComponent.class).get();
+        this.aniCmpMapper = ComponentMapper.getFor(AnimationComponent.class);
+        this.animationFamily = Family.all(AnimationComponent.class).get();
 
         // add systems
         // movement
@@ -77,8 +82,16 @@ public class EntityEngine extends PooledEngine {
         return getEntitiesFor(b2dFamily);
     }
 
+    public ImmutableArray<Entity> getAnimatedEntites() {
+        return getEntitiesFor(animationFamily);
+    }
+
     public Box2DComponent getBox2DComponent(final Entity entity) {
         return b2dCmpMapper.get(entity);
+    }
+
+    public AnimationComponent getAnimationComponent(final Entity entity) {
+        return aniCmpMapper.get(entity);
     }
 
     public Entity createEntity(final World world, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height) {
@@ -130,6 +143,10 @@ public class EntityEngine extends PooledEngine {
         final MoveComponent moveCmp = this.createComponent(MoveComponent.class);
         moveCmp.maxSpeed = 6;
         entity.add(moveCmp);
+
+        // animation component
+        final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
+        entity.add(aniCmp);
 
         this.addEntity(entity);
         return entity;

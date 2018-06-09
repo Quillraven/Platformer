@@ -33,6 +33,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.quillraven.platformer.GameInputListener;
+import com.quillraven.platformer.ui.GameView;
+import com.quillraven.platformer.ui.LoadingView;
+import com.quillraven.platformer.ui.Skin;
+import com.quillraven.platformer.ui.View;
 
 /**
  * GameStateManager is responsible to manage the states of a game like a main menu, game, game over screen, etc..
@@ -80,7 +84,8 @@ public class GameStateManager {
         if (gameState == null) {
             try {
                 Gdx.app.debug(TAG, "Creating new gamestate " + gsType);
-                gameState = gsType.gsClass.getConstructor(AssetManager.class).newInstance(assetManager);
+                final View view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class).newInstance(null, spriteBatch);
+                gameState = gsType.gsClass.getConstructor(AssetManager.class, gsType.viewClass).newInstance(assetManager, view);
                 gameStateCache.put(gsType, gameState);
             } catch (Exception e) {
                 Gdx.app.error(TAG, "Could not create gamestate " + gsType, e);
@@ -190,13 +195,15 @@ public class GameStateManager {
     }
 
     public enum GameStateType {
-        GAME(GSGame.class),
-        LOADING(GSLoading.class);
+        GAME(GSGame.class, GameView.class),
+        LOADING(GSLoading.class, LoadingView.class);
 
-        private final Class<? extends GameState> gsClass;
+        private final Class<? extends GameState<? extends View>> gsClass;
+        private final Class<? extends View> viewClass;
 
-        GameStateType(final Class<? extends GameState> gsClass) {
+        GameStateType(final Class<? extends GameState<? extends View>> gsClass, final Class<? extends View> viewClass) {
             this.gsClass = gsClass;
+            this.viewClass = viewClass;
         }
     }
 }
