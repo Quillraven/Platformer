@@ -32,7 +32,7 @@ import com.quillraven.platformer.GameInputListener;
  * TODO add class description
  */
 
-abstract public class GameState {
+abstract class GameState {
     private final Viewport viewport;
     final OrthographicCamera camera;
     final AssetManager assetManager;

@@ -37,7 +37,7 @@ public class Box2DComponent implements Component, Pool.Poolable {
     public final Array<Entity> contacts = new Array<>();
     public Body body = null;
     public int numGroundContacts;
-    public Vector2 positionBeforeUpdate = new Vector2(0, 0);
+    public final Vector2 positionBeforeUpdate = new Vector2(0, 0);
 
     @Override
     public void reset() {

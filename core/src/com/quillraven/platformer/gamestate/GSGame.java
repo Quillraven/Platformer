@@ -69,7 +69,7 @@ public class GSGame extends GameState implements MapManager.MapListener {
         super(assetManager);
 
         Box2D.init();
-        this.world = new World(new Vector2(0, -9.81f), true);
+        this.world = new World(new Vector2(0, -70), true);
         final WorldContactListener contactListener = new WorldContactListener();
         world.setContactListener(contactListener);
         this.box2DRenderer = new Box2DDebugRenderer();
@@ -132,6 +132,13 @@ public class GSGame extends GameState implements MapManager.MapListener {
                 }
                 break;
             }
+            case JUMP:
+                final Box2DComponent b2dCmp = entityEngine.getBox2DComponent(player);
+                if (b2dCmp.body.getLinearVelocity().y > 0) {
+                    final Vector2 worldCenter = b2dCmp.body.getWorldCenter();
+                    b2dCmp.body.applyLinearImpulse(0, -b2dCmp.body.getLinearVelocity().y * b2dCmp.body.getMass(), worldCenter.x, worldCenter.y, true);
+                }
+                break;
             case EXIT: {
                 gsManager.popState();
                 break;

@@ -154,11 +154,11 @@ public class GameStateManager {
     }
 
     public boolean onKeyPressed(final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        return stateStack.peek().onKeyPressed(this, inputListener, key);
+        return stateStack.size > 0 && stateStack.peek().onKeyPressed(this, inputListener, key);
     }
 
     public boolean onKeyReleased(final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        return stateStack.peek().onKeyReleased(this, inputListener, key);
+        return stateStack.size > 0 && stateStack.peek().onKeyReleased(this, inputListener, key);
     }
 
     private void activateGameState(final GameState gameState) {
