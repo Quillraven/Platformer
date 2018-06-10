@@ -165,6 +165,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
     @Override
     public void onRender(final SpriteBatch spriteBatch, final float alpha) {
+        gameViewport.apply();
         entityEngine.onRender(spriteBatch, gameCamera, alpha);
         super.onRender(spriteBatch, alpha);
     }
