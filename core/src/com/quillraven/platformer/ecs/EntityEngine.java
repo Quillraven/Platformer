@@ -5,19 +5,25 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
+import com.quillraven.platformer.ecs.system.Box2DDebugRenderSystem;
+import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
 import com.quillraven.platformer.ecs.system.MoveSystem;
+import com.quillraven.platformer.ecs.system.RenderSystem;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -55,8 +61,12 @@ public class EntityEngine extends PooledEngine {
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
     private final Family animationFamily;
 
-    public EntityEngine(final WorldContactListener contactListener) {
+    private final Array<RenderSystem> renderSystems;
+
+    public EntityEngine(final World world, final WorldContactListener contactListener, final SpriteBatch spriteBatch) {
         super(20, 200, 10, 100);
+
+        this.renderSystems = new Array<>();
 
         this.b2dFamily = Family.all(Box2DComponent.class).get();
         this.aniCmpMapper = ComponentMapper.getFor(AnimationComponent.class);
@@ -72,6 +82,9 @@ public class EntityEngine extends PooledEngine {
         final JumpSystem jumpSystem = new JumpSystem(b2dCmpMapper, jumpCmpMapper);
         contactListener.addGameContactListener(jumpSystem);
         this.addSystem(jumpSystem);
+        // box2d debug
+        renderSystems.add(new Box2DDebugRenderSystem(this, world));
+        renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
 
         // create box2d definitions
         this.bodyDef = new BodyDef();
@@ -150,5 +163,17 @@ public class EntityEngine extends PooledEngine {
 
         this.addEntity(entity);
         return entity;
+    }
+
+    public void onRender(final SpriteBatch spriteBatch, final Camera camera, final float alpha) {
+        for (final RenderSystem renderSystem : renderSystems) {
+            renderSystem.onRender(spriteBatch, camera, alpha);
+        }
+    }
+
+    public void dispose() {
+        for (final RenderSystem renderSystem : renderSystems) {
+            renderSystem.onDispose();
+        }
     }
 }

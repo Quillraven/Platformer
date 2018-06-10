@@ -24,20 +24,21 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.quillraven.platformer.GameInputListener;
-import com.quillraven.platformer.ui.LoadingView;
+import com.quillraven.platformer.ui.LoadingHUD;
 
 /**
  * TODO add class description
  */
-public class GSLoading extends GameState<LoadingView> {
+public class GSLoading extends GameState<LoadingHUD> {
     private final static String TAG = GameState.class.getSimpleName();
 
     private long timeStartLoading;
 
-    public GSLoading(final AssetManager assetManager, final LoadingView view) {
-        super(assetManager, view);
+    public GSLoading(final AssetManager assetManager, final LoadingHUD hud, final SpriteBatch spriteBatch) {
+        super(assetManager, hud, spriteBatch);
     }
 
     @Override
@@ -63,6 +64,7 @@ public class GSLoading extends GameState<LoadingView> {
 
     @Override
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
+        super.onUpdate(gsManager, fixedTimeStep);
         if (assetManager.update()) {
             Gdx.app.debug(TAG, "Finished loading assets in " + TimeUtils.timeSinceMillis(timeStartLoading) + " milliseconds");
             gsManager.popState();

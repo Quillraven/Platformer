@@ -24,27 +24,27 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactListener;
 import com.quillraven.platformer.ecs.EntityEngine;
-import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.map.MapObjectHandler;
-import com.quillraven.platformer.ui.GameView;
+import com.quillraven.platformer.ui.GameHUD;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -52,39 +52,40 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 
-public class GSGame extends GameState<GameView> implements MapManager.MapListener {
+public class GSGame extends GameState<GameHUD> implements MapManager.MapListener {
     private final World world;
     private final EntityEngine entityEngine;
-    private final MapManager mapManager;
     private Entity player;
+    private final Viewport gameViewport;
+    private final OrthographicCamera gameCamera;
     private float minCameraWidth;
     private float minCameraHeight;
     private float maxCameraWidth;
     private float maxCameraHeight;
 
-    public GSGame(final AssetManager assetManager, final GameView view) {
-        super(assetManager, view);
+    public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
+        super(assetManager, hud, spriteBatch);
+
+        this.gameViewport = new FitViewport(Platformer.V_WIDTH / PPM, Platformer.V_HEIGHT / PPM);
+        this.gameCamera = (OrthographicCamera) gameViewport.getCamera();
 
         // init box2d
         Box2D.init();
         this.world = new World(new Vector2(0, -70), true);
         final WorldContactListener contactListener = new WorldContactListener();
         world.setContactListener(contactListener);
-        view.debugBox2D(world);
 
         // init ashley entity component system
-        entityEngine = new EntityEngine(contactListener);
+        entityEngine = new EntityEngine(world, contactListener, spriteBatch);
 
         // create tile map renderer
-        this.mapManager = new MapManager();
-        this.mapManager.addMapListener(new MapObjectHandler(world, entityEngine));
-        this.mapManager.addMapListener(this);
-        this.mapManager.addMapListener(view);
+        MapManager.getInstance().addMapListener(new MapObjectHandler(world, entityEngine));
+        MapManager.getInstance().addMapListener(this);
     }
 
     @Override
     public void onActivation() {
-        if (mapManager.changeMap(assetManager, MapManager.MapType.TEST)) {
+        if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST)) {
             // create player
             player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 77, 150, 72, 96);
             entityEngine.getAnimationComponent(player).texture = new Sprite(assetManager.get("characters/slimeDead.png", Texture.class));
@@ -157,45 +158,29 @@ public class GSGame extends GameState<GameView> implements MapManager.MapListene
 
         // update camera position
         final Vector2 playerPos = entityEngine.getBox2DComponent(player).body.getPosition();
-        view.setGameCameraPosition(Math.min(maxCameraWidth, Math.max(playerPos.x, minCameraWidth)), Math.min(maxCameraHeight, Math.max(playerPos.y, minCameraHeight)));
-        view.onUpdate(fixedTimeStep);
+        gameCamera.position.set(Math.min(maxCameraWidth, Math.max(playerPos.x, minCameraWidth)), Math.min(maxCameraHeight, Math.max(playerPos.y, minCameraHeight)), 0);
+        gameCamera.update();
+        super.onUpdate(gsManager, fixedTimeStep);
     }
 
     @Override
     public void onRender(final SpriteBatch spriteBatch, final float alpha) {
-        for (final Entity entity : entityEngine.getAnimatedEntites()) {
-            final Box2DComponent b2dCmp = entityEngine.getBox2DComponent(entity);
-            final Vector2 position = b2dCmp.body.getPosition();
-            final AnimationComponent aniCmp = entityEngine.getAnimationComponent(entity);
-            final float radius = b2dCmp.body.getFixtureList().first().getShape().getRadius();
-            final float invertAlpha = 1.0f - alpha;
-
-            // calculate interpolated position for rendering
-            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (72f / PPM / 2);
-            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (96f / PPM / 2);
-
-            aniCmp.texture.setColor(Color.WHITE);
-            aniCmp.texture.setFlip(false, false);
-            aniCmp.texture.setOriginCenter();
-            aniCmp.texture.setRotation(b2dCmp.body.getAngle() * MathUtils.radiansToDegrees);
-            aniCmp.texture.setBounds(x, y, 72 / PPM, 96 / PPM);
-
-            view.addVertices(aniCmp.texture.getTexture(), aniCmp.texture.getVertices(), 0);
-        }
-
+        entityEngine.onRender(spriteBatch, gameCamera, alpha);
         super.onRender(spriteBatch, alpha);
     }
 
     @Override
     public void onDispose() {
         world.dispose();
+        entityEngine.dispose();
         super.onDispose();
     }
 
     @Override
     public void onResize(final int width, final int height) {
         super.onResize(width, height);
-        updateCameraBoundaries(mapManager.getCurrentMap());
+        gameViewport.update(width, height);
+        updateCameraBoundaries(MapManager.getInstance().getCurrentMap());
     }
 
     @Override
@@ -207,9 +192,9 @@ public class GSGame extends GameState<GameView> implements MapManager.MapListene
         if (map == null) {
             return;
         }
-        maxCameraWidth = map.getWidth() - view.getGameViewportWidth() * 0.5f;
-        maxCameraHeight = map.getHeight() - view.getGameViewportHeight() * 0.5f;
-        minCameraWidth = view.getGameViewportWidth() * 0.5f;
-        minCameraHeight = view.getGameViewportHeight() * 0.5f;
+        maxCameraWidth = map.getWidth() - gameCamera.viewportWidth * 0.5f;
+        maxCameraHeight = map.getHeight() - gameCamera.viewportHeight * 0.5f;
+        minCameraWidth = gameCamera.viewportWidth * 0.5f;
+        minCameraHeight = gameCamera.viewportHeight * 0.5f;
     }
 }

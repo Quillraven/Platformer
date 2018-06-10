@@ -22,50 +22,14 @@ package com.quillraven.platformer.ui;
  * SOFTWARE.
  */
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
  * TODO add class description
  */
-public abstract class View {
-    final Skin skin;
-    final Table table;
-    final Viewport hudViewport;
-    final Stage stage;
-
-    View(final Skin skin, final SpriteBatch spriteBatch) {
-        this.skin = skin;
-        this.hudViewport = getHudViewport();
-        this.stage = new Stage(hudViewport, spriteBatch);
-        this.table = new Table();
-        this.table.setFillParent(true);
-        this.stage.addActor(table);
-    }
-
-    abstract Viewport getHudViewport();
-
-    public void onUpdate(final float fixedPhysicsSteps) {
-        stage.act(fixedPhysicsSteps);
-    }
-
-    public void onRender(final SpriteBatch spriteBatch, final float alpha) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        hudViewport.apply();
-        stage.draw();
-    }
-
-    public void onResize(final int width, final int height) {
-        hudViewport.update(width, height, true);
-    }
-
-    public void onDispose() {
-        stage.dispose();
+public class GameHUD extends HUD {
+    public GameHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport) {
+        super(skin, spriteBatch, hudViewport);
     }
 }

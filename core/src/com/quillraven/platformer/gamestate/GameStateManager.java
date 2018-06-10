@@ -26,17 +26,20 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputListener;
-import com.quillraven.platformer.ui.GameView;
-import com.quillraven.platformer.ui.LoadingView;
+import com.quillraven.platformer.ui.GameHUD;
+import com.quillraven.platformer.ui.HUD;
+import com.quillraven.platformer.ui.LoadingHUD;
 import com.quillraven.platformer.ui.Skin;
-import com.quillraven.platformer.ui.View;
 
 /**
  * GameStateManager is responsible to manage the states of a game like a main menu, game, game over screen, etc..
@@ -55,6 +58,7 @@ public class GameStateManager {
 
     private final SpriteBatch spriteBatch;
     private final AssetManager assetManager;
+    private final Viewport hudViewport;
 
     private final ObjectMap<GameStateType, GameState> gameStateCache;
     private final Array<GameState> stateStack;
@@ -68,6 +72,7 @@ public class GameStateManager {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(resolver));
 
         this.spriteBatch = new SpriteBatch();
+        this.hudViewport = new ScreenViewport();
 
         this.gameStateCache = new ObjectMap<>();
         this.stateStack = new Array<>();
@@ -84,8 +89,8 @@ public class GameStateManager {
         if (gameState == null) {
             try {
                 Gdx.app.debug(TAG, "Creating new gamestate " + gsType);
-                final View view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class).newInstance(null, spriteBatch);
-                gameState = gsType.gsClass.getConstructor(AssetManager.class, gsType.viewClass).newInstance(assetManager, view);
+                final HUD view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class, Viewport.class).newInstance(null, spriteBatch, hudViewport);
+                gameState = gsType.gsClass.getConstructor(AssetManager.class, gsType.viewClass, SpriteBatch.class).newInstance(assetManager, view, spriteBatch);
                 gameStateCache.put(gsType, gameState);
             } catch (Exception e) {
                 Gdx.app.error(TAG, "Could not create gamestate " + gsType, e);
@@ -176,6 +181,8 @@ public class GameStateManager {
     }
 
     public void render(final float alpha) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stateStack.peek().onRender(spriteBatch, alpha);
     }
 
@@ -195,13 +202,13 @@ public class GameStateManager {
     }
 
     public enum GameStateType {
-        GAME(GSGame.class, GameView.class),
-        LOADING(GSLoading.class, LoadingView.class);
+        GAME(GSGame.class, GameHUD.class),
+        LOADING(GSLoading.class, LoadingHUD.class);
 
-        private final Class<? extends GameState<? extends View>> gsClass;
-        private final Class<? extends View> viewClass;
+        private final Class<? extends GameState<? extends HUD>> gsClass;
+        private final Class<? extends HUD> viewClass;
 
-        GameStateType(final Class<? extends GameState<? extends View>> gsClass, final Class<? extends View> viewClass) {
+        GameStateType(final Class<? extends GameState<? extends HUD>> gsClass, final Class<? extends HUD> viewClass) {
             this.gsClass = gsClass;
             this.viewClass = viewClass;
         }

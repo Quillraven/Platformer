@@ -1,6 +1,6 @@
-package com.quillraven.platformer.ui;
+package com.quillraven.platformer.ecs.system;
 /*
- * Created by Quillraven on 09.06.2018.
+ * Created by Quillraven on 10.06.2018.
  *
  * MIT License
  *
@@ -22,23 +22,32 @@ package com.quillraven.platformer.ui;
  * SOFTWARE.
  */
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
+import com.quillraven.platformer.ecs.EntityEngine;
 
 /**
  * TODO add class description
  */
-public class RenderData {
-    Texture texture;
-    float[] vertices;
-    int z;
+public class Box2DDebugRenderSystem extends RenderSystem {
+    private final Box2DDebugRenderer box2DRenderer;
+    private final World world;
 
-    RenderData(final Texture texture, final float[] vertices, final int z) {
-        set(texture, vertices, z);
+    public Box2DDebugRenderSystem(final EntityEngine engine, final World world) {
+        super(engine);
+        this.box2DRenderer = new Box2DDebugRenderer();
+        this.world = world;
     }
 
-    void set(final Texture texture, final float[] vertices, final int z) {
-        this.texture = texture;
-        this.vertices = vertices;
-        this.z = z;
+    @Override
+    public void onRender(final SpriteBatch spriteBatch, final Camera camera, final float alpha) {
+        box2DRenderer.render(world, camera.combined);
+    }
+
+    @Override
+    public void onDispose() {
+        box2DRenderer.dispose();
     }
 }

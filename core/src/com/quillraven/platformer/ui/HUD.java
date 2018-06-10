@@ -22,21 +22,43 @@ package com.quillraven.platformer.ui;
  * SOFTWARE.
  */
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
  * TODO add class description
  */
-public class LoadingView extends View {
-    public LoadingView(final Skin skin, final SpriteBatch spriteBatch) {
-        super(skin, spriteBatch);
+public abstract class HUD {
+    final Skin skin;
+    final Table table;
+    final Viewport hudViewport;
+    final Stage stage;
+
+    HUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport) {
+        this.skin = skin;
+        this.hudViewport = hudViewport;
+        this.stage = new Stage(hudViewport, spriteBatch);
+        this.table = new Table();
+        this.table.setFillParent(true);
+        this.stage.addActor(table);
     }
 
-    @Override
-    Viewport getHudViewport() {
-        return new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    public void onUpdate(final float fixedPhysicsSteps) {
+        stage.act(fixedPhysicsSteps);
+    }
+
+    public void onRender(final SpriteBatch spriteBatch, final float alpha) {
+        hudViewport.apply();
+        stage.draw();
+    }
+
+    public void onResize(final int width, final int height) {
+        hudViewport.update(width, height, true);
+    }
+
+    public void onDispose() {
+        stage.dispose();
     }
 }

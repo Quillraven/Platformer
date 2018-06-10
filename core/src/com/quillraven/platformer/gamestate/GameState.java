@@ -25,19 +25,18 @@ package com.quillraven.platformer.gamestate;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.quillraven.platformer.GameInputListener;
-import com.quillraven.platformer.ui.View;
+import com.quillraven.platformer.ui.HUD;
 
 /**
  * TODO add class description
  */
 
-abstract class GameState<T extends View> {
+abstract class GameState<T extends HUD> {
     final AssetManager assetManager;
-    final T view;
+    final T hud;
 
-    GameState(final AssetManager assetManager, final T view) {
-        this.view = view;
-
+    GameState(final AssetManager assetManager, final T hud, final SpriteBatch spriteBatch) {
+        this.hud = hud;
         this.assetManager = assetManager;
     }
 
@@ -50,18 +49,18 @@ abstract class GameState<T extends View> {
     abstract public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
 
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
-        view.onUpdate(fixedTimeStep);
+        hud.onUpdate(fixedTimeStep);
     }
 
     public void onRender(final SpriteBatch spriteBatch, final float alpha) {
-        view.onRender(spriteBatch, alpha);
+        hud.onRender(spriteBatch, alpha);
     }
 
     public void onResize(final int width, final int height) {
-        view.onResize(width, height);
+        hud.onResize(width, height);
     }
 
     public void onDispose() {
-        view.onDispose();
+        hud.onDispose();
     }
 }

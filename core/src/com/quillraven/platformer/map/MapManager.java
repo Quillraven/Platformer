@@ -33,14 +33,22 @@ import com.badlogic.gdx.utils.ObjectMap;
  */
 public class MapManager {
     private final static String TAG = MapManager.class.getSimpleName();
+
+    private static final MapManager instance = new MapManager();
+
     private final ObjectMap<MapType, Map> mapCache;
     private final Array<MapListener> mapListeners;
     private Map currentMap;
 
-    public MapManager() {
+
+    private MapManager() {
         this.mapListeners = new Array<>();
         this.currentMap = null;
         this.mapCache = new ObjectMap<>();
+    }
+
+    public static MapManager getInstance() {
+        return instance;
     }
 
     public void addMapListener(final MapListener listener) {
