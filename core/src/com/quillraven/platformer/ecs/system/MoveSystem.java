@@ -93,6 +93,16 @@ public class MoveSystem extends IteratingSystem implements GameInputManager.Game
                     if (player != null) {
                         moveCmpMapper.get(player).speed = 0;
                     }
+                } else if (inputMgr.isKeyPressed(GameInputManager.GameKeys.RIGHT)) {
+                    final Entity player = ((EntityEngine) getEngine()).getPlayer();
+                    if (player != null) {
+                        moveCmpMapper.get(player).speed = 6;
+                    }
+                } else {
+                    final Entity player = ((EntityEngine) getEngine()).getPlayer();
+                    if (player != null) {
+                        moveCmpMapper.get(player).speed = -6;
+                    }
                 }
                 return true;
             }
