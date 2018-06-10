@@ -24,24 +24,37 @@ package com.quillraven.platformer;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
-import com.quillraven.platformer.gamestate.GameStateManager;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * TODO add class description
  */
-public class GameInputListener extends InputAdapter {
-    private final GameKeys[] keyMapping;
+public class GameInputManager extends InputAdapter {
+    private static final GameInputManager instance = new GameInputManager();
 
-    private final GameStateManager gsManager;
+    private final Array<GameKeyListener> gameKeyListeners;
+    private final GameKeys[] keyMapping;
     private final boolean keyState[];
 
-    public GameInputListener(final GameStateManager gsManager) {
-        this.gsManager = gsManager;
+    private GameInputManager() {
+        this.gameKeyListeners = new Array<>();
         this.keyMapping = new GameKeys[256];
         for (GameKeys key : GameKeys.values()) {
             keyMapping[key.keyCode] = key;
         }
         this.keyState = new boolean[GameKeys.values().length];
+    }
+
+    public static GameInputManager getInstance() {
+        return instance;
+    }
+
+    public void addGameKeyListener(final GameKeyListener listener) {
+        this.gameKeyListeners.add(listener);
+    }
+
+    public void removeGameKeyListener(final GameKeyListener listener) {
+        this.gameKeyListeners.removeValue(listener, true);
     }
 
     @Override
@@ -53,7 +66,11 @@ public class GameInputListener extends InputAdapter {
         }
 
         keyState[gKey.ordinal()] = true;
-        return gsManager.onKeyPressed(this, gKey);
+        boolean result = true;
+        for (final GameKeyListener listener : gameKeyListeners) {
+            result &= listener.onKeyPressed(gKey);
+        }
+        return result;
     }
 
     @Override
@@ -65,7 +82,11 @@ public class GameInputListener extends InputAdapter {
         }
 
         keyState[gKey.ordinal()] = false;
-        return gsManager.onKeyReleased(this, gKey);
+        boolean result = true;
+        for (final GameKeyListener listener : gameKeyListeners) {
+            result &= listener.onKeyReleased(gKey);
+        }
+        return result;
     }
 
     public boolean isKeyPressed(final GameKeys key) {
@@ -83,5 +104,11 @@ public class GameInputListener extends InputAdapter {
         GameKeys(final int keyCode) {
             this.keyCode = keyCode;
         }
+    }
+
+    public interface GameKeyListener {
+        boolean onKeyPressed(final GameKeys key);
+
+        boolean onKeyReleased(final GameKeys key);
     }
 }

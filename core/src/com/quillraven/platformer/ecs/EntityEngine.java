@@ -6,19 +6,21 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.quillraven.platformer.Platformer;
-import com.quillraven.platformer.WorldContactListener;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
+import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ecs.system.Box2DDebugRenderSystem;
 import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
@@ -60,10 +62,11 @@ public class EntityEngine extends PooledEngine {
     private final Family b2dFamily;
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
     private final Family animationFamily;
+    private final Family playerFamily;
 
     private final Array<RenderSystem> renderSystems;
 
-    public EntityEngine(final World world, final WorldContactListener contactListener, final SpriteBatch spriteBatch) {
+    public EntityEngine(final World world, final SpriteBatch spriteBatch) {
         super(20, 200, 10, 100);
 
         this.renderSystems = new Array<>();
@@ -71,6 +74,7 @@ public class EntityEngine extends PooledEngine {
         this.b2dFamily = Family.all(Box2DComponent.class).get();
         this.aniCmpMapper = ComponentMapper.getFor(AnimationComponent.class);
         this.animationFamily = Family.all(AnimationComponent.class).get();
+        this.playerFamily = Family.all(PlayerComponent.class).get();
 
         // add systems
         // movement
@@ -79,9 +83,7 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new MoveSystem(b2dCmpMapper, moveCmpMapper));
         // jump
         final ComponentMapper<JumpComponent> jumpCmpMapper = ComponentMapper.getFor(JumpComponent.class);
-        final JumpSystem jumpSystem = new JumpSystem(b2dCmpMapper, jumpCmpMapper);
-        contactListener.addGameContactListener(jumpSystem);
-        this.addSystem(jumpSystem);
+        this.addSystem(new JumpSystem(b2dCmpMapper, jumpCmpMapper));
         // box2d debug
         renderSystems.add(new Box2DDebugRenderSystem(this, world));
         renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
@@ -97,6 +99,11 @@ public class EntityEngine extends PooledEngine {
 
     public ImmutableArray<Entity> getAnimatedEntites() {
         return getEntitiesFor(animationFamily);
+    }
+
+    public Entity getPlayer() {
+        final ImmutableArray<Entity> playerEntities = getEntitiesFor(playerFamily);
+        return playerEntities.size() > 0 ? playerEntities.first() : null;
     }
 
     public Box2DComponent getBox2DComponent(final Entity entity) {
@@ -116,6 +123,7 @@ public class EntityEngine extends PooledEngine {
         bodyDef.position.set(x / PPM, y / PPM);
         bodyDef.type = bodyType;
         b2dCmp.body = world.createBody(bodyDef);
+        b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
         b2dCmp.body.setUserData(entity);
         // fixture
         fixtureDef.friction = 1;
@@ -142,7 +150,7 @@ public class EntityEngine extends PooledEngine {
         shape.setAsBox(width * 0.3f / PPM, height * 0.3f / PPM);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
-        fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
+        fixtureDef.filter.maskBits = maskBits;
         fixtureDef.filter.categoryBits = categoryBits;
         b2dCmp.body.createFixture(fixtureDef).setUserData("hitbox");
         shape.dispose();
@@ -159,6 +167,28 @@ public class EntityEngine extends PooledEngine {
 
         // animation component
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
+        entity.add(aniCmp);
+
+        // player component
+        entity.add(this.createComponent(PlayerComponent.class));
+
+        this.addEntity(entity);
+        return entity;
+    }
+
+    public Entity createGameObj(final Body body, final Sprite sprite) {
+        final Entity entity = this.createEntity();
+
+        final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
+        b2dCmp.body = body;
+        b2dCmp.positionBeforeUpdate.set(body.getPosition());
+        b2dCmp.body.setUserData(entity);
+        entity.add(b2dCmp);
+
+        final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
+        aniCmp.texture = sprite;
+        aniCmp.width = sprite.getWidth();
+        aniCmp.height = sprite.getHeight();
         entity.add(aniCmp);
 
         this.addEntity(entity);

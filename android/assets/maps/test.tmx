@@ -45,20 +45,20 @@
   </object>
  </objectgroup>
  <objectgroup name="objects">
-  <object id="6" gid="4" x="280" y="629.75" width="70" height="70"/>
-  <object id="7" gid="4" x="350.5" y="630.25" width="70" height="70"/>
-  <object id="8" gid="4" x="279.75" y="560.417" width="70" height="70"/>
-  <object id="9" gid="1" x="524" y="613" width="70" height="70"/>
+  <object id="6" gid="4" x="278.667" y="559.083" width="70" height="70"/>
+  <object id="7" gid="4" x="349.167" y="559.583" width="70" height="70"/>
+  <object id="8" gid="4" x="278.417" y="489.75" width="70" height="70"/>
+  <object id="9" gid="1" x="525.333" y="559.667" width="70" height="70"/>
   <object id="11" gid="5" x="2450" y="421" width="70" height="70"/>
   <object id="14" gid="4" x="1035.67" y="600.333" width="70" height="70"/>
-  <object id="15" gid="4" x="1265" y="452.333" width="70" height="70"/>
-  <object id="16" gid="4" x="1318.33" y="415" width="70" height="70"/>
-  <object id="17" gid="4" x="1386.33" y="440.333" width="70" height="70"/>
-  <object id="18" gid="4" x="1437" y="501.667" width="70" height="70"/>
-  <object id="19" gid="4" x="1471.67" y="565.667" width="70" height="70"/>
-  <object id="20" gid="4" x="1910.33" y="595" width="70" height="70"/>
-  <object id="21" gid="4" x="1961" y="541.667" width="70" height="70"/>
-  <object id="22" gid="4" x="2021" y="379" width="70" height="70"/>
-  <object id="23" gid="1" x="2202.33" y="312.333" width="70" height="70"/>
+  <object id="15" gid="4" x="1293" y="392.333" width="70" height="70"/>
+  <object id="16" gid="4" x="1346.33" y="355" width="70" height="70"/>
+  <object id="17" gid="4" x="1414.33" y="380.333" width="70" height="70"/>
+  <object id="18" gid="4" x="1465" y="441.667" width="70" height="70"/>
+  <object id="19" gid="4" x="1499.67" y="505.667" width="70" height="70"/>
+  <object id="20" gid="4" x="1906.33" y="521.667" width="70" height="70"/>
+  <object id="21" gid="4" x="1957" y="468.334" width="70" height="70"/>
+  <object id="22" gid="4" x="2017" y="305.667" width="70" height="70"/>
+  <object id="23" gid="1" x="2210.33" y="260.333" width="70" height="70"/>
  </objectgroup>
 </map>

@@ -27,7 +27,9 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
-import com.quillraven.platformer.WorldContactListener;
+import com.quillraven.platformer.GameInputManager;
+import com.quillraven.platformer.WorldContactManager;
+import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
@@ -35,7 +37,7 @@ import com.quillraven.platformer.ecs.component.MoveComponent;
 /**
  * TODO add class description
  */
-public class JumpSystem extends IteratingSystem implements WorldContactListener.GameContactListener {
+public class JumpSystem extends IteratingSystem implements WorldContactManager.GameContactListener, GameInputManager.GameKeyListener {
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final ComponentMapper<JumpComponent> jumpCmpMapper;
 
@@ -44,6 +46,9 @@ public class JumpSystem extends IteratingSystem implements WorldContactListener.
 
         this.b2dCmpMapper = b2dCmpMapper;
         this.jumpCmpMapper = jumpCmpMapper;
+
+        GameInputManager.getInstance().addGameKeyListener(this);
+        WorldContactManager.getInstance().addGameContactListener(this);
     }
 
     @Override
@@ -83,5 +88,33 @@ public class JumpSystem extends IteratingSystem implements WorldContactListener.
     public void onEndEntityContact(final Entity entityA, final Entity entityB) {
         b2dCmpMapper.get(entityA).contacts.removeValue(entityB, false);
         b2dCmpMapper.get(entityB).contacts.removeValue(entityA, false);
+    }
+
+    @Override
+    public boolean onKeyPressed(final GameInputManager.GameKeys key) {
+        if (key == GameInputManager.GameKeys.JUMP) {
+            final Entity player = ((EntityEngine) getEngine()).getPlayer();
+            if (player != null) {
+                jumpCmpMapper.get(player).jump = true;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyReleased(final GameInputManager.GameKeys key) {
+        if (key == GameInputManager.GameKeys.JUMP) {
+            final Entity player = ((EntityEngine) getEngine()).getPlayer();
+            if (player != null) {
+                final Box2DComponent b2dCmp = b2dCmpMapper.get(player);
+                if (b2dCmp.body.getLinearVelocity().y > 0) {
+                    final Vector2 worldCenter = b2dCmp.body.getWorldCenter();
+                    b2dCmp.body.applyLinearImpulse(0, -b2dCmp.body.getLinearVelocity().y * b2dCmp.body.getMass(), worldCenter.x, worldCenter.y, true);
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }

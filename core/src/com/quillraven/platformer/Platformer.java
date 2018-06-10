@@ -44,6 +44,7 @@ public class Platformer extends ApplicationAdapter {
 
     public static final short BIT_GROUND = 1 << 1;
     public static final short BIT_PLAYER = 1 << 2;
+    public static final short BIT_OBJECT = 1 << 3;
 
     private static final float FIXED_TIME_STEP = 1 / 60f;
     private float accumulator;

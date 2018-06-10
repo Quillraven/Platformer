@@ -28,22 +28,19 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.Platformer;
-import com.quillraven.platformer.WorldContactListener;
+import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
-import com.quillraven.platformer.ecs.component.Box2DComponent;
-import com.quillraven.platformer.ecs.component.JumpComponent;
-import com.quillraven.platformer.ecs.component.MoveComponent;
+import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
-import com.quillraven.platformer.map.MapObjectHandler;
 import com.quillraven.platformer.ui.GameHUD;
 
 import static com.quillraven.platformer.Platformer.PPM;
@@ -72,27 +69,25 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         // init box2d
         Box2D.init();
         this.world = new World(new Vector2(0, -70), true);
-        final WorldContactListener contactListener = new WorldContactListener();
-        world.setContactListener(contactListener);
+        world.setContactListener(WorldContactManager.getInstance());
 
         // init ashley entity component system
-        entityEngine = new EntityEngine(world, contactListener, spriteBatch);
+        entityEngine = new EntityEngine(world, spriteBatch);
 
         // create tile map renderer
-        MapManager.getInstance().addMapListener(new MapObjectHandler(world, entityEngine));
         MapManager.getInstance().addMapListener(this);
     }
 
     @Override
     public void onActivation() {
-        if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST)) {
+        if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST, world, entityEngine)) {
             // create player
-            player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 77, 150, 72, 96);
-            entityEngine.getAnimationComponent(player).texture = new Sprite(assetManager.get("characters/slimeDead.png", Texture.class));
-
-            // create second entity
-            final Entity entity = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, Platformer.BIT_GROUND, Platformer.BIT_PLAYER, 217, 150, 72, 96);
-            entityEngine.getAnimationComponent(entity).texture = new Sprite(assetManager.get("characters/slimeDead.png", Texture.class));
+            final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
+            player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 77, 150, 72, 96);
+            final AnimationComponent aniCmp = entityEngine.getAnimationComponent(player);
+            aniCmp.texture = new Sprite(assetManager.get("characters/slimeDead.png", Texture.class));
+            aniCmp.width = 72;
+            aniCmp.height = 96;
         } else {
             assetManager.load("characters/slimeDead.png", Texture.class);
         }
@@ -103,58 +98,12 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     }
 
     @Override
-    public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        switch (key) {
-            case JUMP: {
-                player.getComponent(JumpComponent.class).jump = true;
-                break;
-            }
-            case LEFT: {
-                player.getComponent(MoveComponent.class).speed = -6;
-                break;
-            }
-            case RIGHT: {
-                player.getComponent(MoveComponent.class).speed = 6;
-                break;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        switch (key) {
-            case RIGHT:
-            case LEFT: {
-                if (!inputListener.isKeyPressed(GameInputListener.GameKeys.RIGHT) && !inputListener.isKeyPressed(GameInputListener.GameKeys.LEFT)) {
-                    player.getComponent(MoveComponent.class).speed = 0;
-                }
-                break;
-            }
-            case JUMP:
-                final Box2DComponent b2dCmp = entityEngine.getBox2DComponent(player);
-                if (b2dCmp.body.getLinearVelocity().y > 0) {
-                    final Vector2 worldCenter = b2dCmp.body.getWorldCenter();
-                    b2dCmp.body.applyLinearImpulse(0, -b2dCmp.body.getLinearVelocity().y * b2dCmp.body.getMass(), worldCenter.x, worldCenter.y, true);
-                }
-                break;
-            case EXIT: {
-                gsManager.popState();
-                break;
-            }
-        }
-        return true;
-    }
-
-    @Override
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
-        // save position before update for interpolated rendering
-        for (Entity entity : entityEngine.getBox2DEntities()) {
-            final Box2DComponent b2dCmp = entityEngine.getBox2DComponent(entity);
-            b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
-        }
-        world.step(fixedTimeStep, 6, 2);
+        // important to update entity engine before updating the box2d world in order to store
+        // the body position BEFORE the step in some components.
+        // This is f.e. needed to interpolate the rendering
         entityEngine.update(fixedTimeStep);
+        world.step(fixedTimeStep, 6, 2);
 
         // update camera position
         final Vector2 playerPos = entityEngine.getBox2DComponent(player).body.getPosition();
@@ -185,8 +134,8 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     }
 
     @Override
-    public void onMapChanged(final Map currentMap, final Map newMap) {
-        updateCameraBoundaries(newMap);
+    public void onMapChanged(final Map map, final TiledMap tiledMap) {
+        updateCameraBoundaries(map);
     }
 
     private void updateCameraBoundaries(final Map map) {

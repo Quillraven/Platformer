@@ -35,7 +35,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.quillraven.platformer.GameInputListener;
+import com.quillraven.platformer.GameInputManager;
 import com.quillraven.platformer.ui.GameHUD;
 import com.quillraven.platformer.ui.HUD;
 import com.quillraven.platformer.ui.LoadingHUD;
@@ -78,7 +78,7 @@ public class GameStateManager {
         this.stateStack = new Array<>();
         this.popState = false;
 
-        Gdx.input.setInputProcessor(new GameInputListener(this));
+        Gdx.input.setInputProcessor(GameInputManager.getInstance());
 
         activateGameState(getState(initialGS));
     }
@@ -161,14 +161,6 @@ public class GameStateManager {
     public void pushState(final GameStateType gsType) {
         popState = false;
         nextGSToPush = getState(gsType);
-    }
-
-    public boolean onKeyPressed(final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        return stateStack.size > 0 && stateStack.peek().onKeyPressed(this, inputListener, key);
-    }
-
-    public boolean onKeyReleased(final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        return stateStack.size > 0 && stateStack.peek().onKeyReleased(this, inputListener, key);
     }
 
     private void activateGameState(final GameState gameState) {

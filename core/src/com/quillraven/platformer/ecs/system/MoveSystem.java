@@ -27,13 +27,15 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
+import com.quillraven.platformer.GameInputManager;
+import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 
 /**
  * TODO add class description
  */
-public class MoveSystem extends IteratingSystem {
+public class MoveSystem extends IteratingSystem implements GameInputManager.GameKeyListener {
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final ComponentMapper<MoveComponent> moveCmpMapper;
 
@@ -42,6 +44,8 @@ public class MoveSystem extends IteratingSystem {
 
         this.b2dCmpMapper = b2dCmpMapper;
         this.moveCmpMapper = moveCmpMapper;
+
+        GameInputManager.getInstance().addGameKeyListener(this);
     }
 
     @Override
@@ -54,5 +58,45 @@ public class MoveSystem extends IteratingSystem {
         moveCmp.speed = Math.max(-moveCmp.maxSpeed, Math.min(moveCmp.maxSpeed, moveCmp.speed));
         // apply force to box2d body
         b2dCmp.body.applyLinearImpulse((moveCmp.speed - b2dCmp.body.getLinearVelocity().x) * b2dCmp.body.getMass(), 0, worldCenter.x, worldCenter.y, true);
+        b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
+    }
+
+    @Override
+    public boolean onKeyPressed(final GameInputManager.GameKeys key) {
+        switch (key) {
+            case LEFT: {
+                final Entity player = ((EntityEngine) getEngine()).getPlayer();
+                if (player != null) {
+                    moveCmpMapper.get(player).speed = -6;
+                }
+                return true;
+            }
+            case RIGHT: {
+                final Entity player = ((EntityEngine) getEngine()).getPlayer();
+                if (player != null) {
+                    moveCmpMapper.get(player).speed = 6;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyReleased(final GameInputManager.GameKeys key) {
+        switch (key) {
+            case RIGHT:
+            case LEFT: {
+                final GameInputManager inputMgr = GameInputManager.getInstance();
+                if (!inputMgr.isKeyPressed(GameInputManager.GameKeys.RIGHT) && !inputMgr.isKeyPressed(GameInputManager.GameKeys.LEFT)) {
+                    final Entity player = ((EntityEngine) getEngine()).getPlayer();
+                    if (player != null) {
+                        moveCmpMapper.get(player).speed = 0;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

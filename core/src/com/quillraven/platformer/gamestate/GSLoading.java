@@ -26,7 +26,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.ui.LoadingHUD;
 
 /**
@@ -50,16 +49,6 @@ public class GSLoading extends GameState<LoadingHUD> {
     @Override
     public void onDeactivation() {
 
-    }
-
-    @Override
-    public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        return false;
-    }
-
-    @Override
-    public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key) {
-        return false;
     }
 
     @Override

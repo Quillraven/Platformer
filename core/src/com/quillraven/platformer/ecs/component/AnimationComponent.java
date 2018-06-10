@@ -31,9 +31,13 @@ import com.badlogic.gdx.utils.Pool;
  */
 public class AnimationComponent implements Component, Pool.Poolable {
     public Sprite texture = null;
+    public float width = 0;
+    public float height = 0;
 
     @Override
     public void reset() {
         this.texture = null;
+        this.width = 0;
+        this.height = 0;
     }
 }

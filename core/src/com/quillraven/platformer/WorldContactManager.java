@@ -34,11 +34,16 @@ import com.badlogic.gdx.utils.Array;
  * TODO add class description
  */
 
-public class WorldContactListener implements ContactListener {
+public class WorldContactManager implements ContactListener {
+    private static final WorldContactManager instance = new WorldContactManager();
     private final Array<GameContactListener> listeners;
 
-    public WorldContactListener() {
+    private WorldContactManager() {
         this.listeners = new Array<>();
+    }
+
+    public static WorldContactManager getInstance() {
+        return instance;
     }
 
     public void addGameContactListener(final GameContactListener listener) {

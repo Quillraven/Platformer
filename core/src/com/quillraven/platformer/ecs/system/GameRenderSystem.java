@@ -31,6 +31,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
@@ -45,7 +46,7 @@ import com.quillraven.platformer.map.MapManager;
 import static com.quillraven.platformer.Platformer.PPM;
 
 /**
- * TODO add class description
+ * TODO add class description and use SortedIteratingSystem
  */
 public class GameRenderSystem extends RenderSystem implements MapManager.MapListener {
     private final OrthogonalTiledMapRenderer tiledMapRenderer;
@@ -57,7 +58,7 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
         super(engine);
         MapManager.getInstance().addMapListener(this);
         tiledMapRenderer = new OrthogonalTiledMapRenderer(null, 1 / PPM, spriteBatch);
-        this.renderFamily = Family.all(AnimationComponent.class).get();
+        this.renderFamily = Family.all(AnimationComponent.class, Box2DComponent.class).get();
         this.b2dCmpMapper = b2dCmpMapper;
         this.aniCmpMapper = aniCmpMapper;
     }
@@ -81,18 +82,17 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
             final Vector2 position = b2dCmp.body.getPosition();
             final AnimationComponent aniCmp = aniCmpMapper.get(entity);
-//            final float radius = b2dCmp.body.getFixtureList().first().getShape().getRadius();
             final float invertAlpha = 1.0f - alpha;
 
             // calculate interpolated position for rendering
-            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (72f / PPM / 2);
-            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (96f / PPM / 2);
+            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (aniCmp.width / PPM / 2);
+            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (aniCmp.height / PPM / 2);
 
             aniCmp.texture.setColor(Color.WHITE);
             aniCmp.texture.setFlip(false, false);
             aniCmp.texture.setOriginCenter();
             aniCmp.texture.setRotation(b2dCmp.body.getAngle() * MathUtils.radiansToDegrees);
-            aniCmp.texture.setBounds(x, y, 72 / PPM, 96 / PPM);
+            aniCmp.texture.setBounds(x, y, aniCmp.width / PPM, aniCmp.height / PPM);
 
             spriteBatch.draw(aniCmp.texture.getTexture(), aniCmp.texture.getVertices(), 0, 20);
         }
@@ -100,8 +100,8 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     }
 
     @Override
-    public void onMapChanged(final Map currentMap, final Map newMap) {
-        tiledMapRenderer.setMap(newMap.getTiledMap());
+    public void onMapChanged(final Map map, final TiledMap tiledMap) {
+        tiledMapRenderer.setMap(tiledMap);
     }
 
     @Override

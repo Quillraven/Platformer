@@ -1,6 +1,6 @@
-package com.quillraven.platformer.map;
+package com.quillraven.platformer.ecs.component;
 /*
- * Created by Quillraven on 09.06.2018.
+ * Created by Quillraven on 10.06.2018.
  *
  * MIT License
  *
@@ -22,35 +22,15 @@ package com.quillraven.platformer.map;
  * SOFTWARE.
  */
 
-import com.badlogic.gdx.maps.MapProperties;
-
-import static com.quillraven.platformer.Platformer.PPM;
+import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.utils.Pool;
 
 /**
  * TODO add class description
  */
-public class Map {
-    private static final String TAG = Map.class.getSimpleName();
+public class PlayerComponent implements Component, Pool.Poolable {
+    @Override
+    public void reset() {
 
-    private final MapManager.MapType mapType;
-    private final float width;
-    private final float height;
-
-    Map(final MapManager.MapType mapType, final MapProperties mapProperties) {
-        this.mapType = mapType;
-        this.width = mapProperties.get("width", Integer.class) * mapProperties.get("tilewidth", Integer.class) / PPM;
-        this.height = mapProperties.get("height", Integer.class) * mapProperties.get("tileheight", Integer.class) / PPM;
-    }
-
-    private MapManager.MapType getMapType() {
-        return mapType;
-    }
-
-    public float getWidth() {
-        return width;
-    }
-
-    public float getHeight() {
-        return height;
     }
 }

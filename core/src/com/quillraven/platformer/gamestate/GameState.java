@@ -24,7 +24,6 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.quillraven.platformer.GameInputListener;
 import com.quillraven.platformer.ui.HUD;
 
 /**
@@ -43,10 +42,6 @@ abstract class GameState<T extends HUD> {
     abstract public void onActivation();
 
     abstract public void onDeactivation();
-
-    abstract public boolean onKeyPressed(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
-
-    abstract public boolean onKeyReleased(final GameStateManager gsManager, final GameInputListener inputListener, final GameInputListener.GameKeys key);
 
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
         hud.onUpdate(fixedTimeStep);
