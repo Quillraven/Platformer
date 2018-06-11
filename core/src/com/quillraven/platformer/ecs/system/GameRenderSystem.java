@@ -53,6 +53,8 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     private final Family renderFamily;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
+    private float mapWidth;
+    private float mapHeight;
 
     public GameRenderSystem(final EntityEngine engine, final SpriteBatch spriteBatch, final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<AnimationComponent> aniCmpMapper) {
         super(engine);
@@ -66,6 +68,20 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     @Override
     public void onRender(final SpriteBatch spriteBatch, final Camera camera, final float alpha) {
         final ImmutableArray<Entity> entitiesFor = engine.getEntitiesFor(renderFamily);
+
+        final Entity player = engine.getPlayer();
+        if (player != null) {
+            final Box2DComponent b2dCmp = b2dCmpMapper.get(player);
+            final AnimationComponent aniCmp = aniCmpMapper.get(player);
+            final Vector2 playerPos = b2dCmp.body.getPosition();
+            final float invertAlpha = 1.0f - alpha;
+            final float x = (playerPos.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (aniCmp.width / PPM / 2);
+            final float y = (playerPos.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (aniCmp.height / PPM / 2);
+            final float camWidth = camera.viewportWidth * 0.5f;
+            final float camHeight = camera.viewportHeight * 0.5f;
+            camera.position.set(Math.min(mapWidth - camWidth, Math.max(x, camWidth)), Math.min(mapHeight - camHeight, Math.max(y, camHeight)), 0);
+            camera.update();
+        }
 
         spriteBatch.begin();
         if (tiledMapRenderer.getMap() != null) {
@@ -101,6 +117,8 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
 
     @Override
     public void onMapChanged(final Map map, final TiledMap tiledMap) {
+        mapWidth = map.getWidth();
+        mapHeight = map.getHeight();
         tiledMapRenderer.setMap(tiledMap);
     }
 

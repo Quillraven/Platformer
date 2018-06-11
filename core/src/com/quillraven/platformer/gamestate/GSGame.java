@@ -28,7 +28,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -39,7 +38,6 @@ import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
-import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.ui.GameHUD;
 
@@ -49,16 +47,12 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 
-public class GSGame extends GameState<GameHUD> implements MapManager.MapListener {
+public class GSGame extends GameState<GameHUD> {
     private final World world;
     private final EntityEngine entityEngine;
     private Entity player;
     private final Viewport gameViewport;
     private final OrthographicCamera gameCamera;
-    private float minCameraWidth;
-    private float minCameraHeight;
-    private float maxCameraWidth;
-    private float maxCameraHeight;
 
     public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
         super(assetManager, hud, spriteBatch);
@@ -73,9 +67,6 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
         // init ashley entity component system
         entityEngine = new EntityEngine(world, spriteBatch);
-
-        // create tile map renderer
-        MapManager.getInstance().addMapListener(this);
     }
 
     @Override
@@ -105,10 +96,6 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         entityEngine.update(fixedTimeStep);
         world.step(fixedTimeStep, 6, 2);
 
-        // update camera position
-        final Vector2 playerPos = entityEngine.getBox2DComponent(player).body.getPosition();
-        gameCamera.position.set(Math.min(maxCameraWidth, Math.max(playerPos.x, minCameraWidth)), Math.min(maxCameraHeight, Math.max(playerPos.y, minCameraHeight)), 0);
-        gameCamera.update();
         super.onUpdate(gsManager, fixedTimeStep);
     }
 
@@ -130,21 +117,6 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     public void onResize(final int width, final int height) {
         super.onResize(width, height);
         gameViewport.update(width, height);
-        updateCameraBoundaries(MapManager.getInstance().getCurrentMap());
     }
 
-    @Override
-    public void onMapChanged(final Map map, final TiledMap tiledMap) {
-        updateCameraBoundaries(map);
-    }
-
-    private void updateCameraBoundaries(final Map map) {
-        if (map == null) {
-            return;
-        }
-        maxCameraWidth = map.getWidth() - gameCamera.viewportWidth * 0.5f;
-        maxCameraHeight = map.getHeight() - gameCamera.viewportHeight * 0.5f;
-        minCameraWidth = gameCamera.viewportWidth * 0.5f;
-        minCameraHeight = gameCamera.viewportHeight * 0.5f;
-    }
 }
