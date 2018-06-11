@@ -30,9 +30,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
@@ -55,6 +53,8 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
     private float mapWidth;
     private float mapHeight;
+    private int[] bgdLayerIdx;
+    private int[] fgdLayerIdx;
 
     public GameRenderSystem(final EntityEngine engine, final SpriteBatch spriteBatch, final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<AnimationComponent> aniCmpMapper) {
         super(engine);
@@ -83,17 +83,14 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             camera.update();
         }
 
-        spriteBatch.begin();
+
         if (tiledMapRenderer.getMap() != null) {
             tiledMapRenderer.setView((OrthographicCamera) camera);
             AnimatedTiledMapTile.updateAnimationBaseTime();
-            for (final MapLayer layer : tiledMapRenderer.getMap().getLayers()) {
-                if (layer instanceof TiledMapTileLayer) {
-                    tiledMapRenderer.renderTileLayer((TiledMapTileLayer) layer);
-                }
-            }
+            tiledMapRenderer.render(bgdLayerIdx);
         }
 
+        spriteBatch.begin();
         for (final Entity entity : entitiesFor) {
             final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
             final Vector2 position = b2dCmp.body.getPosition();
@@ -113,12 +110,18 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             spriteBatch.draw(aniCmp.texture.getTexture(), aniCmp.texture.getVertices(), 0, 20);
         }
         spriteBatch.end();
+
+        if (tiledMapRenderer.getMap() != null) {
+            tiledMapRenderer.render(fgdLayerIdx);
+        }
     }
 
     @Override
     public void onMapChanged(final Map map, final TiledMap tiledMap) {
         mapWidth = map.getWidth();
         mapHeight = map.getHeight();
+        bgdLayerIdx = map.getBackgroundLayerIndex();
+        fgdLayerIdx = map.getForegroundLayerIndex();
         tiledMapRenderer.setMap(tiledMap);
     }
 

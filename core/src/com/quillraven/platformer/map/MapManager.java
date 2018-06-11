@@ -92,7 +92,7 @@ public class MapManager {
             final TiledMap tiledMap = assetManager.get(mapType.filePath, TiledMap.class);
             if (map == null) {
                 Gdx.app.debug(TAG, "Creating new map " + mapType);
-                map = new Map(mapType, tiledMap.getProperties());
+                map = new Map(mapType, tiledMap.getProperties(), tiledMap.getLayers().getIndex("ground"), tiledMap.getLayers().getIndex("background"), tiledMap.getLayers().getIndex("foreground"));
                 mapCache.put(mapType, map);
             }
 

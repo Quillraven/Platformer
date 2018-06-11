@@ -4,8 +4,8 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -63,7 +63,7 @@ public class EntityEngine extends PooledEngine {
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
     private final Family animationFamily;
     private final Family playerFamily;
-
+    private Entity player;
     private final Array<RenderSystem> renderSystems;
 
     public EntityEngine(final World world, final SpriteBatch spriteBatch) {
@@ -93,29 +93,12 @@ public class EntityEngine extends PooledEngine {
         this.fixtureDef = new FixtureDef();
     }
 
-    public ImmutableArray<Entity> getBox2DEntities() {
-        return getEntitiesFor(b2dFamily);
-    }
-
-    public ImmutableArray<Entity> getAnimatedEntites() {
-        return getEntitiesFor(animationFamily);
-    }
-
     public Entity getPlayer() {
-        final ImmutableArray<Entity> playerEntities = getEntitiesFor(playerFamily);
-        return playerEntities.size() > 0 ? playerEntities.first() : null;
+        return player;
     }
 
-    public Box2DComponent getBox2DComponent(final Entity entity) {
-        return b2dCmpMapper.get(entity);
-    }
-
-    public AnimationComponent getAnimationComponent(final Entity entity) {
-        return aniCmpMapper.get(entity);
-    }
-
-    public Entity createEntity(final World world, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height) {
-        final Entity entity = this.createEntity();
+    public Entity createPlayer(final World world, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height, final Texture texture) {
+        player = this.createEntity();
 
         // box2d component
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
@@ -124,7 +107,7 @@ public class EntityEngine extends PooledEngine {
         bodyDef.type = bodyType;
         b2dCmp.body = world.createBody(bodyDef);
         b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
-        b2dCmp.body.setUserData(entity);
+        b2dCmp.body.setUserData(player);
         // fixture
         fixtureDef.friction = 1;
         fixtureDef.isSensor = false;
@@ -135,7 +118,7 @@ public class EntityEngine extends PooledEngine {
         fixtureDef.filter.categoryBits = categoryBits;
         b2dCmp.body.createFixture(fixtureDef).setUserData("body");
         shape.dispose();
-        entity.add(b2dCmp);
+        player.add(b2dCmp);
         // foot sensor
         shape = new PolygonShape();
         shape.setAsBox(width * 0.3f / PPM, height * 0.3f / PPM, new Vector2(0, -height * 0.5f / PPM), 0);
@@ -158,41 +141,44 @@ public class EntityEngine extends PooledEngine {
         // jump component
         final JumpComponent jumpCmp = this.createComponent(JumpComponent.class);
         jumpCmp.jumpSpeed = 25;
-        entity.add(jumpCmp);
+        player.add(jumpCmp);
 
         // move component
         final MoveComponent moveCmp = this.createComponent(MoveComponent.class);
         moveCmp.maxSpeed = 6;
-        entity.add(moveCmp);
+        player.add(moveCmp);
 
         // animation component
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
-        entity.add(aniCmp);
+        aniCmp.texture = new Sprite(texture);
+        aniCmp.width = 72;
+        aniCmp.height = 96;
+        player.add(aniCmp);
 
         // player component
-        entity.add(this.createComponent(PlayerComponent.class));
+        player.add(this.createComponent(PlayerComponent.class));
 
-        this.addEntity(entity);
-        return entity;
+        this.addEntity(player);
+        return player;
     }
 
     public Entity createGameObj(final Body body, final Sprite sprite) {
-        final Entity entity = this.createEntity();
+        final Entity gameObj = this.createEntity();
 
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
         b2dCmp.body = body;
         b2dCmp.positionBeforeUpdate.set(body.getPosition());
-        b2dCmp.body.setUserData(entity);
-        entity.add(b2dCmp);
+        b2dCmp.body.setUserData(gameObj);
+        gameObj.add(b2dCmp);
 
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
         aniCmp.texture = sprite;
         aniCmp.width = sprite.getWidth();
         aniCmp.height = sprite.getHeight();
-        entity.add(aniCmp);
+        gameObj.add(aniCmp);
 
-        this.addEntity(entity);
-        return entity;
+        this.addEntity(gameObj);
+        return gameObj;
     }
 
     public void onRender(final SpriteBatch spriteBatch, final Camera camera, final float alpha) {

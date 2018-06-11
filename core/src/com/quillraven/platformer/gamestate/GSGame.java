@@ -26,7 +26,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -37,7 +36,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
-import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.ui.GameHUD;
 
@@ -74,11 +72,7 @@ public class GSGame extends GameState<GameHUD> {
         if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST, world, entityEngine)) {
             // create player
             final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-            player = entityEngine.createEntity(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 77, 150, 72, 96);
-            final AnimationComponent aniCmp = entityEngine.getAnimationComponent(player);
-            aniCmp.texture = new Sprite(assetManager.get("characters/slimeDead.png", Texture.class));
-            aniCmp.width = 72;
-            aniCmp.height = 96;
+            player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 77, 150, 72, 96, assetManager.get("characters/slimeDead.png", Texture.class));
         } else {
             assetManager.load("characters/slimeDead.png", Texture.class);
         }
