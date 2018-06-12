@@ -140,7 +140,7 @@ public class EntityEngine extends PooledEngine {
 
         // jump component
         final JumpComponent jumpCmp = this.createComponent(JumpComponent.class);
-        jumpCmp.jumpSpeed = 25;
+        jumpCmp.jumpSpeed = 22;
         player.add(jumpCmp);
 
         // move component

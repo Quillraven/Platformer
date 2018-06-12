@@ -109,9 +109,11 @@ public class WorldContactManager implements ContactListener {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
 
-        if ("body".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        if ("body".equals(fixtureB.getUserData()) && fixtureB.getBody().getLinearVelocity().y > 5 && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            System.out.println(fixtureB.getBody().getLinearVelocity().y);
             contact.setEnabled(false);
-        } else if ("body".equals(fixtureB.getUserData()) && fixtureB.getBody().getLinearVelocity().y > 0 && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        } else if ("body".equals(fixtureA.getUserData()) && fixtureA.getBody().getLinearVelocity().y > 5 && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            System.out.println(fixtureB.getBody().getLinearVelocity().y);
             contact.setEnabled(false);
         }
     }

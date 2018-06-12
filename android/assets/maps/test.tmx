@@ -3,7 +3,7 @@
  <tileset firstgid="1" source="tileset.tsx"/>
  <layer name="ground" width="36" height="12">
   <data encoding="base64" compression="zlib">
-   eJxjYBgF5AIBIBaEYqEBdstgBbAwEsLBHwW0AcJALIWGpSk0k9y4A7lFBIg5sWB6A3xuoZV7JBkw4wKG8bkF5h4ePPpxYT487sFnHyFMrhn4ACXuAQARpgX5
+   eJxjYBg6QACIBaFYaIDdMgqIA7A4E8LBHwW0AcJALIWGpSk0k9y4A7lFBIg5sWB6A3xuoZV7JBkw4wKG8bkF5h4ePPpxYT487sFnHyFMrhn4ACXuAQA35gX5
   </data>
  </layer>
  <layer name="background" width="36" height="12">
@@ -38,7 +38,7 @@
     <property name="platform" type="bool" value="true"/>
    </properties>
   </object>
-  <object id="35" x="491.333" y="140" width="276" height="16">
+  <object id="35" x="492.666" y="72" width="276" height="16">
    <properties>
     <property name="platform" type="bool" value="true"/>
    </properties>
