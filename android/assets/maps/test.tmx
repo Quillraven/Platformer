@@ -3,7 +3,7 @@
  <tileset firstgid="1" source="tileset.tsx"/>
  <layer name="ground" width="36" height="12">
   <data encoding="base64" compression="zlib">
-   eJxjYCAMBIBYEIiFiFA7EsFo+BAPRsOKPkAYiKXQsDSFZpIbdyC3iAAxJxZMb4DPLbRyjyQDZlzAMD63wNzDg0c/LsyHxz347COEyTUDH6DEPQAlDgXo
+   eJxjYBgF5AIBIBaEYqEBdstgBbAwEsLBHwW0AcJALIWGpSk0k9y4A7lFBIg5sWB6A3xuoZV7JBkw4wKG8bkF5h4ePPpxYT487sFnHyFMrhn4ACXuAQARpgX5
   </data>
  </layer>
  <layer name="background" width="36" height="12">
@@ -18,7 +18,7 @@
  </layer>
  <objectgroup name="collision">
   <object id="24" x="68" y="700" width="980" height="53.3333"/>
-  <object id="25" x="1050.67" y="490.667" width="206.667" height="37.3333">
+  <object id="25" x="1050.67" y="490.667" width="206.667" height="13.3333">
    <properties>
     <property name="platform" type="bool" value="true"/>
    </properties>
@@ -28,17 +28,17 @@
   <object id="30" x="1960" y="630.667">
    <polyline points="0,0 210.667,-209.333"/>
   </object>
-  <object id="33" x="839.333" y="280" width="206.667" height="37.3333">
+  <object id="33" x="839.333" y="280" width="206.667" height="16">
    <properties>
     <property name="platform" type="bool" value="true"/>
    </properties>
   </object>
-  <object id="34" x="631.333" y="138.667" width="206.667" height="37.3333">
+  <object id="34" x="560.666" y="280" width="206.667" height="20">
    <properties>
     <property name="platform" type="bool" value="true"/>
    </properties>
   </object>
-  <object id="35" x="630" y="1.33335" width="206.667" height="37.3333">
+  <object id="35" x="491.333" y="140" width="276" height="16">
    <properties>
     <property name="platform" type="bool" value="true"/>
    </properties>

@@ -106,11 +106,17 @@ public class WorldContactManager implements ContactListener {
 
     @Override
     public void preSolve(final Contact contact, final Manifold oldManifold) {
+        final Fixture fixtureA = contact.getFixtureA();
+        final Fixture fixtureB = contact.getFixtureB();
 
+        if ("body".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            contact.setEnabled(false);
+        } else if ("body".equals(fixtureB.getUserData()) && fixtureB.getBody().getLinearVelocity().y > 0 && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+            contact.setEnabled(false);
+        }
     }
 
     @Override
     public void postSolve(final Contact contact, final ContactImpulse impulse) {
-
     }
 }
