@@ -60,7 +60,7 @@ public class GSGame extends GameState<GameHUD> {
 
         // init box2d
         Box2D.init();
-        this.world = new World(new Vector2(0, -70), true);
+        this.world = new World(new Vector2(0, -PPM), true);
         world.setContactListener(WorldContactManager.getInstance());
 
         // init ashley entity component system

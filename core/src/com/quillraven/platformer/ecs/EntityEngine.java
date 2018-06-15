@@ -108,7 +108,7 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.body = world.createBody(bodyDef);
         b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
         b2dCmp.body.setUserData(player);
-        // fixture
+        // hitbox
         fixtureDef.friction = 1;
         fixtureDef.isSensor = false;
         PolygonShape shape = new PolygonShape();
@@ -121,21 +121,12 @@ public class EntityEngine extends PooledEngine {
         player.add(b2dCmp);
         // foot sensor
         shape = new PolygonShape();
-        shape.setAsBox(width * 0.3f / PPM, height * 0.3f / PPM, new Vector2(0, -height * 0.5f / PPM), 0);
+        shape.setAsBox(width * 0.5f / PPM, 3f / PPM, new Vector2(0, -height * 0.5f / PPM), 0);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
         fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
         fixtureDef.filter.categoryBits = categoryBits;
         b2dCmp.body.createFixture(fixtureDef).setUserData("foot");
-        shape.dispose();
-        // hitbox
-        shape = new PolygonShape();
-        shape.setAsBox(width * 0.3f / PPM, height * 0.3f / PPM);
-        fixtureDef.shape = shape;
-        fixtureDef.isSensor = true;
-        fixtureDef.filter.maskBits = maskBits;
-        fixtureDef.filter.categoryBits = categoryBits;
-        b2dCmp.body.createFixture(fixtureDef).setUserData("hitbox");
         shape.dispose();
 
         // jump component

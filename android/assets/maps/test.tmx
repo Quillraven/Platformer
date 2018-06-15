@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="12" tilewidth="70" tileheight="70" infinite="0" nextobjectid="36">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="12" tilewidth="70" tileheight="70" infinite="0" nextobjectid="37">
  <tileset firstgid="1" source="tileset.tsx"/>
  <layer name="ground" width="36" height="12">
   <data encoding="base64" compression="zlib">
-   eJxjYBg6QACIBaFYaIDdMgqIA7A4E8LBHwW0AcJALIWGpSk0k9y4A7lFBIg5sWB6A3xuoZV7JBkw4wKG8bkF5h4ePPpxYT487sFnHyFMrhn4ACXuAQA35gX5
+   eJxjYBgFwwkIALEgFAsNsFuwAZj7BqPbhhMQBmIpNCxNoZnkxh3ILSJAzIkF0xvgcwut3CPJgBkXMIzPLTD38ODRjwvz4XEPPvsIYXLNwAcocQ8AC/sFxg==
   </data>
  </layer>
  <layer name="background" width="36" height="12">
@@ -33,12 +33,7 @@
     <property name="platform" type="bool" value="true"/>
    </properties>
   </object>
-  <object id="34" x="560.666" y="280" width="206.667" height="20">
-   <properties>
-    <property name="platform" type="bool" value="true"/>
-   </properties>
-  </object>
-  <object id="35" x="492.666" y="72" width="276" height="16">
+  <object id="35" x="560.666" y="210.667" width="276" height="16">
    <properties>
     <property name="platform" type="bool" value="true"/>
    </properties>

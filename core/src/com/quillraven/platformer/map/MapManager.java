@@ -29,6 +29,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -39,7 +40,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -62,6 +62,7 @@ public class MapManager {
     private final BodyDef bodyDef;
     private final FixtureDef fixtureDef;
     private final Array<Body> worldBodies;
+    private final float[] rectVertices = new float[8];
 
     private MapManager() {
         this.mapListeners = new Array<>();
@@ -147,83 +148,91 @@ public class MapManager {
         }
 
         for (MapObject mapObj : layer.getObjects()) {
-            final float[] vertices;
-            final Object userData;
             if (mapObj instanceof RectangleMapObject) {
                 // create rectangle collision object
-                final Rectangle rect = ((RectangleMapObject) mapObj).getRectangle();
-                vertices = new float[8];
-                userData = "platform";
-                // left-bot
-                vertices[0] = rect.x / PPM;
-                vertices[1] = rect.y / PPM;
-                // left-top
-                vertices[2] = rect.x / PPM;
-                vertices[3] = rect.y / PPM + rect.height / PPM;
-                // right-top
-                vertices[4] = rect.x / PPM + rect.width / PPM;
-                vertices[5] = rect.y / PPM + rect.height / PPM;
-                // right-bot
-                vertices[6] = rect.x / PPM + rect.width / PPM;
-                vertices[7] = rect.y / PPM;
+                createRectangleCollisionBody((RectangleMapObject) mapObj, world);
             } else if (mapObj instanceof PolylineMapObject) {
                 // create polyline collision object
-                final Polyline polyline = ((PolylineMapObject) mapObj).getPolyline();
-                vertices = polyline.getVertices();
-                userData = "platform";
-                final float x = polyline.getX() / PPM;
-                final float y = polyline.getY() / PPM;
-                for (int i = 0; i < vertices.length; i += 2) {
-                    vertices[i] = vertices[i] / PPM + x;
-                    vertices[i + 1] = vertices[i + 1] / PPM + y;
-                }
+                createPolylineCollisionBody(((PolylineMapObject) mapObj).getPolyline(), world);
             } else if (mapObj instanceof TiledMapTileMapObject) {
-                final TiledMapTileMapObject obj = (TiledMapTileMapObject) mapObj;
-                final float x = obj.getX() / PPM;
-                final float y = obj.getY() / PPM;
-                final float width = obj.getProperties().get("width", Float.class) / PPM;
-                final float height = obj.getProperties().get("height", Float.class) / PPM;
-
-                bodyDef.type = BodyDef.BodyType.StaticBody;
-                bodyDef.position.set(x + width * 0.5f, y + height * 0.5f);
-                final Body body = world.createBody(bodyDef);
-                final PolygonShape shape = new PolygonShape();
-                shape.setAsBox(width * 0.5f, height * 0.5f);
-                fixtureDef.shape = shape;
-                fixtureDef.filter.categoryBits = Platformer.BIT_OBJECT;
-                fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
-                fixtureDef.isSensor = true;
-                body.createFixture(fixtureDef).setUserData("hitbox");
-                entityEngine.createGameObj(body, new Sprite(obj.getTile().getTextureRegion()));
-                shape.dispose();
-                continue;
+                createMapObject((TiledMapTileMapObject) mapObj, world, entityEngine);
             } else {
                 Gdx.app.error(TAG, "Unsupported map object type: " + mapObj.getClass().getSimpleName());
-                vertices = null;
-                userData = null;
-            }
-
-            if (vertices != null) {
-                bodyDef.type = BodyDef.BodyType.StaticBody;
-                bodyDef.position.set(0, 0);
-                final Body body = world.createBody(bodyDef);
-                final ChainShape shape = new ChainShape();
-                if (vertices.length <= 4) {
-                    // point or line
-                    shape.createChain(vertices);
-                } else {
-                    // object with at least 3 corners
-                    shape.createLoop(vertices);
-                }
-                fixtureDef.shape = shape;
-                fixtureDef.friction = 0;
-                fixtureDef.filter.categoryBits = Platformer.BIT_GROUND;
-                fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
-                fixtureDef.isSensor = false;
-                body.createFixture(fixtureDef).setUserData(userData);
-                shape.dispose();
             }
         }
+    }
+
+    private Body createCollisionBody(final World world, final float x, final float y, final float[] vertices, final boolean createLoop, final short categoryBit, final boolean isSensor) {
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+        bodyDef.position.set(x, y);
+        final Body body = world.createBody(bodyDef);
+        final ChainShape shape = new ChainShape();
+        if (createLoop) {
+            shape.createLoop(vertices);
+        } else {
+            shape.createChain(vertices);
+        }
+        fixtureDef.shape = shape;
+        fixtureDef.friction = 0;
+        fixtureDef.filter.categoryBits = categoryBit;
+        fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
+        fixtureDef.isSensor = isSensor;
+        body.createFixture(fixtureDef);
+        shape.dispose();
+
+        return body;
+    }
+
+    private void createRectangleCollisionBody(final RectangleMapObject mapObj, final World world) {
+        final Rectangle rect = mapObj.getRectangle();
+        final float halfW = rect.width / PPM * 0.5f;
+        final float halfH = rect.height / PPM * 0.5f;
+        // left-bot
+        rectVertices[0] = -halfW;
+        rectVertices[1] = -halfH;
+        // left-top
+        rectVertices[2] = -halfW;
+        rectVertices[3] = halfH;
+        // right-top
+        rectVertices[4] = halfW;
+        rectVertices[5] = halfH;
+        // right-bot
+        rectVertices[6] = halfW;
+        rectVertices[7] = -halfH;
+
+        createCollisionBody(world, rect.x / PPM + halfW, rect.y / PPM + halfH, rectVertices, true, Platformer.BIT_GROUND, false);
+    }
+
+    private void createPolylineCollisionBody(final Polyline polyline, final World world) {
+        final float[] vertices = polyline.getVertices();
+        for (int i = 0; i < vertices.length; i += 2) {
+            vertices[i] = vertices[i] / PPM;
+            vertices[i + 1] = vertices[i + 1] / PPM;
+        }
+
+        createCollisionBody(world, polyline.getX() / PPM, polyline.getY() / PPM, vertices, false, Platformer.BIT_GROUND, false);
+    }
+
+    private void createMapObject(final TiledMapTileMapObject mapObj, final World world, final EntityEngine entityEngine) {
+        final MapProperties properties = mapObj.getProperties();
+        final float halfW = properties.get("width", Float.class) / PPM * 0.5f;
+        final float halfH = properties.get("height", Float.class) / PPM * 0.5f;
+
+        // left-bot
+        rectVertices[0] = -halfW;
+        rectVertices[1] = -halfH;
+        // left-top
+        rectVertices[2] = -halfW;
+        rectVertices[3] = halfH;
+        // right-top
+        rectVertices[4] = halfW;
+        rectVertices[5] = halfH;
+        // right-bot
+        rectVertices[6] = halfW;
+        rectVertices[7] = -halfH;
+
+        final Body body = createCollisionBody(world, properties.get("x", Float.class) / PPM + halfW, properties.get("y", Float.class) / PPM + halfH, rectVertices, true, Platformer.BIT_OBJECT, true);
+        entityEngine.createGameObj(body, new Sprite(mapObj.getTile().getTextureRegion()));
     }
 
     public enum MapType {
