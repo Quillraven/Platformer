@@ -90,9 +90,10 @@ public class MapManager {
             Gdx.app.debug(TAG, "Changing map to " + mapType);
             Map map = mapCache.get(mapType);
             final TiledMap tiledMap = assetManager.get(mapType.filePath, TiledMap.class);
+            final MapLayers mapLayers = tiledMap.getLayers();
             if (map == null) {
                 Gdx.app.debug(TAG, "Creating new map " + mapType);
-                map = new Map(mapType, tiledMap.getProperties(), tiledMap.getLayers().getIndex("ground"), tiledMap.getLayers().getIndex("background"), tiledMap.getLayers().getIndex("foreground"));
+                map = new Map(mapType, tiledMap.getProperties(), mapLayers.getIndex("ground"), mapLayers.getIndex("background"), mapLayers.getIndex("objects"), mapLayers.getIndex("foreground"));
                 mapCache.put(mapType, map);
             }
 
@@ -104,7 +105,7 @@ public class MapManager {
                 listener.onMapChanged(map, tiledMap);
             }
             currentMap = map;
-            createMapBodies(tiledMap.getLayers(), world, entityEngine);
+            createMapBodies(mapLayers, world, entityEngine);
             return true;
         } else {
             // map not loaded yet

@@ -19,7 +19,6 @@ import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
-import com.quillraven.platformer.ecs.system.Box2DDebugRenderSystem;
 import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
 import com.quillraven.platformer.ecs.system.MoveSystem;
@@ -84,7 +83,7 @@ public class EntityEngine extends PooledEngine {
         final ComponentMapper<JumpComponent> jumpCmpMapper = ComponentMapper.getFor(JumpComponent.class);
         this.addSystem(new JumpSystem(b2dCmpMapper, jumpCmpMapper));
         // box2d debug
-        renderSystems.add(new Box2DDebugRenderSystem(this, world));
+//        renderSystems.add(new Box2DDebugRenderSystem(this, world));
         renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
 
         // create box2d definitions
@@ -101,6 +100,8 @@ public class EntityEngine extends PooledEngine {
 
         // box2d component
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
+        b2dCmp.width = width / PPM;
+        b2dCmp.height = height / PPM;
         // body
         bodyDef.position.set(x / PPM, y / PPM);
         bodyDef.type = bodyType;
@@ -108,7 +109,6 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
         b2dCmp.body.setUserData(player);
         // hitbox
-        fixtureDef.friction = 1;
         fixtureDef.isSensor = false;
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(width * 0.5f / PPM, height * 0.5f / PPM);
@@ -120,12 +120,20 @@ public class EntityEngine extends PooledEngine {
         player.add(b2dCmp);
         // foot sensor
         shape = new PolygonShape();
-        shape.setAsBox(width * 0.5f / PPM, 3f / PPM, new Vector2(0, -height * 0.5f / PPM), 0);
+        shape.setAsBox(width * 0.25f / PPM, 15f / PPM, new Vector2(-width * 0.25f / PPM, -height * 0.5f / PPM), 0);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
         fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
         fixtureDef.filter.categoryBits = categoryBits;
-        b2dCmp.body.createFixture(fixtureDef).setUserData("foot");
+        b2dCmp.body.createFixture(fixtureDef).setUserData("foot-left");
+        shape.dispose();
+        shape = new PolygonShape();
+        shape.setAsBox(width * 0.25f / PPM, 15f / PPM, new Vector2(width * 0.25f / PPM, -height * 0.5f / PPM), 0);
+        fixtureDef.shape = shape;
+        fixtureDef.isSensor = true;
+        fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
+        fixtureDef.filter.categoryBits = categoryBits;
+        b2dCmp.body.createFixture(fixtureDef).setUserData("foot-right");
         shape.dispose();
 
         // jump component

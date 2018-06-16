@@ -57,7 +57,7 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
         final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
         final Vector2 worldCenter = b2dCmp.body.getWorldCenter();
 
-        if (jumpCmp.jump && b2dCmp.numGroundContacts > 0) {
+        if (jumpCmp.jump && (b2dCmp.numGroundContactsLeft > 0 || b2dCmp.numGroundContactsRight > 0)) {
             // impulse = velocity * mass / time
             // since we want instant movement we ignore the time factor
             // therefore if we want to move our objects with a constant speed of 5 units/seconds our impulse will be:
@@ -69,13 +69,21 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
     }
 
     @Override
-    public void onBeginGroundContact(final Entity entity) {
-        ++b2dCmpMapper.get(entity).numGroundContacts;
+    public void onBeginGroundContact(final Entity entity, final String userData) {
+        if ("foot-left".equals(userData)) {
+            ++b2dCmpMapper.get(entity).numGroundContactsLeft;
+        } else {
+            ++b2dCmpMapper.get(entity).numGroundContactsRight;
+        }
     }
 
     @Override
-    public void onEndGroundContact(final Entity entity) {
-        --b2dCmpMapper.get(entity).numGroundContacts;
+    public void onEndGroundContact(final Entity entity, final String userData) {
+        if ("foot-left".equals(userData)) {
+            --b2dCmpMapper.get(entity).numGroundContactsLeft;
+        } else {
+            --b2dCmpMapper.get(entity).numGroundContactsRight;
+        }
     }
 
     @Override

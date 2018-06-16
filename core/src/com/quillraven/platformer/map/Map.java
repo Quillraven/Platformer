@@ -38,11 +38,11 @@ public class Map {
     private final int[] bgdLayerIdx;
     private final int[] fgdLayerIdx;
 
-    Map(final MapManager.MapType mapType, final MapProperties mapProperties, final int gdLayerIdx, final int bgdLayerIdx, final int fgdLayerIdx) {
+    Map(final MapManager.MapType mapType, final MapProperties mapProperties, final int gdLayerIdx, final int bgdLayerIdx, final int objectLayerIdx, final int fgdLayerIdx) {
         this.mapType = mapType;
         this.width = mapProperties.get("width", Integer.class) * mapProperties.get("tilewidth", Integer.class) / PPM;
         this.height = mapProperties.get("height", Integer.class) * mapProperties.get("tileheight", Integer.class) / PPM;
-        this.bgdLayerIdx = new int[]{gdLayerIdx, bgdLayerIdx};
+        this.bgdLayerIdx = new int[]{gdLayerIdx, bgdLayerIdx, objectLayerIdx};
         this.fgdLayerIdx = new int[]{fgdLayerIdx};
     }
 

@@ -62,13 +62,13 @@ public class WorldContactManager implements ContactListener {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
 
-        if ("foot".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        if (("foot-left".equals(fixtureA.getUserData()) || "foot-right".equals(fixtureA.getUserData())) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
             for (GameContactListener listener : listeners) {
-                listener.onBeginGroundContact((Entity) fixtureA.getBody().getUserData());
+                listener.onBeginGroundContact((Entity) fixtureA.getBody().getUserData(), (String) fixtureA.getUserData());
             }
-        } else if ("foot".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        } else if (("foot-left".equals(fixtureB.getUserData()) || "foot-right".equals(fixtureB.getUserData())) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
             for (GameContactListener listener : listeners) {
-                listener.onBeginGroundContact((Entity) fixtureB.getBody().getUserData());
+                listener.onBeginGroundContact((Entity) fixtureB.getBody().getUserData(), (String) fixtureB.getUserData());
             }
         } else if ("body".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
             for (GameContactListener listener : listeners) {
@@ -86,13 +86,13 @@ public class WorldContactManager implements ContactListener {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
 
-        if ("foot".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        if (("foot-left".equals(fixtureA.getUserData()) || "foot-right".equals(fixtureA.getUserData())) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
             for (GameContactListener listener : listeners) {
-                listener.onEndGroundContact((Entity) fixtureA.getBody().getUserData());
+                listener.onEndGroundContact((Entity) fixtureA.getBody().getUserData(), (String) fixtureA.getUserData());
             }
-        } else if ("foot".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        } else if (("foot-left".equals(fixtureB.getUserData()) || "foot-right".equals(fixtureB.getUserData())) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
             for (GameContactListener listener : listeners) {
-                listener.onEndGroundContact((Entity) fixtureB.getBody().getUserData());
+                listener.onEndGroundContact((Entity) fixtureB.getBody().getUserData(), (String) fixtureB.getUserData());
             }
         } else if ("body".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
             for (GameContactListener listener : listeners) {
@@ -147,9 +147,9 @@ public class WorldContactManager implements ContactListener {
 
 
     public interface GameContactListener {
-        void onBeginGroundContact(final Entity entity);
+        void onBeginGroundContact(final Entity entity, final String userData);
 
-        void onEndGroundContact(final Entity entity);
+        void onEndGroundContact(final Entity entity, final String userData);
 
         void onBeginEntityContact(final Entity entityA, final Entity entityB);
 

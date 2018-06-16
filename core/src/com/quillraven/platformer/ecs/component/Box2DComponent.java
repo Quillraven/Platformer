@@ -36,8 +36,11 @@ import com.badlogic.gdx.utils.Pool;
 public class Box2DComponent implements Component, Pool.Poolable {
     public final Array<Entity> contacts = new Array<>();
     public Body body;
-    public int numGroundContacts;
+    public int numGroundContactsLeft;
+    public int numGroundContactsRight;
     public final Vector2 positionBeforeUpdate = new Vector2(0, 0);
+    public float width;
+    public float height;
 
     @Override
     public void reset() {
@@ -45,8 +48,11 @@ public class Box2DComponent implements Component, Pool.Poolable {
             body.getWorld().destroyBody(body);
             body = null;
         }
-        numGroundContacts = 0;
+        numGroundContactsLeft = 0;
+        numGroundContactsRight = 0;
         contacts.clear();
         positionBeforeUpdate.set(0, 0);
+        this.width = 0;
+        this.height = 0;
     }
 }

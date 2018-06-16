@@ -73,7 +73,7 @@ public class GSGame extends GameState<GameHUD> {
         if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST, world, entityEngine)) {
             // create player
             final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-            player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 77, 150, 72, 96);
+            player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 77, 150, 48, 64);
         }
     }
 

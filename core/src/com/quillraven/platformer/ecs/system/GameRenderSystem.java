@@ -33,15 +33,13 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
+import com.quillraven.platformer.map.MapRenderer;
 import com.quillraven.platformer.ui.AnimationManager;
 
 import static com.quillraven.platformer.Platformer.PPM;
@@ -50,7 +48,7 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description and use SortedIteratingSystem
  */
 public class GameRenderSystem extends RenderSystem implements MapManager.MapListener {
-    private final OrthogonalTiledMapRenderer tiledMapRenderer;
+    private final MapRenderer mapRenderer;
     private final Family renderFamily;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
@@ -62,7 +60,7 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     public GameRenderSystem(final EntityEngine engine, final SpriteBatch spriteBatch, final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<AnimationComponent> aniCmpMapper) {
         super(engine);
         MapManager.getInstance().addMapListener(this);
-        tiledMapRenderer = new OrthogonalTiledMapRenderer(null, 1 / PPM, spriteBatch);
+        mapRenderer = new MapRenderer(spriteBatch);
         this.renderFamily = Family.all(AnimationComponent.class, Box2DComponent.class).get();
         this.b2dCmpMapper = b2dCmpMapper;
         this.aniCmpMapper = aniCmpMapper;
@@ -86,14 +84,12 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             camera.update();
         }
 
-
-        if (tiledMapRenderer.getMap() != null) {
-            tiledMapRenderer.setView((OrthographicCamera) camera);
-            AnimatedTiledMapTile.updateAnimationBaseTime();
-            tiledMapRenderer.render(bgdLayerIdx);
+        spriteBatch.begin();
+        if (mapRenderer.getMap() != null) {
+            mapRenderer.setView((OrthographicCamera) camera);
+            mapRenderer.render(bgdLayerIdx);
         }
 
-        spriteBatch.begin();
         for (final Entity entity : animatedEntities) {
             final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
             final Vector2 position = b2dCmp.body.getPosition();
@@ -101,24 +97,29 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             final float invertAlpha = 1.0f - alpha;
 
             // calculate interpolated position for rendering
-            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (aniCmp.width * 0.5f);
-            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (aniCmp.height * 0.5f);
+            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (b2dCmp.width * 0.5f);
+            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (b2dCmp.height * 0.5f);
 
             final Animation<Sprite> animation = AnimationManager.getInstance().getAnimation(aniCmp.aniType);
             final Sprite frame = animation.getKeyFrame(aniCmp.animationTime, true);
             frame.setColor(Color.WHITE);
             frame.setFlip(false, aniCmp.flipY);
             frame.setOriginCenter();
-            frame.setRotation(b2dCmp.body.getAngle() * MathUtils.radiansToDegrees);
-            frame.setBounds(x, y, aniCmp.width, aniCmp.height);
+            if (b2dCmp.body.getLinearVelocity().y >= 5) {
+                // jumping
+                frame.setRotation(0);
+            } else {
+                frame.setRotation(b2dCmp.numGroundContactsLeft == 0 && b2dCmp.numGroundContactsRight > 0 ? 40 : b2dCmp.numGroundContactsLeft > 0 && b2dCmp.numGroundContactsRight == 0 ? 320 : 0);
+            }
+            frame.setBounds(x - (aniCmp.width - b2dCmp.width) * 0.5f, frame.getRotation() == 0 ? y : y - b2dCmp.height * 0.2f, aniCmp.width, aniCmp.height);
 
             spriteBatch.draw(frame.getTexture(), frame.getVertices(), 0, 20);
         }
-        spriteBatch.end();
 
-        if (tiledMapRenderer.getMap() != null) {
-            tiledMapRenderer.render(fgdLayerIdx);
+        if (mapRenderer.getMap() != null) {
+            mapRenderer.render(fgdLayerIdx);
         }
+        spriteBatch.end();
     }
 
     @Override
@@ -127,11 +128,11 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
         mapHeight = map.getHeight();
         bgdLayerIdx = map.getBackgroundLayerIndex();
         fgdLayerIdx = map.getForegroundLayerIndex();
-        tiledMapRenderer.setMap(tiledMap);
+        mapRenderer.setMap(tiledMap);
     }
 
     @Override
     public void onDispose() {
-        tiledMapRenderer.dispose();
+        mapRenderer.dispose();
     }
 }
