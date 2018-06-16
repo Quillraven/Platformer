@@ -35,7 +35,7 @@ import com.badlogic.gdx.utils.Pool;
  */
 public class Box2DComponent implements Component, Pool.Poolable {
     public final Array<Entity> contacts = new Array<>();
-    public Body body = null;
+    public Body body;
     public int numGroundContacts;
     public final Vector2 positionBeforeUpdate = new Vector2(0, 0);
 

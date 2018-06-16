@@ -113,3 +113,9 @@ task buildTilesetTextureAtlas(description: "Rebuilds the tileset atlas located i
         TexturePacker.process('android/assets/tiles/input', 'android/assets/tiles', 'tileset.atlas')
     }
 }
+
+task buildCharacterTextureAtlas(description: "Rebuilds the character atlas located in assets/characters folder. Images are taken from assets/characters/input folder.", group: "game") {
+    doLast {
+        TexturePacker.process('android/assets/characters/input', 'android/assets/characters', 'characters.atlas')
+    }
+}

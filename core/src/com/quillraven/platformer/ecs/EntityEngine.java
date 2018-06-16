@@ -5,8 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -26,6 +24,7 @@ import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
 import com.quillraven.platformer.ecs.system.MoveSystem;
 import com.quillraven.platformer.ecs.system.RenderSystem;
+import com.quillraven.platformer.ui.AnimationManager;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -97,7 +96,7 @@ public class EntityEngine extends PooledEngine {
         return player;
     }
 
-    public Entity createPlayer(final World world, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height, final Texture texture) {
+    public Entity createPlayer(final World world, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height) {
         player = this.createEntity();
 
         // box2d component
@@ -141,9 +140,9 @@ public class EntityEngine extends PooledEngine {
 
         // animation component
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
-        aniCmp.texture = new Sprite(texture);
-        aniCmp.width = 72;
-        aniCmp.height = 96;
+        aniCmp.aniType = AnimationManager.AnimationType.PLAYER_IDLE;
+        aniCmp.width = 72 / PPM;
+        aniCmp.height = 96 / PPM;
         player.add(aniCmp);
 
         // player component
@@ -153,7 +152,7 @@ public class EntityEngine extends PooledEngine {
         return player;
     }
 
-    public Entity createGameObj(final Body body, final Sprite sprite) {
+    public Entity createGameObj(final Body body) {
         final Entity gameObj = this.createEntity();
 
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
@@ -161,12 +160,6 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.positionBeforeUpdate.set(body.getPosition());
         b2dCmp.body.setUserData(gameObj);
         gameObj.add(b2dCmp);
-
-        final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
-        aniCmp.texture = sprite;
-        aniCmp.width = sprite.getWidth();
-        aniCmp.height = sprite.getHeight();
-        gameObj.add(aniCmp);
 
         this.addEntity(gameObj);
         return gameObj;

@@ -25,7 +25,6 @@ package com.quillraven.platformer.map;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
@@ -232,7 +231,7 @@ public class MapManager {
         rectVertices[7] = -halfH;
 
         final Body body = createCollisionBody(world, properties.get("x", Float.class) / PPM + halfW, properties.get("y", Float.class) / PPM + halfH, rectVertices, true, Platformer.BIT_OBJECT, true);
-        entityEngine.createGameObj(body, new Sprite(mapObj.getTile().getTextureRegion()));
+        entityEngine.createGameObj(body);
     }
 
     public enum MapType {

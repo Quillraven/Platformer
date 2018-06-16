@@ -29,6 +29,8 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -40,6 +42,7 @@ import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
+import com.quillraven.platformer.ui.AnimationManager;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -67,7 +70,7 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
 
     @Override
     public void onRender(final SpriteBatch spriteBatch, final Camera camera, final float alpha) {
-        final ImmutableArray<Entity> entitiesFor = engine.getEntitiesFor(renderFamily);
+        final ImmutableArray<Entity> animatedEntities = engine.getEntitiesFor(renderFamily);
 
         final Entity player = engine.getPlayer();
         if (player != null) {
@@ -91,23 +94,25 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
         }
 
         spriteBatch.begin();
-        for (final Entity entity : entitiesFor) {
+        for (final Entity entity : animatedEntities) {
             final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
             final Vector2 position = b2dCmp.body.getPosition();
             final AnimationComponent aniCmp = aniCmpMapper.get(entity);
             final float invertAlpha = 1.0f - alpha;
 
             // calculate interpolated position for rendering
-            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (aniCmp.width / PPM / 2);
-            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (aniCmp.height / PPM / 2);
+            final float x = (position.x * alpha + b2dCmp.positionBeforeUpdate.x * invertAlpha) - (aniCmp.width * 0.5f);
+            final float y = (position.y * alpha + b2dCmp.positionBeforeUpdate.y * invertAlpha) - (aniCmp.height * 0.5f);
 
-            aniCmp.texture.setColor(Color.WHITE);
-            aniCmp.texture.setFlip(false, false);
-            aniCmp.texture.setOriginCenter();
-            aniCmp.texture.setRotation(b2dCmp.body.getAngle() * MathUtils.radiansToDegrees);
-            aniCmp.texture.setBounds(x, y, aniCmp.width / PPM, aniCmp.height / PPM);
+            final Animation<Sprite> animation = AnimationManager.getInstance().getAnimation(aniCmp.aniType);
+            final Sprite frame = animation.getKeyFrame(aniCmp.animationTime, true);
+            frame.setColor(Color.WHITE);
+            frame.setFlip(false, aniCmp.flipY);
+            frame.setOriginCenter();
+            frame.setRotation(b2dCmp.body.getAngle() * MathUtils.radiansToDegrees);
+            frame.setBounds(x, y, aniCmp.width, aniCmp.height);
 
-            spriteBatch.draw(aniCmp.texture.getTexture(), aniCmp.texture.getVertices(), 0, 20);
+            spriteBatch.draw(frame.getTexture(), frame.getVertices(), 0, 20);
         }
         spriteBatch.end();
 

@@ -23,21 +23,25 @@ package com.quillraven.platformer.ecs.component;
  */
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Pool;
+import com.quillraven.platformer.ui.AnimationManager;
 
 /**
  * TODO add class description
  */
 public class AnimationComponent implements Component, Pool.Poolable {
-    public Sprite texture = null;
-    public float width = 0;
-    public float height = 0;
+    public AnimationManager.AnimationType aniType;
+    public float animationTime;
+    public float width;
+    public float height;
+    public boolean flipY;
 
     @Override
     public void reset() {
-        this.texture = null;
+        this.aniType = null;
+        this.animationTime = 0;
         this.width = 0;
         this.height = 0;
+        this.flipY = false;
     }
 }
