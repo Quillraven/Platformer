@@ -26,6 +26,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -36,6 +38,9 @@ import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
+import com.quillraven.platformer.ecs.component.PlayerComponent;
+import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
+import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.ui.AnimationManager;
 import com.quillraven.platformer.ui.GameHUD;
@@ -46,15 +51,17 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 
-public class GSGame extends GameState<GameHUD> {
+public class GSGame extends GameState<GameHUD> implements MapManager.MapListener, GameObjectCollisionSystem.GameObjectListener {
     private final World world;
     private final EntityEngine entityEngine;
     private Entity player;
     private final Viewport gameViewport;
     private final OrthographicCamera gameCamera;
+    private int maxCoins;
 
     public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
         super(assetManager, hud, spriteBatch);
+        MapManager.getInstance().addMapListener(this);
 
         this.gameViewport = new FitViewport(Platformer.V_WIDTH / PPM, Platformer.V_HEIGHT / PPM);
         this.gameCamera = (OrthographicCamera) gameViewport.getCamera();
@@ -66,6 +73,7 @@ public class GSGame extends GameState<GameHUD> {
 
         // init ashley entity component system
         entityEngine = new EntityEngine(world, spriteBatch);
+        entityEngine.getSystem(GameObjectCollisionSystem.class).addGameObjectListener(this);
     }
 
     @Override
@@ -75,7 +83,8 @@ public class GSGame extends GameState<GameHUD> {
         if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST, world, entityEngine)) {
             // create player
             final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-            player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 77, 150, 48, 64);
+            player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 2 * PPM, 3 * PPM, 48, 64);
+            hud.updateLifeInfo(player.getComponent(PlayerComponent.class).currentLife, player.getComponent(PlayerComponent.class).maxLife);
         }
     }
 
@@ -114,4 +123,33 @@ public class GSGame extends GameState<GameHUD> {
         gameViewport.update(width, height);
     }
 
+    @Override
+    public void onMapChanged(final Map map, final TiledMap tiledMap) {
+        hud.setLevelName(map.getName());
+        this.maxCoins = map.getMaxCoins();
+        hud.updateCoinInfo(0, maxCoins);
+    }
+
+    @Override
+    public void onCoinPickup(final int numCoinsCollected) {
+        hud.updateCoinInfo(numCoinsCollected, maxCoins);
+
+        if (numCoinsCollected >= maxCoins) {
+            SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_ALL_COINS);
+            // stop flag pole at the end of the level
+            // flag pole has 3 animation frames; set the time for the first 2 frames to negative to skip them
+            final Map currentMap = MapManager.getInstance().getCurrentMap();
+            final AnimatedTiledMapTile flagTile = (AnimatedTiledMapTile) currentMap.getCoinFlagObject().getTile();
+            final int[] intervals = flagTile.getAnimationIntervals();
+            intervals[0] = -1;
+            intervals[1] = -1;
+            intervals[2] = 150;
+            flagTile.setAnimationIntervals(intervals);
+        }
+    }
+
+    @Override
+    public void onInfoBoxActivation(final float x, final float y, final String infoBoxID) {
+        hud.showInfoMessage(x, y, infoBoxID);
+    }
 }

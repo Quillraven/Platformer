@@ -5,6 +5,7 @@
   <animation>
    <frame tileid="4" duration="150"/>
    <frame tileid="5" duration="150"/>
+   <frame tileid="6" duration="150"/>
   </animation>
  </tile>
 </tileset>

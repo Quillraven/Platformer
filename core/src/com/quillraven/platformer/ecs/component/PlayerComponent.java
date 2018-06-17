@@ -29,8 +29,14 @@ import com.badlogic.gdx.utils.Pool;
  * TODO add class description
  */
 public class PlayerComponent implements Component, Pool.Poolable {
+    public int coinsCollected;
+    public int maxLife;
+    public int currentLife;
+
     @Override
     public void reset() {
-
+        this.coinsCollected = 0;
+        this.maxLife = 0;
+        this.currentLife = 0;
     }
 }

@@ -49,7 +49,7 @@ public abstract class HUD {
         stage.act(fixedPhysicsSteps);
     }
 
-    public void onRender(final SpriteBatch spriteBatch, final float alpha) {
+    public void onRender() {
         hudViewport.apply();
         stage.draw();
     }

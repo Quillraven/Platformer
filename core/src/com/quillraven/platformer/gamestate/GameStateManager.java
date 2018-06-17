@@ -27,7 +27,11 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Array;
@@ -40,6 +44,7 @@ import com.quillraven.platformer.ui.GameHUD;
 import com.quillraven.platformer.ui.HUD;
 import com.quillraven.platformer.ui.LoadingHUD;
 import com.quillraven.platformer.ui.Skin;
+import com.quillraven.platformer.ui.SkinLoader;
 
 /**
  * GameStateManager is responsible to manage the states of a game like a main menu, game, game over screen, etc..
@@ -58,6 +63,7 @@ public class GameStateManager {
 
     private final SpriteBatch spriteBatch;
     private final AssetManager assetManager;
+    private final Skin skin;
     private final Viewport hudViewport;
 
     private final ObjectMap<GameStateType, GameState> gameStateCache;
@@ -70,6 +76,12 @@ public class GameStateManager {
         final FileHandleResolver resolver = new InternalFileHandleResolver();
         this.assetManager = new AssetManager();
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(resolver));
+        assetManager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
+        assetManager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
+        assetManager.setLoader(Skin.class, new SkinLoader(resolver));
+        assetManager.load("hud/hud.json", Skin.class, new SkinLoader.SkinParameter("hud/font.ttf", 16, 24, 32));
+        assetManager.finishLoading();
+        skin = assetManager.get("hud/hud.json", Skin.class);
 
         this.spriteBatch = new SpriteBatch();
         this.hudViewport = new ScreenViewport();
@@ -89,7 +101,7 @@ public class GameStateManager {
         if (gameState == null) {
             try {
                 Gdx.app.debug(TAG, "Creating new gamestate " + gsType);
-                final HUD view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class, Viewport.class).newInstance(null, spriteBatch, hudViewport);
+                final HUD view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class, Viewport.class).newInstance(skin, spriteBatch, hudViewport);
                 gameState = gsType.gsClass.getConstructor(AssetManager.class, gsType.viewClass, SpriteBatch.class).newInstance(assetManager, view, spriteBatch);
                 gameStateCache.put(gsType, gameState);
             } catch (Exception e) {

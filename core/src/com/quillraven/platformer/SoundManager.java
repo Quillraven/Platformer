@@ -70,7 +70,8 @@ public class SoundManager {
     public enum SoundType {
         STAGE("sounds/stage.mp3", Music.class),
         SFX_JUMP("sounds/jump.wav", Sound.class),
-        SFX_COIN("sounds/coin.wav", Sound.class);
+        SFX_COIN("sounds/coin.wav", Sound.class),
+        SFX_ALL_COINS("sounds/all_coins.wav", Sound.class);
 
         private final String filePath;
         private final Class<?> soundClass;

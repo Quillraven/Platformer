@@ -48,7 +48,7 @@ abstract class GameState<T extends HUD> {
     }
 
     public void onRender(final SpriteBatch spriteBatch, final float alpha) {
-        hud.onRender(spriteBatch, alpha);
+        hud.onRender();
     }
 
     public void onResize(final int width, final int height) {

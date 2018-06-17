@@ -23,6 +23,7 @@ package com.quillraven.platformer.map;
  */
 
 import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -33,10 +34,13 @@ public class Map {
     private static final String TAG = Map.class.getSimpleName();
 
     private final MapManager.MapType mapType;
+    private final String name;
     private final float width;
     private final float height;
     private final int[] bgdLayerIdx;
     private final int[] fgdLayerIdx;
+    private int maxCoins;
+    private TiledMapTileMapObject coinFlagObject;
 
     Map(final MapManager.MapType mapType, final MapProperties mapProperties, final int gdLayerIdx, final int bgdLayerIdx, final int objectLayerIdx, final int fgdLayerIdx) {
         this.mapType = mapType;
@@ -44,6 +48,9 @@ public class Map {
         this.height = mapProperties.get("height", Integer.class) * mapProperties.get("tileheight", Integer.class) / PPM;
         this.bgdLayerIdx = new int[]{gdLayerIdx, bgdLayerIdx, objectLayerIdx};
         this.fgdLayerIdx = new int[]{fgdLayerIdx};
+        this.name = mapProperties.get("name", String.class);
+        this.maxCoins = 0;
+        this.coinFlagObject = null;
     }
 
     private MapManager.MapType getMapType() {
@@ -64,5 +71,25 @@ public class Map {
 
     public int[] getForegroundLayerIndex() {
         return fgdLayerIdx;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getMaxCoins() {
+        return maxCoins;
+    }
+
+    public void setMaxCoins(final int maxCoins) {
+        this.maxCoins = maxCoins;
+    }
+
+    public TiledMapTileMapObject getCoinFlagObject() {
+        return coinFlagObject;
+    }
+
+    public void setCoinFlagObject(final TiledMapTileMapObject mapObj) {
+        this.coinFlagObject = mapObj;
     }
 }

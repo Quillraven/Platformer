@@ -33,6 +33,7 @@ import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -104,12 +105,16 @@ public class MapManager {
                 removeMapBodies(world, entityEngine);
             }
 
-            for (final MapListener listener : mapListeners) {
-                listener.onMapChanged(map, currentTiledMap);
-            }
             currentMap = map;
+            currentMap.setMaxCoins(0);
             createMapBodies(mapLayers, world, entityEngine);
+
             SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentTiledMap.getProperties().get("music", String.class)));
+
+            for (final MapListener listener : mapListeners) {
+                listener.onMapChanged(currentMap, currentTiledMap);
+            }
+
             return true;
         } else {
             // map not loaded yet
@@ -117,6 +122,10 @@ public class MapManager {
             assetManager.load(mapType.filePath, TiledMap.class);
             return false;
         }
+    }
+
+    public Map getCurrentMap() {
+        return currentMap;
     }
 
     private void removeMapBodies(final World world, final EntityEngine entityEngine) {
@@ -184,6 +193,10 @@ public class MapManager {
         body.createFixture(fixtureDef).setUserData(userData);
         shape.dispose();
 
+        if ("coin".equals(userData)) {
+            currentMap.setMaxCoins(currentMap.getMaxCoins() + 1);
+        }
+
         return body;
     }
 
@@ -237,7 +250,15 @@ public class MapManager {
 
         final float centerX = properties.get("x", Float.class) / PPM + halfW;
         final float centerY = properties.get("y", Float.class) / PPM + halfH;
-        final Body body = createCollisionBody(world, centerX, centerY, rectVertices, true, Platformer.BIT_OBJECT, true, properties.get("userData", String.class));
+        final String userData = properties.get("userData", String.class);
+        if ("coinFlag".equals(userData)) {
+            currentMap.setCoinFlagObject(mapObj);
+            final AnimatedTiledMapTile flagPoleTile = (AnimatedTiledMapTile) mapObj.getTile();
+            final int[] intervals = flagPoleTile.getAnimationIntervals();
+            intervals[2] = -1;
+            flagPoleTile.setAnimationIntervals(intervals);
+        }
+        final Body body = createCollisionBody(world, centerX, centerY, rectVertices, true, Platformer.BIT_OBJECT, true, userData);
         entityEngine.createGameObj(body, mapObj);
     }
 

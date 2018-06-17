@@ -2,6 +2,7 @@
 <map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="12" tilewidth="70" tileheight="70" infinite="0" nextobjectid="52">
  <properties>
   <property name="music" value="STAGE"/>
+  <property name="name" value="level1"/>
  </properties>
  <tileset firstgid="1" source="tileset.tsx"/>
  <layer name="ground" width="36" height="12">
@@ -50,13 +51,17 @@
   </object>
   <object id="9" gid="1" x="525.333" y="559.667" width="70" height="70">
    <properties>
-    <property name="userData" value="Info1"/>
+    <property name="userData" value="InfoBox1"/>
    </properties>
   </object>
-  <object id="11" gid="5" x="2450" y="421" width="70" height="70"/>
-  <object id="23" gid="1" x="2222.33" y="280.333" width="70" height="70">
+  <object id="11" gid="5" x="2450" y="421" width="70" height="70">
    <properties>
-    <property name="userData" value="Info2"/>
+    <property name="userData" value="coinFlag"/>
+   </properties>
+  </object>
+  <object id="23" gid="1" x="2173" y="280.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="InfoBox2"/>
    </properties>
   </object>
   <object id="38" gid="4" x="279.333" y="490" width="70" height="70">

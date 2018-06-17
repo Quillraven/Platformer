@@ -28,10 +28,13 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.badlogic.gdx.utils.Array;
 import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
+import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.GameObjectComponent;
+import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ecs.component.RemoveComponent;
 
 import static com.quillraven.platformer.Platformer.PPM;
@@ -43,14 +46,28 @@ import static com.quillraven.platformer.Platformer.PPM;
 public class GameObjectCollisionSystem extends IteratingSystem implements WorldContactManager.GameContactListener {
     private static final String TAG = GameObjectCollisionSystem.class.getSimpleName();
 
+    private final ComponentMapper<PlayerComponent> playerCmpMapper;
     private final ComponentMapper<GameObjectComponent> gameObjCmpMapper;
     private final ComponentMapper<RemoveComponent> removeCmpMapper;
+    private final ComponentMapper<Box2DComponent> b2dCmpMapper;
+    private final Array<GameObjectListener> gameObjectListeners;
 
     public GameObjectCollisionSystem() {
         super(Family.all(GameObjectComponent.class).get());
+        this.gameObjectListeners = new Array<>();
         WorldContactManager.getInstance().addGameContactListener(this);
+        this.playerCmpMapper = ComponentMapper.getFor(PlayerComponent.class);
         this.gameObjCmpMapper = ComponentMapper.getFor(GameObjectComponent.class);
+        this.b2dCmpMapper = ComponentMapper.getFor(Box2DComponent.class);
         this.removeCmpMapper = ComponentMapper.getFor(RemoveComponent.class);
+    }
+
+    public void addGameObjectListener(final GameObjectListener listener) {
+        this.gameObjectListeners.add(listener);
+    }
+
+    public void removeGameObjectListener(final GameObjectListener listener) {
+        this.gameObjectListeners.removeValue(listener, true);
     }
 
     @Override
@@ -77,11 +94,19 @@ public class GameObjectCollisionSystem extends IteratingSystem implements WorldC
         }
 
         if ("coin".equals(objectUserData)) {
+            ++playerCmpMapper.get(player).coinsCollected;
             mapObj.setTile(null);
             object.add(((EntityEngine) this.getEngine()).createComponent(RemoveComponent.class));
             SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_COIN);
+            for (final GameObjectListener listener : gameObjectListeners) {
+                listener.onCoinPickup(playerCmpMapper.get(player).coinsCollected);
+            }
         } else if (objectUserData.startsWith("Info")) {
-            gameObjCmpMapper.get(object).sleepTime = 2f;
+            final Box2DComponent b2dCmp = b2dCmpMapper.get(object);
+            gameObjCmpMapper.get(object).sleepTime = 5f;
+            for (final GameObjectListener listener : gameObjectListeners) {
+                listener.onInfoBoxActivation(b2dCmp.body.getPosition().x, b2dCmp.body.getPosition().y, objectUserData);
+            }
         }
     }
 
@@ -98,5 +123,11 @@ public class GameObjectCollisionSystem extends IteratingSystem implements WorldC
         } else {
             this.getEngine().removeEntity(entity);
         }
+    }
+
+    public interface GameObjectListener {
+        void onCoinPickup(final int numCoinsCollected);
+
+        void onInfoBoxActivation(final float x, final float y, final String infoBoxID);
     }
 }

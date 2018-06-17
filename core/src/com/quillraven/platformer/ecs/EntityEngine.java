@@ -162,7 +162,10 @@ public class EntityEngine extends PooledEngine {
         player.add(aniCmp);
 
         // player component
-        player.add(this.createComponent(PlayerComponent.class));
+        final PlayerComponent playerCmp = this.createComponent(PlayerComponent.class);
+        playerCmp.maxLife = 5;
+        playerCmp.currentLife = playerCmp.maxLife;
+        player.add(playerCmp);
 
         this.addEntity(player);
         return player;
