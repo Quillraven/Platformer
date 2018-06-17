@@ -1,0 +1,76 @@
+
+characters.png
+size: 814,200
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+flyDead
+  rotate: false
+  xy: 0, 0
+  size: 59, 33
+  orig: 59, 33
+  offset: 0, 0
+  index: -1
+flyWalk
+  rotate: false
+  xy: 0, 65
+  size: 150, 36
+  orig: 150, 36
+  offset: 0, 0
+  index: -1
+playerDuck
+  rotate: false
+  xy: 152, 30
+  size: 69, 71
+  orig: 69, 71
+  offset: 0, 0
+  index: -1
+playerFront
+  rotate: false
+  xy: 363, 9
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+playerHurt
+  rotate: false
+  xy: 223, 9
+  size: 69, 92
+  orig: 69, 92
+  offset: 0, 0
+  index: -1
+playerJump
+  rotate: false
+  xy: 294, 7
+  size: 67, 94
+  orig: 67, 94
+  offset: 0, 0
+  index: -1
+playerStand
+  rotate: false
+  xy: 431, 9
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+playerWalk
+  rotate: false
+  xy: 0, 103
+  size: 814, 97
+  orig: 814, 97
+  offset: 0, 0
+  index: -1
+slimeDead
+  rotate: false
+  xy: 499, 89
+  size: 59, 12
+  orig: 59, 12
+  offset: 0, 0
+  index: -1
+slimeWalk
+  rotate: false
+  xy: 0, 35
+  size: 102, 28
+  orig: 102, 28
+  offset: 0, 0
+  index: -1
