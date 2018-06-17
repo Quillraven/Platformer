@@ -34,7 +34,7 @@ public class AnimationComponent implements Component, Pool.Poolable {
     public float animationTime;
     public float width;
     public float height;
-    public boolean flipY;
+    public boolean flipHoricontal;
 
     @Override
     public void reset() {
@@ -42,6 +42,6 @@ public class AnimationComponent implements Component, Pool.Poolable {
         this.animationTime = 0;
         this.width = 0;
         this.height = 0;
-        this.flipY = false;
+        this.flipHoricontal = false;
     }
 }

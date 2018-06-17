@@ -21,6 +21,7 @@ import com.quillraven.platformer.ecs.component.GameObjectComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
+import com.quillraven.platformer.ecs.system.AnimationSystem;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
@@ -87,6 +88,8 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new JumpSystem(b2dCmpMapper, jumpCmpMapper));
         // game object collision system
         this.addSystem(new GameObjectCollisionSystem());
+        // animation system
+        this.addSystem(new AnimationSystem());
         // box2d debug
         //renderSystems.add(new Box2DDebugRenderSystem(this, world));
         renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
@@ -153,7 +156,7 @@ public class EntityEngine extends PooledEngine {
 
         // animation component
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
-        aniCmp.aniType = AnimationManager.AnimationType.PLAYER_IDLE;
+        aniCmp.aniType = AnimationManager.AnimationType.PLAYER_WALK;
         aniCmp.width = 72 / PPM;
         aniCmp.height = 96 / PPM;
         player.add(aniCmp);

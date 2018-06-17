@@ -70,7 +70,7 @@ public class GSGame extends GameState<GameHUD> {
 
     @Override
     public void onActivation() {
-        AnimationManager.getInstance().loadAnimation(assetManager, AnimationManager.AnimationType.PLAYER_IDLE);
+        AnimationManager.getInstance().loadAnimations(assetManager);
         SoundManager.getInstance().loadSounds(assetManager);
         if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST, world, entityEngine)) {
             // create player

@@ -103,7 +103,7 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             final Animation<Sprite> animation = AnimationManager.getInstance().getAnimation(aniCmp.aniType);
             final Sprite frame = animation.getKeyFrame(aniCmp.animationTime, true);
             frame.setColor(Color.WHITE);
-            frame.setFlip(false, aniCmp.flipY);
+            frame.setFlip(aniCmp.flipHoricontal, false);
             frame.setOriginCenter();
             if (b2dCmp.body.getLinearVelocity().y >= 5) {
                 // jumping
@@ -111,7 +111,7 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             } else {
                 frame.setRotation(b2dCmp.numGroundContactsLeft == 0 && b2dCmp.numGroundContactsRight > 0 ? 40 : b2dCmp.numGroundContactsLeft > 0 && b2dCmp.numGroundContactsRight == 0 ? 320 : 0);
             }
-            frame.setBounds(x - (aniCmp.width - b2dCmp.width) * 0.5f, frame.getRotation() == 0 ? y : y - b2dCmp.height * 0.2f, aniCmp.width, aniCmp.height);
+            frame.setBounds(x - (aniCmp.width - b2dCmp.width) * 0.5f, frame.getRotation() == 0 ? y - 2f / PPM : y - b2dCmp.height * 0.2f, aniCmp.width, aniCmp.height);
 
             spriteBatch.draw(frame.getTexture(), frame.getVertices(), 0, 20);
         }

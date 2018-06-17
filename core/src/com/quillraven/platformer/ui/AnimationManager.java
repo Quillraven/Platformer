@@ -27,6 +27,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -38,6 +39,7 @@ public class AnimationManager {
     private static final AnimationManager instance = new AnimationManager();
 
     private final Array<Animation<Sprite>> animationCache;
+    private AssetManager assetManager;
 
 
     private AnimationManager() {
@@ -52,34 +54,48 @@ public class AnimationManager {
     }
 
     public Animation<Sprite> getAnimation(final AnimationType aniType) {
-        return animationCache.get(aniType.ordinal());
+        Animation<Sprite> animation = animationCache.get(aniType.ordinal());
+        if (animation == null) {
+            Gdx.app.debug(TAG, "Creating new animation " + aniType);
+            final TextureRegion[][] regions = assetManager.get(aniType.atlasPath, TextureAtlas.class).findRegion(aniType.atlasKey).split(aniType.frameWidth, aniType.frameHeight);
+            final Array<Sprite> keyFrames = new Array<>();
+            for (final TextureRegion[] rowFrames : regions) {
+                for (final TextureRegion frame : rowFrames) {
+                    keyFrames.add(new Sprite(frame));
+                }
+            }
+            animation = new Animation<>(aniType.frameDuration, keyFrames);
+            animationCache.set(aniType.ordinal(), animation);
+        }
+        return animation;
     }
 
-    public void loadAnimation(final AssetManager assetManager, final AnimationType aniType) {
-        if (assetManager.isLoaded(aniType.atlasPath, TextureAtlas.class)) {
-            Animation<Sprite> animation = animationCache.get(aniType.ordinal());
-            if (animation == null) {
-                Gdx.app.debug(TAG, "Creating new animation " + aniType);
-                final Array<Sprite> keyFrames = new Array<>();
-                keyFrames.add(new Sprite(assetManager.get(aniType.atlasPath, TextureAtlas.class).findRegion(aniType.atlasKey)));
-                animation = new Animation<>(0.25f, keyFrames);
-                animationCache.set(aniType.ordinal(), animation);
+    public void loadAnimations(final AssetManager assetManager) {
+        if (!assetManager.isLoaded(AnimationType.PLAYER_IDLE.atlasPath)) {
+            this.assetManager = assetManager;
+            for (final AnimationType aniType : AnimationType.values()) {
+                assetManager.load(aniType.atlasPath, TextureAtlas.class);
             }
-        } else {
-            Gdx.app.debug(TAG, "Animation " + aniType + " not loaded yet");
-            assetManager.load(aniType.atlasPath, TextureAtlas.class);
         }
     }
 
     public enum AnimationType {
-        PLAYER_IDLE("characters/characters.atlas", "playerStand");
+        PLAYER_IDLE("characters/characters.atlas", "playerStand", 66, 92, 0f),
+        PLAYER_WALK("characters/characters.atlas", "playerWalk", 74, 97, 0.03f),
+        PLAYER_JUMP("characters/characters.atlas", "playerJump", 67, 94, 0f);
 
         private final String atlasPath;
         private final String atlasKey;
+        private final int frameWidth;
+        private final int frameHeight;
+        private final float frameDuration;
 
-        AnimationType(final String atlasPath, final String atlasKey) {
+        AnimationType(final String atlasPath, final String atlasKey, final int frameWidth, final int frameHeight, final float frameDuration) {
             this.atlasPath = atlasPath;
             this.atlasKey = atlasKey;
+            this.frameWidth = frameWidth;
+            this.frameHeight = frameHeight;
+            this.frameDuration = frameDuration;
         }
     }
 }
