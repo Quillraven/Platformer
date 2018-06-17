@@ -21,7 +21,6 @@ import com.quillraven.platformer.ecs.component.GameObjectComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
-import com.quillraven.platformer.ecs.system.Box2DDebugRenderSystem;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
@@ -89,7 +88,7 @@ public class EntityEngine extends PooledEngine {
         // game object collision system
         this.addSystem(new GameObjectCollisionSystem());
         // box2d debug
-        renderSystems.add(new Box2DDebugRenderSystem(this, world));
+        //renderSystems.add(new Box2DDebugRenderSystem(this, world));
         renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
 
         // create box2d definitions

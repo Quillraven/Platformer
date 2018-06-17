@@ -26,16 +26,23 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.GameObjectComponent;
 import com.quillraven.platformer.ecs.component.RemoveComponent;
+
+import static com.quillraven.platformer.Platformer.PPM;
 
 /**
  * TODO add class description
  */
 
 public class GameObjectCollisionSystem extends IteratingSystem implements WorldContactManager.GameContactListener {
+    private static final String TAG = GameObjectCollisionSystem.class.getSimpleName();
+
     private final ComponentMapper<GameObjectComponent> gameObjCmpMapper;
     private final ComponentMapper<RemoveComponent> removeCmpMapper;
 
@@ -62,9 +69,17 @@ public class GameObjectCollisionSystem extends IteratingSystem implements WorldC
             // object will be removed the next frame or is not ready yet to be collected -> do not process
             return;
         }
+
+        final TiledMapTileMapObject mapObj = gameObjCmpMapper.get(object).mapObject;
+        if (objectUserData == null) {
+            Gdx.app.error(TAG, "Game object at " + mapObj.getX() / PPM + "/" + mapObj.getY() / PPM + " does not have a userData");
+            return;
+        }
+
         if ("coin".equals(objectUserData)) {
-            gameObjCmpMapper.get(object).mapObject.setTile(null);
+            mapObj.setTile(null);
             object.add(((EntityEngine) this.getEngine()).createComponent(RemoveComponent.class));
+            SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_COIN);
         } else if (objectUserData.startsWith("Info")) {
             gameObjCmpMapper.get(object).sleepTime = 2f;
         }

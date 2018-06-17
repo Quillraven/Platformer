@@ -33,6 +33,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.Platformer;
+import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.map.MapManager;
@@ -70,6 +71,7 @@ public class GSGame extends GameState<GameHUD> {
     @Override
     public void onActivation() {
         AnimationManager.getInstance().loadAnimation(assetManager, AnimationManager.AnimationType.PLAYER_IDLE);
+        SoundManager.getInstance().loadSounds(assetManager);
         if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST, world, entityEngine)) {
             // create player
             final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;

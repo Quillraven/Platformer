@@ -43,6 +43,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.quillraven.platformer.Platformer;
+import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.ecs.EntityEngine;
 
 import static com.quillraven.platformer.Platformer.PPM;
@@ -108,6 +109,7 @@ public class MapManager {
             }
             currentMap = map;
             createMapBodies(mapLayers, world, entityEngine);
+            SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentTiledMap.getProperties().get("music", String.class)));
             return true;
         } else {
             // map not loaded yet
