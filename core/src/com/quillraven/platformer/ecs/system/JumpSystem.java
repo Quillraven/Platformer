@@ -87,15 +87,13 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
     }
 
     @Override
-    public void onBeginEntityContact(final Entity entityA, final Entity entityB) {
-        b2dCmpMapper.get(entityA).contacts.add(entityB);
-        b2dCmpMapper.get(entityB).contacts.add(entityA);
+    public void onBeginObjectContact(final Entity player, final Entity object, final String objectUserData) {
+
     }
 
     @Override
-    public void onEndEntityContact(final Entity entityA, final Entity entityB) {
-        b2dCmpMapper.get(entityA).contacts.removeValue(entityB, false);
-        b2dCmpMapper.get(entityB).contacts.removeValue(entityA, false);
+    public void onEndObjectContact(final Entity player, final Entity object, final String objectUserData) {
+
     }
 
     @Override

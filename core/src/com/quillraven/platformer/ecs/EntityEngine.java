@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -16,9 +17,12 @@ import com.badlogic.gdx.utils.Array;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
+import com.quillraven.platformer.ecs.component.GameObjectComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
+import com.quillraven.platformer.ecs.system.Box2DDebugRenderSystem;
+import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
 import com.quillraven.platformer.ecs.system.MoveSystem;
@@ -82,8 +86,10 @@ public class EntityEngine extends PooledEngine {
         // jump
         final ComponentMapper<JumpComponent> jumpCmpMapper = ComponentMapper.getFor(JumpComponent.class);
         this.addSystem(new JumpSystem(b2dCmpMapper, jumpCmpMapper));
+        // game object collision system
+        this.addSystem(new GameObjectCollisionSystem());
         // box2d debug
-//        renderSystems.add(new Box2DDebugRenderSystem(this, world));
+        renderSystems.add(new Box2DDebugRenderSystem(this, world));
         renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
 
         // create box2d definitions
@@ -120,7 +126,7 @@ public class EntityEngine extends PooledEngine {
         player.add(b2dCmp);
         // foot sensor
         shape = new PolygonShape();
-        shape.setAsBox(width * 0.25f / PPM, 15f / PPM, new Vector2(-width * 0.25f / PPM, -height * 0.5f / PPM), 0);
+        shape.setAsBox(width * 0.33f / PPM, 15f / PPM, new Vector2(-width * 0.17f / PPM, -height * 0.5f / PPM), 0);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
         fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
@@ -128,7 +134,7 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.body.createFixture(fixtureDef).setUserData("foot-left");
         shape.dispose();
         shape = new PolygonShape();
-        shape.setAsBox(width * 0.25f / PPM, 15f / PPM, new Vector2(width * 0.25f / PPM, -height * 0.5f / PPM), 0);
+        shape.setAsBox(width * 0.33f / PPM, 15f / PPM, new Vector2(width * 0.17f / PPM, -height * 0.5f / PPM), 0);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
         fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
@@ -160,7 +166,7 @@ public class EntityEngine extends PooledEngine {
         return player;
     }
 
-    public Entity createGameObj(final Body body) {
+    public Entity createGameObj(final Body body, final TiledMapTileMapObject mapObj) {
         final Entity gameObj = this.createEntity();
 
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
@@ -168,6 +174,10 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.positionBeforeUpdate.set(body.getPosition());
         b2dCmp.body.setUserData(gameObj);
         gameObj.add(b2dCmp);
+
+        final GameObjectComponent gameObjCmp = this.createComponent(GameObjectComponent.class);
+        gameObjCmp.mapObject = mapObj;
+        gameObj.add(gameObjCmp);
 
         this.addEntity(gameObj);
         return gameObj;

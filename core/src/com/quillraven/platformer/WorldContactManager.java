@@ -61,22 +61,27 @@ public class WorldContactManager implements ContactListener {
     public void beginContact(final Contact contact) {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
+        final Fixture playerFixture;
+        final Fixture otherFixture;
 
-        if (("foot-left".equals(fixtureA.getUserData()) || "foot-right".equals(fixtureA.getUserData())) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        if ("body".equals(fixtureA.getUserData()) || "foot-left".equals(fixtureA.getUserData()) || "foot-right".equals(fixtureA.getUserData())) {
+            playerFixture = fixtureA;
+            otherFixture = fixtureB;
+        } else if ("body".equals(fixtureB.getUserData()) || "foot-left".equals(fixtureB.getUserData()) || "foot-right".equals(fixtureB.getUserData())) {
+            playerFixture = fixtureB;
+            otherFixture = fixtureA;
+        } else {
+            // no contact related to player -> ignore
+            return;
+        }
+
+        if (otherFixture.getFilterData().categoryBits == Platformer.BIT_GROUND) {
             for (GameContactListener listener : listeners) {
-                listener.onBeginGroundContact((Entity) fixtureA.getBody().getUserData(), (String) fixtureA.getUserData());
+                listener.onBeginGroundContact((Entity) playerFixture.getBody().getUserData(), (String) playerFixture.getUserData());
             }
-        } else if (("foot-left".equals(fixtureB.getUserData()) || "foot-right".equals(fixtureB.getUserData())) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        } else if (otherFixture.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
             for (GameContactListener listener : listeners) {
-                listener.onBeginGroundContact((Entity) fixtureB.getBody().getUserData(), (String) fixtureB.getUserData());
-            }
-        } else if ("body".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
-            for (GameContactListener listener : listeners) {
-                listener.onBeginEntityContact((Entity) fixtureA.getBody().getUserData(), (Entity) fixtureB.getBody().getUserData());
-            }
-        } else if ("body".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
-            for (GameContactListener listener : listeners) {
-                listener.onBeginEntityContact((Entity) fixtureA.getBody().getUserData(), (Entity) fixtureB.getBody().getUserData());
+                listener.onBeginObjectContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), (String) otherFixture.getUserData());
             }
         }
     }
@@ -85,22 +90,27 @@ public class WorldContactManager implements ContactListener {
     public void endContact(final Contact contact) {
         final Fixture fixtureA = contact.getFixtureA();
         final Fixture fixtureB = contact.getFixtureB();
+        final Fixture playerFixture;
+        final Fixture otherFixture;
 
-        if (("foot-left".equals(fixtureA.getUserData()) || "foot-right".equals(fixtureA.getUserData())) && fixtureB.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        if ("body".equals(fixtureA.getUserData()) || "foot-left".equals(fixtureA.getUserData()) || "foot-right".equals(fixtureA.getUserData())) {
+            playerFixture = fixtureA;
+            otherFixture = fixtureB;
+        } else if ("body".equals(fixtureB.getUserData()) || "foot-left".equals(fixtureB.getUserData()) || "foot-right".equals(fixtureB.getUserData())) {
+            playerFixture = fixtureB;
+            otherFixture = fixtureA;
+        } else {
+            // no contact related to player -> ignore
+            return;
+        }
+
+        if (otherFixture.getFilterData().categoryBits == Platformer.BIT_GROUND) {
             for (GameContactListener listener : listeners) {
-                listener.onEndGroundContact((Entity) fixtureA.getBody().getUserData(), (String) fixtureA.getUserData());
+                listener.onEndGroundContact((Entity) playerFixture.getBody().getUserData(), (String) playerFixture.getUserData());
             }
-        } else if (("foot-left".equals(fixtureB.getUserData()) || "foot-right".equals(fixtureB.getUserData())) && fixtureA.getFilterData().categoryBits == Platformer.BIT_GROUND) {
+        } else if (otherFixture.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
             for (GameContactListener listener : listeners) {
-                listener.onEndGroundContact((Entity) fixtureB.getBody().getUserData(), (String) fixtureB.getUserData());
-            }
-        } else if ("body".equals(fixtureA.getUserData()) && fixtureB.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
-            for (GameContactListener listener : listeners) {
-                listener.onEndEntityContact((Entity) fixtureA.getBody().getUserData(), (Entity) fixtureB.getBody().getUserData());
-            }
-        } else if ("body".equals(fixtureB.getUserData()) && fixtureA.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
-            for (GameContactListener listener : listeners) {
-                listener.onEndEntityContact((Entity) fixtureA.getBody().getUserData(), (Entity) fixtureB.getBody().getUserData());
+                listener.onEndObjectContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), (String) otherFixture.getUserData());
             }
         }
     }
@@ -126,9 +136,9 @@ public class WorldContactManager implements ContactListener {
         final Vector2[] points = manifold.getPoints();
         final Body playerBody = playerFixture.getBody();
         final Body groundBody = groundFixture.getBody();
-        for (int i = 0; i < points.length; ++i) {
-            final Vector2 groundVelocity = groundBody.getLinearVelocityFromWorldPoint(points[i]);
-            final Vector2 playerVelocity = playerBody.getLinearVelocityFromWorldPoint(points[i]);
+        for (final Vector2 point : points) {
+            final Vector2 groundVelocity = groundBody.getLinearVelocityFromWorldPoint(point);
+            final Vector2 playerVelocity = playerBody.getLinearVelocityFromWorldPoint(point);
             // check should actually be < 0 but if the player moves up a slope then the velocity becomes > 0 and a "stutter movement" is happening
             // --> value 5 is used to jump through platforms and to walk up slopes normally
             if (groundBody.getLocalVector(playerVelocity.sub(groundVelocity)).y <= 5) {
@@ -151,8 +161,8 @@ public class WorldContactManager implements ContactListener {
 
         void onEndGroundContact(final Entity entity, final String userData);
 
-        void onBeginEntityContact(final Entity entityA, final Entity entityB);
+        void onBeginObjectContact(final Entity player, final Entity object, final String objectUserData);
 
-        void onEndEntityContact(final Entity entityA, final Entity entityB);
+        void onEndObjectContact(final Entity player, final Entity object, final String objectUserData);
     }
 }

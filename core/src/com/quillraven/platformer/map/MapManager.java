@@ -58,6 +58,7 @@ public class MapManager {
     private final ObjectMap<MapType, Map> mapCache;
     private final Array<MapListener> mapListeners;
     private Map currentMap;
+    private TiledMap currentTiledMap;
     private final BodyDef bodyDef;
     private final FixtureDef fixtureDef;
     private final Array<Body> worldBodies;
@@ -66,6 +67,7 @@ public class MapManager {
     private MapManager() {
         this.mapListeners = new Array<>();
         this.currentMap = null;
+        this.currentTiledMap = null;
         this.mapCache = new ObjectMap<>();
         this.bodyDef = new BodyDef();
         this.fixtureDef = new FixtureDef();
@@ -89,11 +91,11 @@ public class MapManager {
             // map loaded -> change it
             Gdx.app.debug(TAG, "Changing map to " + mapType);
             Map map = mapCache.get(mapType);
-            final TiledMap tiledMap = assetManager.get(mapType.filePath, TiledMap.class);
-            final MapLayers mapLayers = tiledMap.getLayers();
+            currentTiledMap = assetManager.get(mapType.filePath, TiledMap.class);
+            final MapLayers mapLayers = currentTiledMap.getLayers();
             if (map == null) {
                 Gdx.app.debug(TAG, "Creating new map " + mapType);
-                map = new Map(mapType, tiledMap.getProperties(), mapLayers.getIndex("ground"), mapLayers.getIndex("background"), mapLayers.getIndex("objects"), mapLayers.getIndex("foreground"));
+                map = new Map(mapType, currentTiledMap.getProperties(), mapLayers.getIndex("ground"), mapLayers.getIndex("background"), mapLayers.getIndex("objects"), mapLayers.getIndex("foreground"));
                 mapCache.put(mapType, map);
             }
 
@@ -102,7 +104,7 @@ public class MapManager {
             }
 
             for (final MapListener listener : mapListeners) {
-                listener.onMapChanged(map, tiledMap);
+                listener.onMapChanged(map, currentTiledMap);
             }
             currentMap = map;
             createMapBodies(mapLayers, world, entityEngine);
@@ -113,10 +115,6 @@ public class MapManager {
             assetManager.load(mapType.filePath, TiledMap.class);
             return false;
         }
-    }
-
-    public Map getCurrentMap() {
-        return currentMap;
     }
 
     private void removeMapBodies(final World world, final EntityEngine entityEngine) {
@@ -163,6 +161,10 @@ public class MapManager {
     }
 
     private Body createCollisionBody(final World world, final float x, final float y, final float[] vertices, final boolean createLoop, final short categoryBit, final boolean isSensor) {
+        return createCollisionBody(world, x, y, vertices, createLoop, categoryBit, isSensor, null);
+    }
+
+    private Body createCollisionBody(final World world, final float x, final float y, final float[] vertices, final boolean createLoop, final short categoryBit, final boolean isSensor, final String userData) {
         bodyDef.type = BodyDef.BodyType.StaticBody;
         bodyDef.position.set(x, y);
         final Body body = world.createBody(bodyDef);
@@ -177,7 +179,7 @@ public class MapManager {
         fixtureDef.filter.categoryBits = categoryBit;
         fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
         fixtureDef.isSensor = isSensor;
-        body.createFixture(fixtureDef);
+        body.createFixture(fixtureDef).setUserData(userData);
         shape.dispose();
 
         return body;
@@ -231,8 +233,10 @@ public class MapManager {
         rectVertices[6] = halfW;
         rectVertices[7] = -halfH;
 
-        final Body body = createCollisionBody(world, properties.get("x", Float.class) / PPM + halfW, properties.get("y", Float.class) / PPM + halfH, rectVertices, true, Platformer.BIT_OBJECT, true);
-        entityEngine.createGameObj(body);
+        final float centerX = properties.get("x", Float.class) / PPM + halfW;
+        final float centerY = properties.get("y", Float.class) / PPM + halfH;
+        final Body body = createCollisionBody(world, centerX, centerY, rectVertices, true, Platformer.BIT_OBJECT, true, properties.get("userData", String.class));
+        entityEngine.createGameObj(body, mapObj);
     }
 
     public enum MapType {
