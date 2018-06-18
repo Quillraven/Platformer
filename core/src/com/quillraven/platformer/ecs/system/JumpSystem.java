@@ -74,7 +74,7 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
     public void onBeginGroundContact(final Entity entity, final String userData) {
         if ("foot-left".equals(userData)) {
             ++b2dCmpMapper.get(entity).numGroundContactsLeft;
-        } else {
+        } else if ("foot-right".equals(userData)) {
             ++b2dCmpMapper.get(entity).numGroundContactsRight;
         }
     }
@@ -83,7 +83,7 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
     public void onEndGroundContact(final Entity entity, final String userData) {
         if ("foot-left".equals(userData)) {
             --b2dCmpMapper.get(entity).numGroundContactsLeft;
-        } else {
+        } else if ("foot-right".equals(userData)) {
             --b2dCmpMapper.get(entity).numGroundContactsRight;
         }
     }

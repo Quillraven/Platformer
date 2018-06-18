@@ -80,10 +80,10 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     public void onActivation() {
         AnimationManager.getInstance().loadAnimations(assetManager);
         SoundManager.getInstance().loadSounds(assetManager);
-        if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.TEST, world, entityEngine)) {
+        if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.LEVEL_1, world, entityEngine)) {
             // create player
             final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-            player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, 2 * PPM, 3 * PPM, 48, 64);
+            player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
             hud.updateLifeInfo(player.getComponent(PlayerComponent.class).currentLife, player.getComponent(PlayerComponent.class).maxLife);
         }
     }

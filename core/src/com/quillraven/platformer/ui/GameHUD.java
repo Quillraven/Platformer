@@ -52,6 +52,7 @@ public class GameHUD extends HUD {
 
         infoBox = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
         infoBox.getLabel().setWrap(true);
+        // it is important to set a width otherwise setWrap does not work --> info message takes up 85% of screen width
         table.add(infoBox).expand().colspan(3).top().padTop(50).width(V_WIDTH * 0.85f).row();
 
         lifeStrBuilder = new StringBuilder(10);
@@ -79,7 +80,7 @@ public class GameHUD extends HUD {
     }
 
     public void setLevelName(final String name) {
-        levelInfo.setText(name);
+        levelInfo.setText(getString(name));
     }
 
     public void showInfoMessage(final float x, final float y, final String infoBoxID) {

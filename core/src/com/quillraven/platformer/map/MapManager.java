@@ -97,7 +97,7 @@ public class MapManager {
             final MapLayers mapLayers = currentTiledMap.getLayers();
             if (map == null) {
                 Gdx.app.debug(TAG, "Creating new map " + mapType);
-                map = new Map(mapType, currentTiledMap.getProperties(), mapLayers.getIndex("ground"), mapLayers.getIndex("background"), mapLayers.getIndex("objects"), mapLayers.getIndex("foreground"));
+                map = new Map(mapType, currentTiledMap);
                 mapCache.put(mapType, map);
             }
 
@@ -263,7 +263,7 @@ public class MapManager {
     }
 
     public enum MapType {
-        TEST("maps/test.tmx");
+        LEVEL_1("maps/level1.tmx");
 
         private final String filePath;
 

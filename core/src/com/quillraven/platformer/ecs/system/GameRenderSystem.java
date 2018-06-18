@@ -126,8 +126,14 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     public void onMapChanged(final Map map, final TiledMap tiledMap) {
         mapWidth = map.getWidth();
         mapHeight = map.getHeight();
-        bgdLayerIdx = map.getBackgroundLayerIndex();
-        fgdLayerIdx = map.getForegroundLayerIndex();
+        bgdLayerIdx = new int[map.getBackgroundLayerIndex().length];
+        for (int i = 0; i < map.getBackgroundLayerIndex().length; ++i) {
+            bgdLayerIdx[i] = map.getBackgroundLayerIndex()[i];
+        }
+        fgdLayerIdx = new int[map.getForegroundLayerIndex().length];
+        for (int i = 0; i < map.getForegroundLayerIndex().length; ++i) {
+            fgdLayerIdx[i] = map.getForegroundLayerIndex()[i];
+        }
         mapRenderer.setMap(tiledMap);
     }
 

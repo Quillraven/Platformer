@@ -4,105 +4,105 @@ size: 1024,256
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-boxItemAlt
+blue
   rotate: false
   xy: 0, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-bush
+boxItemAlt
   rotate: false
   xy: 72, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-cactus
+bush
   rotate: false
   xy: 144, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-coinGold
+cactus
   rotate: false
   xy: 216, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-flagGreen
+cloud1left
   rotate: false
   xy: 288, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-flagGreen2
+cloud1right
   rotate: false
   xy: 360, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-flagGreenHanging
+cloud2left
   rotate: false
   xy: 432, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grass
+cloud2right
   rotate: false
   xy: 504, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassCenter
+coinGold
   rotate: false
   xy: 576, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassCenter_rounded
+flagYellow
   rotate: false
   xy: 648, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassCliffLeft
+flagYellow2
   rotate: false
   xy: 720, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassCliffLeftAlt
+flagYellowHanging
   rotate: false
   xy: 792, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassCliffRight
+grassCenter
   rotate: false
   xy: 864, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassCliffRightAlt
+grassCliffLeft
   rotate: false
   xy: 936, 0
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassHalf
+grassCliffRight
   rotate: false
   xy: 0, 72
   size: 70, 70
@@ -158,65 +158,51 @@ grassHillRight2
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassLedgeLeft
-  rotate: false
-  xy: 576, 72
-  size: 5, 24
-  orig: 5, 24
-  offset: 0, 0
-  index: -1
-grassLedgeRight
-  rotate: false
-  xy: 648, 72
-  size: 5, 24
-  orig: 5, 24
-  offset: 0, 0
-  index: -1
-grassLeft
-  rotate: false
-  xy: 720, 72
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
 grassMid
   rotate: false
-  xy: 792, 72
+  xy: 576, 72
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
-grassRight
+mushroomBrown
   rotate: false
-  xy: 864, 72
+  xy: 648, 72
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
 mushroomRed
   rotate: false
-  xy: 936, 72
+  xy: 720, 72
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
 plant
   rotate: false
-  xy: 0, 144
+  xy: 792, 72
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+rock
+  rotate: false
+  xy: 864, 72
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
 signExit
   rotate: false
-  xy: 72, 144
+  xy: 936, 72
   size: 70, 70
   orig: 70, 70
   offset: 0, 0
   index: -1
 signRight
   rotate: false
-  xy: 144, 144
+  xy: 0, 144
   size: 70, 70
   orig: 70, 70
   offset: 0, 0

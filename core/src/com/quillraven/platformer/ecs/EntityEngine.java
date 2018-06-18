@@ -91,8 +91,8 @@ public class EntityEngine extends PooledEngine {
         // animation system
         this.addSystem(new AnimationSystem());
         // box2d debug
-        //renderSystems.add(new Box2DDebugRenderSystem(this, world));
         renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
+//        renderSystems.add(new Box2DDebugRenderSystem(this, world));
 
         // create box2d definitions
         this.bodyDef = new BodyDef();

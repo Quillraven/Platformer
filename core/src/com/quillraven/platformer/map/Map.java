@@ -22,8 +22,11 @@ package com.quillraven.platformer.map;
  * SOFTWARE.
  */
 
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.badlogic.gdx.utils.Array;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -37,20 +40,43 @@ public class Map {
     private final String name;
     private final float width;
     private final float height;
-    private final int[] bgdLayerIdx;
-    private final int[] fgdLayerIdx;
+    private final Array<Integer> bgdLayerIdx;
+    private final Array<Integer> fgdLayerIdx;
+    private float startX;
+    private float startY;
     private int maxCoins;
     private TiledMapTileMapObject coinFlagObject;
 
-    Map(final MapManager.MapType mapType, final MapProperties mapProperties, final int gdLayerIdx, final int bgdLayerIdx, final int objectLayerIdx, final int fgdLayerIdx) {
+    Map(final MapManager.MapType mapType, final TiledMap tiledMap) {
         this.mapType = mapType;
+
+        this.bgdLayerIdx = new Array<>();
+        this.fgdLayerIdx = new Array<>();
+        final MapProperties mapProperties = tiledMap.getProperties();
+        for (final MapLayer mapLayer : tiledMap.getLayers()) {
+            if ("objects".equals(mapLayer.getName()) || "ground".equals(mapLayer.getName()) || mapLayer.getName().startsWith("background")) {
+                bgdLayerIdx.add(tiledMap.getLayers().getIndex(mapLayer));
+            } else if (mapLayer.getName().startsWith("foreground")) {
+                fgdLayerIdx.add(tiledMap.getLayers().getIndex(mapLayer));
+            }
+        }
+
         this.width = mapProperties.get("width", Integer.class) * mapProperties.get("tilewidth", Integer.class) / PPM;
         this.height = mapProperties.get("height", Integer.class) * mapProperties.get("tileheight", Integer.class) / PPM;
-        this.bgdLayerIdx = new int[]{gdLayerIdx, bgdLayerIdx, objectLayerIdx};
-        this.fgdLayerIdx = new int[]{fgdLayerIdx};
         this.name = mapProperties.get("name", String.class);
         this.maxCoins = 0;
         this.coinFlagObject = null;
+
+        this.startX = mapProperties.get("startX", Integer.class) * PPM;
+        this.startY = mapProperties.get("startY", Integer.class) * PPM;
+    }
+
+    public float getStartX() {
+        return startX;
+    }
+
+    public float getStartY() {
+        return startY;
     }
 
     private MapManager.MapType getMapType() {
@@ -65,12 +91,12 @@ public class Map {
         return height;
     }
 
-    public int[] getBackgroundLayerIndex() {
-        return bgdLayerIdx;
+    public Integer[] getBackgroundLayerIndex() {
+        return bgdLayerIdx.toArray(Integer.class);
     }
 
-    public int[] getForegroundLayerIndex() {
-        return fgdLayerIdx;
+    public Integer[] getForegroundLayerIndex() {
+        return fgdLayerIdx.toArray(Integer.class);
     }
 
     public String getName() {
