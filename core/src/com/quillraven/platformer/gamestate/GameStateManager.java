@@ -36,6 +36,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -65,6 +66,7 @@ public class GameStateManager {
     private final AssetManager assetManager;
     private final Skin skin;
     private final Viewport hudViewport;
+    private final I18NBundle i18NBundle;
 
     private final ObjectMap<GameStateType, GameState> gameStateCache;
     private final Array<GameState> stateStack;
@@ -80,8 +82,10 @@ public class GameStateManager {
         assetManager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
         assetManager.setLoader(Skin.class, new SkinLoader(resolver));
         assetManager.load("hud/hud.json", Skin.class, new SkinLoader.SkinParameter("hud/font.ttf", 16, 24, 32));
+        assetManager.load("i18n/strings", I18NBundle.class);
         assetManager.finishLoading();
         skin = assetManager.get("hud/hud.json", Skin.class);
+        i18NBundle = assetManager.get("i18n/strings", I18NBundle.class);
 
         this.spriteBatch = new SpriteBatch();
         this.hudViewport = new ScreenViewport();
@@ -101,7 +105,7 @@ public class GameStateManager {
         if (gameState == null) {
             try {
                 Gdx.app.debug(TAG, "Creating new gamestate " + gsType);
-                final HUD view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class, Viewport.class).newInstance(skin, spriteBatch, hudViewport);
+                final HUD view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class, Viewport.class, I18NBundle.class).newInstance(skin, spriteBatch, hudViewport, i18NBundle);
                 gameState = gsType.gsClass.getConstructor(AssetManager.class, gsType.viewClass, SpriteBatch.class).newInstance(assetManager, view, spriteBatch);
                 gameStateCache.put(gsType, gameState);
             } catch (Exception e) {

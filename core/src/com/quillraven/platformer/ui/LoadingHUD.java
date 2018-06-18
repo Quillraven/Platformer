@@ -23,13 +23,14 @@ package com.quillraven.platformer.ui;
  */
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
  * TODO add class description
  */
 public class LoadingHUD extends HUD {
-    public LoadingHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport) {
-        super(skin, spriteBatch, hudViewport);
+    public LoadingHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18NBundle) {
+        super(skin, spriteBatch, hudViewport, i18NBundle);
     }
 }

@@ -25,6 +25,7 @@ package com.quillraven.platformer.ui;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
@@ -33,16 +34,22 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public abstract class HUD {
     final Skin skin;
     final Table table;
-    final Viewport hudViewport;
-    final Stage stage;
+    private final Viewport hudViewport;
+    private final Stage stage;
+    private final I18NBundle i18nBundle;
 
-    HUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport) {
+    HUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle) {
         this.skin = skin;
         this.hudViewport = hudViewport;
         this.stage = new Stage(hudViewport, spriteBatch);
         this.table = new Table();
         this.table.setFillParent(true);
         this.stage.addActor(table);
+        this.i18nBundle = i18nBundle;
+    }
+
+    String getString(final String key) {
+        return i18nBundle.format(key);
     }
 
     public void onUpdate(final float fixedPhysicsSteps) {

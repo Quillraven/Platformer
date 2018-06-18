@@ -26,10 +26,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
+import static com.quillraven.platformer.Platformer.V_WIDTH;
 
 /**
  * TODO add class description
@@ -45,24 +47,23 @@ public class GameHUD extends HUD {
 
     private final TextButton infoBox;
 
-    public GameHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport) {
-        super(skin, spriteBatch, hudViewport);
+    public GameHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18NBundle) {
+        super(skin, spriteBatch, hudViewport, i18NBundle);
+
+        infoBox = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
+        infoBox.getLabel().setWrap(true);
+        table.add(infoBox).expand().colspan(3).top().padTop(50).width(V_WIDTH * 0.85f).row();
 
         lifeStrBuilder = new StringBuilder(10);
         lifeInfo = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
-        table.add(lifeInfo).expandX().padBottom(10);
+        table.add(lifeInfo).expandX().padBottom(10).bottom();
 
         levelInfo = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
-        table.add(levelInfo).expandX().padBottom(10);
+        table.add(levelInfo).expandX().padBottom(10).bottom();
 
         coinStrBuilder = new StringBuilder(14);
         coinInfo = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
-        table.add(coinInfo).expandX().padBottom(10);
-
-        table.bottom();
-
-        infoBox = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
-        stage.addActor(infoBox);
+        table.add(coinInfo).expandX().padBottom(10).bottom();
     }
 
     public void updateCoinInfo(final int numCoins, final int maxCoins) {
@@ -82,13 +83,8 @@ public class GameHUD extends HUD {
     }
 
     public void showInfoMessage(final float x, final float y, final String infoBoxID) {
-        if ("InfoBox1".equals(infoBoxID)) {
-            infoBox.setText("Press some buttons to move and jump!");
-        } else if ("InfoBox2".equals(infoBoxID)) {
-            infoBox.setText("The pole indicates if you have collected all coins of a level :)");
-        }
-
-        infoBox.setPosition(stage.getWidth() / 2, Math.max(stage.getHeight() / 2 + 120, stage.getHeight() - 200));
+        infoBox.setText(getString(infoBoxID));
+        infoBox.clearActions();
         infoBox.addAction(sequence(Actions.alpha(0), Actions.fadeIn(0.4f, Interpolation.fade), Actions.delay(4f, Actions.fadeOut(0.4f))));
     }
 }
