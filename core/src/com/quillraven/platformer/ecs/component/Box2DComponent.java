@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
@@ -45,6 +46,10 @@ public class Box2DComponent implements Component, Pool.Poolable {
     @Override
     public void reset() {
         if (body != null) {
+            body.setUserData(null);
+            for (final Fixture fix : body.getFixtureList()) {
+                fix.setUserData(null);
+            }
             body.getWorld().destroyBody(body);
             body = null;
         }

@@ -38,6 +38,7 @@ public class Skin extends com.badlogic.gdx.scenes.scene2d.ui.Skin {
         super(atlas);
 
         Colors.put("Highlight", new Color(0x4250f4ff));
+        Colors.put("Disabled", new Color(0x222222ff));
     }
 
     @Override

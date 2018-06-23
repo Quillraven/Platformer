@@ -75,6 +75,10 @@ public class MapRenderer extends OrthogonalTiledMapRenderer {
     @Override
     public void renderObject(final MapObject object) {
         if (object instanceof TiledMapTileMapObject) {
+            if (!object.isVisible()) {
+                return;
+            }
+
             final TiledMapTileMapObject tileMapObj = (TiledMapTileMapObject) object;
             final TiledMapTile tile = tileMapObj.getTile();
 

@@ -26,6 +26,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.quillraven.platformer.GameInputManager;
+import com.quillraven.platformer.PreferencesManager;
 import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.ui.MenuHUD;
 
@@ -37,6 +38,7 @@ class GSMenu extends GameState<MenuHUD> implements GameInputManager.GameKeyListe
     private boolean startGame;
     private boolean quitGame;
     private boolean showCredits;
+    private boolean continueGame;
 
     public GSMenu(final AssetManager assetManager, final MenuHUD hud, final SpriteBatch spriteBatch) {
         super(assetManager, hud, spriteBatch);
@@ -64,10 +66,15 @@ class GSMenu extends GameState<MenuHUD> implements GameInputManager.GameKeyListe
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
         super.onUpdate(gsManager, fixedTimeStep);
         if (startGame) {
+            PreferencesManager.getInstance().removeValue("level").removeValue("playerX").removeValue("playerY");
             startGame = false;
+            hud.enableContinueMenuItem();
             gsManager.setState(GameStateManager.GameStateType.GAME);
         } else if (quitGame) {
             Gdx.app.exit();
+        } else if (continueGame) {
+            continueGame = false;
+            gsManager.setState(GameStateManager.GameStateType.GAME);
         }
     }
 
@@ -92,6 +99,8 @@ class GSMenu extends GameState<MenuHUD> implements GameInputManager.GameKeyListe
             } else if ("menuItem.credits".equals(hud.getCurrentSelection())) {
                 showCredits = true;
                 hud.showCredits();
+            } else if ("menuItem.continue".equals(hud.getCurrentSelection())) {
+                continueGame = true;
             }
             return true;
         }

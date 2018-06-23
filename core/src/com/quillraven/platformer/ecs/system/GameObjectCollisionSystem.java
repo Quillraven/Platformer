@@ -95,7 +95,7 @@ public class GameObjectCollisionSystem extends IteratingSystem implements WorldC
 
         if ("coin".equals(objectUserData)) {
             ++playerCmpMapper.get(player).coinsCollected;
-            mapObj.setTile(null);
+            mapObj.setVisible(false);
             object.add(((EntityEngine) this.getEngine()).createComponent(RemoveComponent.class));
             SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_COIN);
             for (final GameObjectListener listener : gameObjectListeners) {

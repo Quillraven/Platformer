@@ -79,7 +79,7 @@ public class Map {
         return startY;
     }
 
-    private MapManager.MapType getMapType() {
+    public MapManager.MapType getMapType() {
         return mapType;
     }
 

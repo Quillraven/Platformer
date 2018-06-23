@@ -88,8 +88,14 @@ public class MapManager {
         this.mapListeners.removeValue(listener, true);
     }
 
-    public boolean changeMap(final AssetManager assetManager, final MapType mapType, final World world, final EntityEngine entityEngine) {
+    public boolean changeMap(final AssetManager assetManager, final MapType mapType, final World world, final EntityEngine entityEngine, boolean resetMap) {
         if (assetManager.isLoaded(mapType.filePath)) {
+            if (!resetMap && currentMap != null && mapType.equals(currentMap.getMapType())) {
+                // map already loaded
+                SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentTiledMap.getProperties().get("music", String.class)));
+                return true;
+            }
+
             // map loaded -> change it
             Gdx.app.debug(TAG, "Changing map to " + mapType);
             Map map = mapCache.get(mapType);
@@ -140,7 +146,7 @@ public class MapManager {
             }
         }
 
-        // remove any remaining entites
+        // remove any remaining entities
         entityEngine.removeAllEntities();
     }
 
@@ -221,7 +227,7 @@ public class MapManager {
     }
 
     private void createPolylineCollisionBody(final Polyline polyline, final World world) {
-        final float[] vertices = polyline.getVertices();
+        final float[] vertices = polyline.getVertices().clone();
         for (int i = 0; i < vertices.length; i += 2) {
             vertices[i] = vertices[i] / PPM;
             vertices[i + 1] = vertices[i + 1] / PPM;
@@ -231,6 +237,7 @@ public class MapManager {
     }
 
     private void createMapObject(final TiledMapTileMapObject mapObj, final World world, final EntityEngine entityEngine) {
+        mapObj.setVisible(true); // coins might be invisible if reloading a level (check GameObjectCollisionSystem)
         final MapProperties properties = mapObj.getProperties();
         final float halfW = properties.get("width", Float.class) / PPM * 0.5f;
         final float halfH = properties.get("height", Float.class) / PPM * 0.5f;
@@ -255,6 +262,8 @@ public class MapManager {
             currentMap.setCoinFlagObject(mapObj);
             final AnimatedTiledMapTile flagPoleTile = (AnimatedTiledMapTile) mapObj.getTile();
             final int[] intervals = flagPoleTile.getAnimationIntervals();
+            intervals[0] = 150;
+            intervals[1] = 150;
             intervals[2] = -1;
             flagPoleTile.setAnimationIntervals(intervals);
         }

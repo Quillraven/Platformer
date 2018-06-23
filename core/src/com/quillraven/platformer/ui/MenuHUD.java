@@ -33,6 +33,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  */
 public class MenuHUD extends HUD {
     private int currentSelection;
+    private TextButton continueItem;
     private Array<TextButton> menuItems;
     private TextButton credits;
 
@@ -60,6 +61,10 @@ public class MenuHUD extends HUD {
                 table.add(item);
             }
         }
+        // disable continue because there is no game started yet
+        continueItem = menuItems.get(1);
+        continueItem.getLabel().getText().insert(0, "[Disabled]");
+        menuItems.removeValue(continueItem, true);
         selectMenuItem(currentSelection);
 
         // credits
@@ -91,8 +96,20 @@ public class MenuHUD extends HUD {
         table.add(credits);
     }
 
+    public void enableContinueMenuItem() {
+        if (!menuItems.get(1).equals(continueItem)) {
+            continueItem.getLabel().getText().replace("[Disabled]", "");
+            continueItem.getLabel().invalidateHierarchy();
+            menuItems.insert(1, continueItem);
+        }
+    }
+
     public void hideCredits() {
         table.clear();
+        final boolean continueAvailable = menuItems.get(1).equals(continueItem);
+        if (!continueAvailable) {
+            menuItems.insert(1, continueItem);
+        }
         for (int i = 0; i < menuItems.size; ++i) {
             final TextButton item = menuItems.get(i);
             if (i < menuItems.size - 1) {
@@ -101,6 +118,12 @@ public class MenuHUD extends HUD {
                 table.add(item);
             }
         }
-        selectMenuItem(2);
+
+        if (!continueAvailable) {
+            menuItems.removeValue(continueItem, true);
+            selectMenuItem(1);
+        } else {
+            selectMenuItem(2);
+        }
     }
 }

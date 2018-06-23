@@ -199,4 +199,12 @@ public class EntityEngine extends PooledEngine {
             renderSystem.onDispose();
         }
     }
+
+    @Override
+    public void removeEntity(final Entity entity) {
+        if (entity.getComponent(PlayerComponent.class) != null) {
+            player = null;
+        }
+        super.removeEntity(entity);
+    }
 }
