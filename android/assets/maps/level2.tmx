@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="14" tilewidth="70" tileheight="70" infinite="0" nextobjectid="90">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="14" tilewidth="70" tileheight="70" infinite="0" nextobjectid="99">
  <properties>
   <property name="music" value="STAGE"/>
   <property name="name" value="level2"/>
@@ -151,16 +151,44 @@
   </object>
  </objectgroup>
  <objectgroup color="#ff0000" name="collisions">
-  <object id="80" x="139.333" y="489.333" width="210.667" height="20"/>
-  <object id="81" x="139.333" y="351.333" width="210.667" height="20"/>
   <object id="83" x="627.333" y="771.333" width="210.667" height="20"/>
   <object id="84" x="908.666" y="630" width="276.667" height="20"/>
-  <object id="85" x="1329.67" y="421" width="210.667" height="20"/>
   <object id="86" x="1326.67" y="632" width="210.667" height="20"/>
-  <object id="87" x="1328.67" y="281" width="210.667" height="20"/>
   <object id="88" x="1752" y="907.333" width="765.334" height="20"/>
   <object id="89" x="489.333" y="281.333">
    <polyline points="0,0 280,0 489.333,206.667 696,208"/>
+  </object>
+  <object id="95" x="140.5" y="496">
+   <polyline points="0,0 207,-1"/>
+  </object>
+  <object id="96" x="141.5" y="355">
+   <polyline points="0,0 206.5,0.5"/>
+  </object>
+  <object id="97" x="1330.5" y="426.5">
+   <polyline points="0,0 208,0"/>
+  </object>
+  <object id="98" x="1330" y="285">
+   <polyline points="0,0 210,0"/>
+  </object>
+ </objectgroup>
+ <objectgroup color="#00ff00" name="enemies">
+  <object id="90" x="666.667" y="244">
+   <properties>
+    <property name="enemyType" value="fly"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="92" x="1433.33" y="392">
+   <properties>
+    <property name="enemyType" value="slime"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="93" x="1434.67" y="233.333">
+   <properties>
+    <property name="enemyType" value="fly"/>
+   </properties>
+   <point/>
   </object>
  </objectgroup>
 </map>

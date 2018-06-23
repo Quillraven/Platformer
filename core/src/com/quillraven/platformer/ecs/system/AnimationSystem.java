@@ -29,6 +29,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
+import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ui.AnimationManager;
 
 /**
@@ -38,26 +39,31 @@ import com.quillraven.platformer.ui.AnimationManager;
 public class AnimationSystem extends IteratingSystem {
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
+    private final ComponentMapper<PlayerComponent> playerCmpMapper;
 
     public AnimationSystem() {
         super(Family.all(AnimationComponent.class, Box2DComponent.class).get());
         this.aniCmpMapper = ComponentMapper.getFor(AnimationComponent.class);
         this.b2dCmpMapper = ComponentMapper.getFor(Box2DComponent.class);
+        this.playerCmpMapper = ComponentMapper.getFor(PlayerComponent.class);
     }
 
     @Override
     protected void processEntity(final Entity entity, final float deltaTime) {
         final Box2DComponent b2dCmp = b2dCmpMapper.get(entity);
         final AnimationComponent aniCmp = aniCmpMapper.get(entity);
+        final PlayerComponent playerCmp = playerCmpMapper.get(entity);
         final Vector2 velocity = b2dCmp.body.getLinearVelocity();
 
         aniCmp.animationTime += deltaTime;
-        if (velocity.y >= 5 || velocity.y < 0) {
-            changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_JUMP);
-        } else if (velocity.x == 0) {
-            changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_IDLE);
-        } else {
-            changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_WALK);
+        if (playerCmp != null) {
+            if (velocity.y >= 5 || velocity.y < -5) {
+                changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_JUMP);
+            } else if (velocity.x == 0) {
+                changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_IDLE);
+            } else {
+                changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_WALK);
+            }
         }
         aniCmp.flipHoricontal = velocity.x < 0;
     }

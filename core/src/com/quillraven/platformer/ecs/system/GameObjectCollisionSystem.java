@@ -116,6 +116,16 @@ public class GameObjectCollisionSystem extends IteratingSystem implements WorldC
     }
 
     @Override
+    public void onBeginEnemyContact(final Entity player, final Entity enemy, final boolean killEnemy) {
+
+    }
+
+    @Override
+    public void onEndEnemyContact(final Entity player, final Entity enemy, final boolean killEnemy) {
+
+    }
+
+    @Override
     protected void processEntity(final Entity entity, final float deltaTime) {
         if (removeCmpMapper.get(entity) == null) {
             final GameObjectComponent gameObjCmp = gameObjCmpMapper.get(entity);

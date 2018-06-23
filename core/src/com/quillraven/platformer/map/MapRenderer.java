@@ -89,8 +89,8 @@ public class MapRenderer extends OrthogonalTiledMapRenderer {
 
                 final float x1 = tileMapObj.getX() * unitScale + tile.getOffsetX() * unitScale;
                 final float y1 = tileMapObj.getY() * unitScale + tile.getOffsetY() * unitScale;
-                final float x2 = x1 + region.getRegionWidth() * unitScale;
-                final float y2 = y1 + region.getRegionHeight() * unitScale;
+                final float x2 = x1 + tileMapObj.getProperties().get("width", Float.class) * unitScale;
+                final float y2 = y1 + tileMapObj.getProperties().get("height", Float.class) * unitScale;
 
                 final float u1 = region.getU();
                 final float v1 = region.getV2();

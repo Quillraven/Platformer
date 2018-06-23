@@ -83,6 +83,10 @@ public class WorldContactManager implements ContactListener {
             for (GameContactListener listener : listeners) {
                 listener.onBeginObjectContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), (String) otherFixture.getUserData());
             }
+        } else if (otherFixture.getFilterData().categoryBits == Platformer.BIT_ENEMY) {
+            for (GameContactListener listener : listeners) {
+                listener.onBeginEnemyContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), playerFixture.getBody().getPosition().y > otherFixture.getBody().getPosition().y + 0.3f);
+            }
         }
     }
 
@@ -111,6 +115,10 @@ public class WorldContactManager implements ContactListener {
         } else if (otherFixture.getFilterData().categoryBits == Platformer.BIT_OBJECT) {
             for (GameContactListener listener : listeners) {
                 listener.onEndObjectContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), (String) otherFixture.getUserData());
+            }
+        } else if (otherFixture.getFilterData().categoryBits == Platformer.BIT_ENEMY) {
+            for (GameContactListener listener : listeners) {
+                listener.onEndEnemyContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), playerFixture.getBody().getPosition().y > otherFixture.getBody().getPosition().y + 0.3f);
             }
         }
     }
@@ -164,5 +172,9 @@ public class WorldContactManager implements ContactListener {
         void onBeginObjectContact(final Entity player, final Entity object, final String objectUserData);
 
         void onEndObjectContact(final Entity player, final Entity object, final String objectUserData);
+
+        void onBeginEnemyContact(final Entity player, final Entity enemy, final boolean killEnemy);
+
+        void onEndEnemyContact(final Entity player, final Entity enemy, final boolean killEnemy);
     }
 }

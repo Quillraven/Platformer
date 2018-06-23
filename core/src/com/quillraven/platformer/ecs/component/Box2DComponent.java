@@ -8,6 +8,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import box2dLight.Light;
+
 /*
  * Created by Quillraven on 06.06.2018.
  *
@@ -37,6 +39,7 @@ import com.badlogic.gdx.utils.Pool;
 public class Box2DComponent implements Component, Pool.Poolable {
     public final Array<Entity> contacts = new Array<>();
     public Body body;
+    public Light light;
     public int numGroundContactsLeft;
     public int numGroundContactsRight;
     public final Vector2 positionBeforeUpdate = new Vector2(0, 0);
@@ -45,6 +48,10 @@ public class Box2DComponent implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
+        if (light != null) {
+            light.remove();
+            light = null;
+        }
         if (body != null) {
             body.setUserData(null);
             for (final Fixture fix : body.getFixtureList()) {

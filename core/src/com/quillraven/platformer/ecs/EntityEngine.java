@@ -18,11 +18,13 @@ import com.badlogic.gdx.utils.Array;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
+import com.quillraven.platformer.ecs.component.EnemyComponent;
 import com.quillraven.platformer.ecs.component.GameObjectComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ecs.system.AnimationSystem;
+import com.quillraven.platformer.ecs.system.EnemyCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameProgressSystem;
 import com.quillraven.platformer.ecs.system.GameRenderSystem;
@@ -95,13 +97,15 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new JumpSystem(b2dCmpMapper, jumpCmpMapper));
         // game object collision system
         this.addSystem(new GameObjectCollisionSystem());
+        // enemy collision system
+        this.addSystem(new EnemyCollisionSystem());
         // game progress system
         this.addSystem(new GameProgressSystem(b2dCmpMapper, playerCmpMapper));
         // animation system
         this.addSystem(new AnimationSystem());
-        // box2d debug
+        // render systems
         renderSystems.add(new GameRenderSystem(this, spriteBatch, rayHandler, b2dCmpMapper, aniCmpMapper));
-        //renderSystems.add(new Box2DDebugRenderSystem(this, world));
+//        renderSystems.add(new Box2DDebugRenderSystem(this, world));
 
         // create box2d definitions
         this.bodyDef = new BodyDef();
@@ -117,7 +121,7 @@ public class EntityEngine extends PooledEngine {
         final int width = 44;
         final int height = 68;
         final short categoryBits = Platformer.BIT_PLAYER;
-        final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
+        final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT | Platformer.BIT_ENEMY;
 
         // box2d component
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
@@ -129,7 +133,7 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.body = world.createBody(bodyDef);
         b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
         b2dCmp.body.setUserData(player);
-        // hitbox
+        // body fixture
         fixtureDef.isSensor = false;
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(width * 0.5f / PPM, height * 0.5f / PPM);
@@ -180,8 +184,8 @@ public class EntityEngine extends PooledEngine {
         playerCmp.currentLife = playerCmp.maxLife;
         player.add(playerCmp);
 
-        final PointLight light = new PointLight(rayHandler, 128, new Color(0.2f, 1, 0.2f, 0.7f), 2f, 0, 0);
-        light.attachToBody(b2dCmp.body);
+        b2dCmp.light = new PointLight(rayHandler, 128, new Color(0.2f, 1, 0.2f, 0.7f), 2f, 0, 0);
+        b2dCmp.light.attachToBody(b2dCmp.body);
 
         this.addEntity(player);
         return player;
@@ -222,5 +226,54 @@ public class EntityEngine extends PooledEngine {
             player = null;
         }
         super.removeEntity(entity);
+    }
+
+    public void createEnemy(final World world, final RayHandler rayHandler, final float x, final float y, final String enemyType) {
+        final Entity enemy = this.createEntity();
+        final short categoryBits = Platformer.BIT_ENEMY;
+        final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_PLAYER;
+        final AnimationManager.AnimationType aniType = "fly".equals(enemyType) ? AnimationManager.AnimationType.FLY_WALK : AnimationManager.AnimationType.SLIME_WALK;
+        final int width = aniType.getFrameWidth();
+        final int height = aniType.getFrameHeight();
+
+        // box2d component
+        final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
+        b2dCmp.width = width / PPM;
+        b2dCmp.height = height / PPM;
+        // body
+        bodyDef.position.set(x, y);
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        b2dCmp.body = world.createBody(bodyDef);
+        b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
+        b2dCmp.body.setUserData(enemy);
+        // body fixture
+        fixtureDef.isSensor = false;
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(width * 0.5f / PPM, height * 0.5f / PPM);
+        fixtureDef.shape = shape;
+        fixtureDef.filter.maskBits = maskBits;
+        fixtureDef.filter.categoryBits = categoryBits;
+        b2dCmp.body.createFixture(fixtureDef).setUserData("enemyHitbox");
+        shape.dispose();
+        enemy.add(b2dCmp);
+
+        // move component
+        final MoveComponent moveCmp = this.createComponent(MoveComponent.class);
+        moveCmp.maxSpeed = 6;
+        enemy.add(moveCmp);
+
+        // animation component
+        final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
+        aniCmp.aniType = aniType;
+        aniCmp.width = (width + 4) / PPM;
+        aniCmp.height = (height + 4) / PPM;
+        enemy.add(aniCmp);
+
+        enemy.add(createComponent(EnemyComponent.class));
+
+        b2dCmp.light = new PointLight(rayHandler, 128, new Color(1, 0, 0, 1f), 2f, 0, 0);
+        b2dCmp.light.attachToBody(b2dCmp.body);
+
+        this.addEntity(enemy);
     }
 }

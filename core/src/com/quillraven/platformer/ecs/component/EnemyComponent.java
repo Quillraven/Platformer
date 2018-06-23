@@ -1,6 +1,6 @@
 package com.quillraven.platformer.ecs.component;
 /*
- * Created by Quillraven on 17.06.2018.
+ * Created by Quillraven on 24.06.2018.
  *
  * MIT License
  *
@@ -23,16 +23,14 @@ package com.quillraven.platformer.ecs.component;
  */
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.utils.Pool;
 
 /**
  * TODO add class description
  */
-
-public class RemoveComponent implements Component, com.badlogic.gdx.utils.Pool.Poolable {
-    public float delay;
-
+public class EnemyComponent implements Component, Pool.Poolable {
     @Override
     public void reset() {
-        delay = 0f;
+
     }
 }

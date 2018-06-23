@@ -59,7 +59,7 @@ public class Map {
         this.groundIdx = new Array<>();
         final MapProperties mapProperties = tiledMap.getProperties();
         for (final MapLayer mapLayer : tiledMap.getLayers()) {
-            if ("objects".equals(mapLayer.getName()) || mapLayer.getName().startsWith("background")) {
+            if (mapLayer.getName().startsWith("background")) {
                 bgdLayerIdx.add(tiledMap.getLayers().getIndex(mapLayer));
             } else if (mapLayer.getName().startsWith("foreground")) {
                 fgdLayerIdx.add(tiledMap.getLayers().getIndex(mapLayer));
@@ -69,6 +69,7 @@ public class Map {
                 groundIdx.add(tiledMap.getLayers().getIndex(mapLayer));
             }
         }
+        groundIdx.add(tiledMap.getLayers().getIndex("objects"));
 
         final String nextLevelStr = mapProperties.get("nextLevel", String.class);
         this.nextLevel = nextLevelStr == null || nextLevelStr.isEmpty() ? null : MapManager.MapType.valueOf(nextLevelStr);

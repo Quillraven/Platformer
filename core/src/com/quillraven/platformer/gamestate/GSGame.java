@@ -113,12 +113,13 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             playerX = PreferencesManager.getInstance().getFloatValue("playerX");
             playerY = PreferencesManager.getInstance().getFloatValue("playerY");
         } else {
-            currentMapType = MapManager.MapType.LEVEL_1;
+            // no game state -> set new game values
+            currentMapType = MapManager.MapType.LEVEL_2;
             resetMap = true;
             playerX = playerY = -1;
         }
 
-        if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, entityEngine, resetMap)) {
+        if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, rayHandler, entityEngine, resetMap)) {
             GameInputManager.getInstance().addGameKeyListener(entityEngine.getSystem(MoveSystem.class));
             GameInputManager.getInstance().addGameKeyListener(entityEngine.getSystem(JumpSystem.class));
             GameInputManager.getInstance().addGameKeyListener(this);
@@ -258,7 +259,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             showVictory = true;
         } else {
             PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
-            if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, entityEngine, true)) {
+            if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, rayHandler, entityEngine, true)) {
                 entityEngine.createPlayer(world, rayHandler, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY());
             }
         }

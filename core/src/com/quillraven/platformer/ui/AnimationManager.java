@@ -82,7 +82,11 @@ public class AnimationManager {
     public enum AnimationType {
         PLAYER_IDLE("characters/characters.atlas", "playerStand", 66, 92, 0f),
         PLAYER_WALK("characters/characters.atlas", "playerWalk", 74, 97, 0.03f),
-        PLAYER_JUMP("characters/characters.atlas", "playerJump", 67, 94, 0f);
+        PLAYER_JUMP("characters/characters.atlas", "playerJump", 67, 94, 0f),
+        FLY_WALK("characters/characters.atlas", "flyWalk", 75, 36, 0.07f),
+        FLY_DEAD("characters/characters.atlas", "flyDead", 59, 33, 0f),
+        SLIME_WALK("characters/characters.atlas", "slimeWalk", 51, 28, 0.5f),
+        SLIME_DEAD("characters/characters.atlas", "slimeDead", 59, 12, 0f);
 
         private final String atlasPath;
         private final String atlasKey;
@@ -96,6 +100,14 @@ public class AnimationManager {
             this.frameWidth = frameWidth;
             this.frameHeight = frameHeight;
             this.frameDuration = frameDuration;
+        }
+
+        public int getFrameWidth() {
+            return frameWidth;
+        }
+
+        public int getFrameHeight() {
+            return frameHeight;
         }
     }
 }

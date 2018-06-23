@@ -47,6 +47,8 @@ import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.ecs.EntityEngine;
 
+import box2dLight.RayHandler;
+
 import static com.quillraven.platformer.Platformer.PPM;
 
 /**
@@ -88,7 +90,7 @@ public class MapManager {
         this.mapListeners.removeValue(listener, true);
     }
 
-    public boolean changeMap(final AssetManager assetManager, final MapType mapType, final World world, final EntityEngine entityEngine, boolean resetMap) {
+    public boolean changeMap(final AssetManager assetManager, final MapType mapType, final World world, final RayHandler rayHandler, final EntityEngine entityEngine, boolean resetMap) {
         if (assetManager.isLoaded(mapType.filePath)) {
             if (!resetMap && currentMap != null && mapType.equals(currentMap.getMapType())) {
                 // map already loaded
@@ -113,7 +115,7 @@ public class MapManager {
 
             currentMap = map;
             currentMap.setMaxCoins(0);
-            createMapBodies(mapLayers, world, entityEngine);
+            createMapBodies(mapLayers, world, rayHandler, entityEngine);
 
             SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentTiledMap.getProperties().get("music", String.class)));
 
@@ -150,12 +152,13 @@ public class MapManager {
         entityEngine.removeAllEntities();
     }
 
-    private void createMapBodies(final MapLayers mapLayers, final World world, final EntityEngine entityEngine) {
-        createMapBodiesForLayer(mapLayers, "collisions", world, entityEngine);
-        createMapBodiesForLayer(mapLayers, "objects", world, entityEngine);
+    private void createMapBodies(final MapLayers mapLayers, final World world, final RayHandler rayHandler, final EntityEngine entityEngine) {
+        createMapBodiesForLayer(mapLayers, "collisions", world, rayHandler, entityEngine);
+        createMapBodiesForLayer(mapLayers, "objects", world, rayHandler, entityEngine);
+        createMapBodiesForLayer(mapLayers, "enemies", world, rayHandler, entityEngine);
     }
 
-    private void createMapBodiesForLayer(final MapLayers mapLayers, final String layerName, final World world, final EntityEngine entityEngine) {
+    private void createMapBodiesForLayer(final MapLayers mapLayers, final String layerName, final World world, final RayHandler rayHandler, final EntityEngine entityEngine) {
         final MapLayer layer = mapLayers.get(layerName);
         if (layer == null) {
             Gdx.app.log(TAG, "Map does not have layer " + layerName);
@@ -164,8 +167,14 @@ public class MapManager {
 
         for (MapObject mapObj : layer.getObjects()) {
             if (mapObj instanceof RectangleMapObject) {
-                // create rectangle collision object
-                createRectangleCollisionBody((RectangleMapObject) mapObj, world);
+                final RectangleMapObject rectMapObj = (RectangleMapObject) mapObj;
+                if (rectMapObj.getRectangle().width == 0) {
+                    // point object --> create enemy
+                    createEnemy(rectMapObj, world, rayHandler, entityEngine);
+                } else {
+                    // rect object --> create collision object
+                    createRectangleCollisionBody(rectMapObj, world);
+                }
             } else if (mapObj instanceof PolylineMapObject) {
                 // create polyline collision object
                 createPolylineCollisionBody(((PolylineMapObject) mapObj).getPolyline(), world);
@@ -175,6 +184,14 @@ public class MapManager {
                 Gdx.app.error(TAG, "Unsupported map object type: " + mapObj.getClass().getSimpleName());
             }
         }
+    }
+
+    private void createEnemy(final RectangleMapObject mapObj, final World world, final RayHandler rayHandler, final EntityEngine entityEngine) {
+        final MapProperties properties = mapObj.getProperties();
+
+        final float x = properties.get("x", Float.class) / PPM;
+        final float y = properties.get("y", Float.class) / PPM;
+        entityEngine.createEnemy(world, rayHandler, x, y, properties.get("enemyType", String.class));
     }
 
     private Body createCollisionBody(final World world, final float x, final float y, final float[] vertices, final boolean createLoop, final short categoryBit, final boolean isSensor) {
@@ -194,7 +211,7 @@ public class MapManager {
         fixtureDef.shape = shape;
         fixtureDef.friction = 0;
         fixtureDef.filter.categoryBits = categoryBit;
-        fixtureDef.filter.maskBits = Platformer.BIT_PLAYER;
+        fixtureDef.filter.maskBits = Platformer.BIT_PLAYER | Platformer.BIT_ENEMY;
         fixtureDef.isSensor = isSensor;
         body.createFixture(fixtureDef).setUserData(userData);
         shape.dispose();

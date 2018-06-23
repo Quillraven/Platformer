@@ -34,6 +34,7 @@ import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
+import com.quillraven.platformer.ecs.component.PlayerComponent;
 
 /**
  * TODO add class description
@@ -43,7 +44,7 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
     private final ComponentMapper<JumpComponent> jumpCmpMapper;
 
     public JumpSystem(final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<JumpComponent> jumpCmpMapper) {
-        super(Family.all(Box2DComponent.class, MoveComponent.class).get());
+        super(Family.all(Box2DComponent.class, MoveComponent.class, PlayerComponent.class).get());
 
         this.b2dCmpMapper = b2dCmpMapper;
         this.jumpCmpMapper = jumpCmpMapper;
@@ -94,6 +95,16 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
 
     @Override
     public void onEndObjectContact(final Entity player, final Entity object, final String objectUserData) {
+
+    }
+
+    @Override
+    public void onBeginEnemyContact(final Entity player, final Entity enemy, final boolean killEnemy) {
+
+    }
+
+    @Override
+    public void onEndEnemyContact(final Entity player, final Entity enemy, final boolean killEnemy) {
 
     }
 
