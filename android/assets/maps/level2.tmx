@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="14" tilewidth="70" tileheight="70" infinite="0" nextobjectid="90">
+ <properties>
+  <property name="music" value="STAGE"/>
+  <property name="name" value="level2"/>
+  <property name="nextLevel" value="LEVEL_3"/>
+  <property name="startX" type="int" value="3"/>
+  <property name="startY" type="int" value="8"/>
+ </properties>
+ <tileset firstgid="1" source="tileset.tsx"/>
+ <layer name="background1" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYBzFo3gUj+JRPIpH8bDCAMy5Afk=
+  </data>
+ </layer>
+ <layer name="background2" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYMAOWIGYDYfcUAHsQMyBRFNqDrHiAxV2zEAsMQD2IoOBtp8egJz4lSVRPSwcmUnUN9KBNBJ7OJRhMEBLvwyFcKK0DKcESBNWwiBDc1eQBwBoYwFL
+  </data>
+ </layer>
+ <layer name="ground" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo4A2gA+IxZGwKAH1AkAsCMRCVLAbl1m8SFiMCDfRGvAyEO8meocPsptgcchPBbtJAdjcg4zpDUhxDzXjixruoQcYdQ/t3YNeruLCoLwKADa4Bgk=
+  </data>
+ </layer>
+ <layer name="foreground" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFIxlIUdk8FiqbN5CA2mEzCqgHBlPcCACxIBALQfFIB8jhMQoGFgAAhWYAyw==
+  </data>
+ </layer>
+ <objectgroup name="objects">
+  <object id="1" gid="10" x="2450.33" y="910.667" width="70" height="70">
+   <properties>
+    <property name="userData" value="coinFlag"/>
+   </properties>
+  </object>
+  <object id="4" gid="2" x="280.5" y="490.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="InfoBox3"/>
+   </properties>
+  </object>
+  <object id="7" gid="9" x="793.667" y="314.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="11" gid="9" x="864.333" y="379" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="12" gid="9" x="627.667" y="771" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="13" gid="9" x="406.333" y="256.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="14" gid="9" x="413.667" y="161" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="15" gid="9" x="341.667" y="302.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="16" gid="9" x="210.333" y="449" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="18" gid="9" x="630.333" y="701" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="19" gid="9" x="633.667" y="632.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="22" gid="9" x="898.33" y="629" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="23" gid="9" x="1208.33" y="443" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="24" gid="9" x="1269" y="401" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="25" gid="9" x="1471.67" y="177" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="26" gid="9" x="1621" y="437.667" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="27" gid="9" x="1553.67" y="405" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="28" gid="9" x="1663" y="498.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="75" gid="9" x="1753" y="711" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="76" gid="9" x="1729" y="635" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="77" gid="9" x="1711" y="553" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="78" gid="9" x="1767" y="783" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="79" gid="9" x="1785" y="863" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ff0000" name="collisions">
+  <object id="80" x="139.333" y="489.333" width="210.667" height="20"/>
+  <object id="81" x="139.333" y="351.333" width="210.667" height="20"/>
+  <object id="83" x="627.333" y="771.333" width="210.667" height="20"/>
+  <object id="84" x="908.666" y="630" width="276.667" height="20"/>
+  <object id="85" x="1329.67" y="421" width="210.667" height="20"/>
+  <object id="86" x="1326.67" y="632" width="210.667" height="20"/>
+  <object id="87" x="1328.67" y="281" width="210.667" height="20"/>
+  <object id="88" x="1752" y="907.333" width="765.334" height="20"/>
+  <object id="89" x="489.333" y="281.333">
+   <polyline points="0,0 280,0 489.333,206.667 696,208"/>
+  </object>
+ </objectgroup>
+</map>

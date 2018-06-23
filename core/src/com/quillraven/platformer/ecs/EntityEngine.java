@@ -23,6 +23,7 @@ import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ecs.system.AnimationSystem;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
+import com.quillraven.platformer.ecs.system.GameProgressSystem;
 import com.quillraven.platformer.ecs.system.GameRenderSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
 import com.quillraven.platformer.ecs.system.MoveSystem;
@@ -60,6 +61,7 @@ import static com.quillraven.platformer.Platformer.PPM;
 public class EntityEngine extends PooledEngine {
     private final BodyDef bodyDef;
     private final FixtureDef fixtureDef;
+    private final ComponentMapper<PlayerComponent> playerCmpMapper;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final Family b2dFamily;
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
@@ -77,6 +79,7 @@ public class EntityEngine extends PooledEngine {
         this.aniCmpMapper = ComponentMapper.getFor(AnimationComponent.class);
         this.animationFamily = Family.all(AnimationComponent.class).get();
         this.playerFamily = Family.all(PlayerComponent.class).get();
+        this.playerCmpMapper = ComponentMapper.getFor(PlayerComponent.class);
 
         // add systems
         // movement
@@ -88,6 +91,8 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new JumpSystem(b2dCmpMapper, jumpCmpMapper));
         // game object collision system
         this.addSystem(new GameObjectCollisionSystem());
+        // game progress system
+        this.addSystem(new GameProgressSystem(b2dCmpMapper, playerCmpMapper));
         // animation system
         this.addSystem(new AnimationSystem());
         // box2d debug
@@ -202,7 +207,7 @@ public class EntityEngine extends PooledEngine {
 
     @Override
     public void removeEntity(final Entity entity) {
-        if (entity.getComponent(PlayerComponent.class) != null) {
+        if (playerCmpMapper.get(entity) != null) {
             player = null;
         }
         super.removeEntity(entity);

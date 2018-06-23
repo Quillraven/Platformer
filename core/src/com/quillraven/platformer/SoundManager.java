@@ -74,7 +74,9 @@ public class SoundManager {
         MENU("sounds/menu.mp3", Music.class),
         SFX_JUMP("sounds/jump.wav", Sound.class),
         SFX_COIN("sounds/coin.wav", Sound.class),
-        SFX_ALL_COINS("sounds/all_coins.wav", Sound.class);
+        SFX_ALL_COINS("sounds/all_coins.wav", Sound.class),
+        SFX_SELECT("sounds/select.wav", Sound.class),
+        SFX_DEATH("sounds/death.ogg", Sound.class);
 
         private final String filePath;
         private final Class<?> soundClass;

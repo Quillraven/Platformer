@@ -22,7 +22,6 @@ package com.quillraven.platformer.gamestate;
  * SOFTWARE.
  */
 
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -43,6 +42,7 @@ import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
+import com.quillraven.platformer.ecs.system.GameProgressSystem;
 import com.quillraven.platformer.ecs.system.JumpSystem;
 import com.quillraven.platformer.ecs.system.MoveSystem;
 import com.quillraven.platformer.map.Map;
@@ -56,13 +56,14 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 
-public class GSGame extends GameState<GameHUD> implements MapManager.MapListener, GameObjectCollisionSystem.GameObjectListener, GameInputManager.GameKeyListener {
+public class GSGame extends GameState<GameHUD> implements MapManager.MapListener, GameObjectCollisionSystem.GameObjectListener, GameInputManager.GameKeyListener, GameProgressSystem.GameProgressListener {
     private final World world;
     private final EntityEngine entityEngine;
     private final Viewport gameViewport;
     private final OrthographicCamera gameCamera;
     private int maxCoins;
     private boolean showMenu;
+    private MapManager.MapType currentMapType;
 
     public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
         super(assetManager, hud, spriteBatch);
@@ -80,6 +81,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         // init ashley entity component system
         entityEngine = new EntityEngine(world, spriteBatch);
         entityEngine.getSystem(GameObjectCollisionSystem.class).addGameObjectListener(this);
+        entityEngine.getSystem(GameProgressSystem.class).addGameProgressListener(this);
     }
 
     @Override
@@ -88,22 +90,21 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         SoundManager.getInstance().loadSounds(assetManager);
 
         final String level = PreferencesManager.getInstance().getStringValue("level");
-        final MapManager.MapType mapType;
         final boolean resetMap;
         final float playerX;
         final float playerY;
         if (!level.isEmpty()) {
-            mapType = MapManager.MapType.valueOf(level);
+            currentMapType = MapManager.MapType.valueOf(level);
             resetMap = false;
             playerX = PreferencesManager.getInstance().getFloatValue("playerX");
             playerY = PreferencesManager.getInstance().getFloatValue("playerY");
         } else {
-            mapType = MapManager.MapType.LEVEL_1;
+            currentMapType = MapManager.MapType.LEVEL_1;
             resetMap = true;
             playerX = playerY = -1;
         }
 
-        if (MapManager.getInstance().changeMap(assetManager, mapType, world, entityEngine, resetMap)) {
+        if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, entityEngine, resetMap)) {
             GameInputManager.getInstance().addGameKeyListener(entityEngine.getSystem(MoveSystem.class));
             GameInputManager.getInstance().addGameKeyListener(entityEngine.getSystem(JumpSystem.class));
             GameInputManager.getInstance().addGameKeyListener(this);
@@ -111,11 +112,12 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             if (entityEngine.getPlayer() == null) {
                 // create player
                 final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-                final Entity player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, playerX == -1 ? MapManager.getInstance().getCurrentMap().getStartX() : playerX, playerY == -1 ? MapManager.getInstance().getCurrentMap().getStartY() : playerY, 48, 64);
-                hud.updateLifeInfo(player.getComponent(PlayerComponent.class).currentLife, player.getComponent(PlayerComponent.class).maxLife);
+                entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
             } else {
                 entityEngine.getPlayer().getComponent(Box2DComponent.class).body.setTransform(playerX, playerY, 0);
             }
+            final PlayerComponent playerCmp = entityEngine.getPlayer().getComponent(PlayerComponent.class);
+            hud.updateLifeInfo(playerCmp.currentLife, playerCmp.maxLife);
         }
     }
 
@@ -125,7 +127,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         GameInputManager.getInstance().removeGameKeyListener(entityEngine.getSystem(JumpSystem.class));
         GameInputManager.getInstance().removeGameKeyListener(this);
 
-        PreferencesManager.getInstance().setStringValue("level", MapManager.getInstance().getCurrentMap().getMapType().name());
+        PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
         PreferencesManager.getInstance().setFloatValue("playerX", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().x);
         PreferencesManager.getInstance().setFloatValue("playerY", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().y);
     }
@@ -209,5 +211,20 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     @Override
     public boolean onKeyReleased(final GameInputManager.GameKeys key) {
         return false;
+    }
+
+    @Override
+    public void onPlayerDeath(final int remainingLife, final int maxLife) {
+        hud.updateLifeInfo(remainingLife, maxLife);
+    }
+
+    @Override
+    public void onLevelCompletion(final Map map) {
+        currentMapType = map.getNextLevel();
+        PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
+        if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, entityEngine, true)) {
+            final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
+            entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
+        }
     }
 }

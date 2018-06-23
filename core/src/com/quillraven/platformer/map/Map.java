@@ -37,6 +37,7 @@ public class Map {
     private static final String TAG = Map.class.getSimpleName();
 
     private final MapManager.MapType mapType;
+    private final MapManager.MapType nextLevel;
     private final String name;
     private final float width;
     private final float height;
@@ -60,6 +61,7 @@ public class Map {
                 fgdLayerIdx.add(tiledMap.getLayers().getIndex(mapLayer));
             }
         }
+        this.nextLevel = MapManager.MapType.valueOf(mapProperties.get("nextLevel", String.class));
 
         this.width = mapProperties.get("width", Integer.class) * mapProperties.get("tilewidth", Integer.class) / PPM;
         this.height = mapProperties.get("height", Integer.class) * mapProperties.get("tileheight", Integer.class) / PPM;
@@ -69,6 +71,10 @@ public class Map {
 
         this.startX = mapProperties.get("startX", Integer.class) * PPM;
         this.startY = mapProperties.get("startY", Integer.class) * PPM;
+    }
+
+    public MapManager.MapType getNextLevel() {
+        return nextLevel;
     }
 
     public float getStartX() {

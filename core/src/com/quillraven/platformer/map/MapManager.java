@@ -151,7 +151,7 @@ public class MapManager {
     }
 
     private void createMapBodies(final MapLayers mapLayers, final World world, final EntityEngine entityEngine) {
-        createMapBodiesForLayer(mapLayers, "collision", world, entityEngine);
+        createMapBodiesForLayer(mapLayers, "collisions", world, entityEngine);
         createMapBodiesForLayer(mapLayers, "objects", world, entityEngine);
     }
 
@@ -272,7 +272,9 @@ public class MapManager {
     }
 
     public enum MapType {
-        LEVEL_1("maps/level1.tmx");
+        LEVEL_1("maps/level1.tmx"),
+        LEVEL_2("maps/level2.tmx"),
+        LEVEL_3("maps/level3.tmx");
 
         private final String filePath;
 

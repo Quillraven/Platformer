@@ -102,6 +102,7 @@ class GSMenu extends GameState<MenuHUD> implements GameInputManager.GameKeyListe
             } else if ("menuItem.continue".equals(hud.getCurrentSelection())) {
                 continueGame = true;
             }
+            SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_SELECT);
             return true;
         }
         return false;
