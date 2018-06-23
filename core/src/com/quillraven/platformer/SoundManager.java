@@ -71,6 +71,9 @@ public class SoundManager {
 
     public enum SoundType {
         STAGE("sounds/stage.mp3", Music.class),
+        FINAL_STAGE("sounds/final_stage.mp3", Music.class),
+        GAME_OVER("sounds/gameover.mp3", Music.class),
+        VICTORY("sounds/victory.mp3", Music.class),
         MENU("sounds/menu.mp3", Music.class),
         SFX_JUMP("sounds/jump.wav", Sound.class),
         SFX_COIN("sounds/coin.wav", Sound.class),

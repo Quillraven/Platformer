@@ -41,6 +41,8 @@ public class Map {
     private final String name;
     private final float width;
     private final float height;
+    private final Array<Integer> cloudsIdx;
+    private final Array<Integer> groundIdx;
     private final Array<Integer> bgdLayerIdx;
     private final Array<Integer> fgdLayerIdx;
     private float startX;
@@ -53,15 +55,23 @@ public class Map {
 
         this.bgdLayerIdx = new Array<>();
         this.fgdLayerIdx = new Array<>();
+        this.cloudsIdx = new Array<>();
+        this.groundIdx = new Array<>();
         final MapProperties mapProperties = tiledMap.getProperties();
         for (final MapLayer mapLayer : tiledMap.getLayers()) {
-            if ("objects".equals(mapLayer.getName()) || "ground".equals(mapLayer.getName()) || mapLayer.getName().startsWith("background")) {
+            if ("objects".equals(mapLayer.getName()) || mapLayer.getName().startsWith("background")) {
                 bgdLayerIdx.add(tiledMap.getLayers().getIndex(mapLayer));
             } else if (mapLayer.getName().startsWith("foreground")) {
                 fgdLayerIdx.add(tiledMap.getLayers().getIndex(mapLayer));
+            } else if ("clouds".equals(mapLayer.getName())) {
+                cloudsIdx.add(tiledMap.getLayers().getIndex(mapLayer));
+            } else if ("ground".equals(mapLayer.getName())) {
+                groundIdx.add(tiledMap.getLayers().getIndex(mapLayer));
             }
         }
-        this.nextLevel = MapManager.MapType.valueOf(mapProperties.get("nextLevel", String.class));
+
+        final String nextLevelStr = mapProperties.get("nextLevel", String.class);
+        this.nextLevel = nextLevelStr == null || nextLevelStr.isEmpty() ? null : MapManager.MapType.valueOf(nextLevelStr);
 
         this.width = mapProperties.get("width", Integer.class) * mapProperties.get("tilewidth", Integer.class) / PPM;
         this.height = mapProperties.get("height", Integer.class) * mapProperties.get("tileheight", Integer.class) / PPM;
@@ -103,6 +113,14 @@ public class Map {
 
     public Integer[] getForegroundLayerIndex() {
         return fgdLayerIdx.toArray(Integer.class);
+    }
+
+    public Integer[] getCloudsIdx() {
+        return cloudsIdx.toArray(Integer.class);
+    }
+
+    public Integer[] getGroundIdx() {
+        return groundIdx.toArray(Integer.class);
     }
 
     public String getName() {

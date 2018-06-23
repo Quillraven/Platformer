@@ -59,6 +59,8 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     private float mapHeight;
     private int[] bgdLayerIdx;
     private int[] fgdLayerIdx;
+    private int[] cloudIdx;
+    private int[] groundIdx;
 
     public GameRenderSystem(final EntityEngine engine, final SpriteBatch spriteBatch, final RayHandler rayHandler, final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<AnimationComponent> aniCmpMapper) {
         super(engine);
@@ -92,6 +94,18 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
         if (mapRenderer.getMap() != null) {
             mapRenderer.setView((OrthographicCamera) camera);
             mapRenderer.render(bgdLayerIdx);
+
+            // paralax map effect with clouds
+            final float camX = camera.position.x;
+            camera.position.x *= 0.7f;
+            camera.update();
+            mapRenderer.setView((OrthographicCamera) camera);
+            mapRenderer.render(cloudIdx);
+
+            camera.position.x = camX;
+            camera.update();
+            mapRenderer.setView((OrthographicCamera) camera);
+            mapRenderer.render(groundIdx);
         }
 
         for (final Entity entity : animatedEntities) {
@@ -141,12 +155,19 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
         for (int i = 0; i < map.getForegroundLayerIndex().length; ++i) {
             fgdLayerIdx[i] = map.getForegroundLayerIndex()[i];
         }
+        cloudIdx = new int[map.getCloudsIdx().length];
+        for (int i = 0; i < map.getCloudsIdx().length; ++i) {
+            cloudIdx[i] = map.getCloudsIdx()[i];
+        }
+        groundIdx = new int[map.getGroundIdx().length];
+        for (int i = 0; i < map.getGroundIdx().length; ++i) {
+            groundIdx[i] = map.getGroundIdx()[i];
+        }
         mapRenderer.setMap(tiledMap);
     }
 
     @Override
     public void onDispose() {
         mapRenderer.dispose();
-        rayHandler.dispose();
     }
 }

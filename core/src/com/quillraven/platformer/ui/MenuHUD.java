@@ -104,6 +104,16 @@ public class MenuHUD extends HUD {
         }
     }
 
+    public void disableContinueMenuItem() {
+        if (menuItems.get(1).equals(continueItem)) {
+            continueItem.getLabel().getText().replace("[Highlight]", "");
+            continueItem.getLabel().getText().insert(0, "[Disabled]");
+            continueItem.getLabel().invalidateHierarchy();
+            menuItems.removeValue(continueItem, true);
+            selectMenuItem(0);
+        }
+    }
+
     public void hideCredits() {
         table.clear();
         final boolean continueAvailable = menuItems.get(1).equals(continueItem);

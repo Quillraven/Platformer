@@ -29,7 +29,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -69,11 +68,15 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     private int maxCoins;
     private boolean showMenu;
     private MapManager.MapType currentMapType;
+    private boolean showVictory;
+    private boolean showGameOver;
 
     public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
         super(assetManager, hud, spriteBatch);
         MapManager.getInstance().addMapListener(this);
         showMenu = false;
+        showVictory = false;
+        showGameOver = false;
 
         this.gameViewport = new FitViewport(Platformer.V_WIDTH / PPM, Platformer.V_HEIGHT / PPM);
         this.gameCamera = (OrthographicCamera) gameViewport.getCamera();
@@ -122,8 +125,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
             if (entityEngine.getPlayer() == null) {
                 // create player
-                final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-                entityEngine.createPlayer(world, rayHandler, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
+                entityEngine.createPlayer(world, rayHandler, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY());
             } else {
                 entityEngine.getPlayer().getComponent(Box2DComponent.class).body.setTransform(playerX, playerY, 0);
             }
@@ -138,7 +140,11 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         GameInputManager.getInstance().removeGameKeyListener(entityEngine.getSystem(JumpSystem.class));
         GameInputManager.getInstance().removeGameKeyListener(this);
 
-        PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
+        if (currentMapType != null) {
+            PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
+        } else {
+            PreferencesManager.getInstance().removeValue("level");
+        }
         PreferencesManager.getInstance().setFloatValue("playerX", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().x);
         PreferencesManager.getInstance().setFloatValue("playerY", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().y);
     }
@@ -148,6 +154,16 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         if (showMenu) {
             gsManager.setState(GameStateManager.GameStateType.MENU);
             showMenu = false;
+            return;
+        } else if (showVictory) {
+            currentMapType = null;
+            gsManager.setState(GameStateManager.GameStateType.VICTORY);
+            showVictory = false;
+            return;
+        } else if (showGameOver) {
+            currentMapType = null;
+            gsManager.setState(GameStateManager.GameStateType.GAME_OVER);
+            showGameOver = false;
             return;
         }
 
@@ -171,6 +187,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     public void onDispose() {
         world.dispose();
         entityEngine.dispose();
+        rayHandler.dispose();
         super.onDispose();
     }
 
@@ -227,15 +244,23 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     @Override
     public void onPlayerDeath(final int remainingLife, final int maxLife) {
         hud.updateLifeInfo(remainingLife, maxLife);
+        if (remainingLife <= 0) {
+            showGameOver = true;
+        }
     }
 
     @Override
     public void onLevelCompletion(final Map map) {
         currentMapType = map.getNextLevel();
-        PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
-        if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, entityEngine, true)) {
-            final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-            entityEngine.createPlayer(world, rayHandler, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
+
+        if (currentMapType == null) {
+            // victory -> no more levels!
+            showVictory = true;
+        } else {
+            PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
+            if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, entityEngine, true)) {
+                entityEngine.createPlayer(world, rayHandler, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY());
+            }
         }
     }
 }

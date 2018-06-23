@@ -42,11 +42,13 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputManager;
 import com.quillraven.platformer.ui.GameHUD;
+import com.quillraven.platformer.ui.GameOverHUD;
 import com.quillraven.platformer.ui.HUD;
 import com.quillraven.platformer.ui.LoadingHUD;
 import com.quillraven.platformer.ui.MenuHUD;
 import com.quillraven.platformer.ui.Skin;
 import com.quillraven.platformer.ui.SkinLoader;
+import com.quillraven.platformer.ui.VictoryHUD;
 
 /**
  * GameStateManager is responsible to manage the states of a game like a main menu, game, game over screen, etc..
@@ -213,7 +215,9 @@ public class GameStateManager {
     public enum GameStateType {
         MENU(GSMenu.class, MenuHUD.class),
         GAME(GSGame.class, GameHUD.class),
-        LOADING(GSLoading.class, LoadingHUD.class);
+        LOADING(GSLoading.class, LoadingHUD.class),
+        VICTORY(GSVictory.class, VictoryHUD.class),
+        GAME_OVER(GSGameOver.class, GameOverHUD.class);
 
         private final Class<? extends GameState<? extends HUD>> gsClass;
         private final Class<? extends HUD> viewClass;

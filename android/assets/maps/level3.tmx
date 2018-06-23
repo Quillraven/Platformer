@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="14" tilewidth="70" tileheight="70" infinite="0" nextobjectid="105">
+ <properties>
+  <property name="music" value="FINAL_STAGE"/>
+  <property name="name" value="level3"/>
+  <property name="startX" type="int" value="2"/>
+  <property name="startY" type="int" value="2"/>
+ </properties>
+ <tileset firstgid="1" source="tileset.tsx"/>
+ <layer name="background1" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYBzFo3gUj+JRPIpH8bDCAMy5Afk=
+  </data>
+ </layer>
+ <layer name="background2" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUDDcgRUWzpKloFj5ATTfTAzDT0GwZBszwoJZ90njMoqWfaAFkGYaem+kJABh6AM0=
+  </data>
+ </layer>
+ <layer name="clouds" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUkAtYgZhtAPSSCtiBmINOdlHTPnLNITdsqeFuesbrUAH0Tn/UBkPV/QCTlwCH
+  </data>
+ </layer>
+ <layer name="ground" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUDCYgAMRCA+0IKgM+IBalklnUCh8xBvxuonU8gMKEH4nPS4SbcAFauJWXAeEmcQZUt1LDTmGouTCM7m9s4YOMCQFS3Adyiwia+YTiApt7kN1MbvhgcwsxbsLmHgARJgQ3
+  </data>
+ </layer>
+ <layer name="foreground" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUSA60A0YBzeOAhcbmDyVAi7AYDd/BBwDt7AA/
+  </data>
+ </layer>
+ <objectgroup name="objects">
+  <object id="1" gid="10" x="2451" y="700.667" width="70" height="70">
+   <properties>
+    <property name="userData" value="coinFlag"/>
+   </properties>
+  </object>
+  <object id="7" gid="9" x="843" y="314.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="11" gid="9" x="835" y="596.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="12" gid="9" x="239.667" y="909.667" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="13" gid="9" x="1059.67" y="348.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="14" gid="9" x="1121.67" y="409" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="15" gid="9" x="429.667" y="689" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="16" gid="9" x="383.666" y="633" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="18" gid="9" x="250.333" y="477" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="19" gid="9" x="247" y="537.666" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="22" gid="9" x="627.663" y="749" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="26" gid="9" x="1811" y="826.667" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="27" gid="9" x="1122.67" y="829" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="28" gid="9" x="1135" y="988.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="75" gid="9" x="2010" y="542" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="76" gid="9" x="2097" y="348" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="77" gid="9" x="1802" y="986" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="78" gid="9" x="1987" y="629" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="79" gid="9" x="1986" y="766" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="90" gid="9" x="1173" y="463.667" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="91" gid="9" x="1207.67" y="538.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+  <object id="92" gid="9" x="1227.67" y="618.333" width="70" height="70">
+   <properties>
+    <property name="userData" value="coin"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ff0000" name="collisions">
+  <object id="93" x="0" y="914.5">
+   <polyline points="0,0 138.5,0.5"/>
+  </object>
+  <object id="94" x="210.5" y="915.5">
+   <polyline points="0,0 138.5,0"/>
+  </object>
+  <object id="95" x="210.5" y="775.5">
+   <polyline points="0,0 138,-0.5"/>
+  </object>
+  <object id="96" x="210" y="634">
+   <polyline points="0,0 138,1"/>
+  </object>
+  <object id="97" x="490.5" y="846">
+   <polyline points="0,0 138,0.5"/>
+  </object>
+  <object id="98" x="700" y="705">
+   <polyline points="0,0 138.5,0"/>
+  </object>
+  <object id="99" x="910" y="565.5">
+   <polyline points="0,0 139,0"/>
+  </object>
+  <object id="100" x="910.5" y="426">
+   <polyline points="0,0 138.5,0"/>
+  </object>
+  <object id="101" x="1193" y="979">
+   <polyline points="0,0 206.5,-206.5 415.5,-207 622,-1.5"/>
+  </object>
+  <object id="102" x="1891" y="774.5">
+   <polyline points="0,0 137.5,-0.5"/>
+  </object>
+  <object id="103" x="1889.5" y="637">
+   <polyline points="0,0 140,-0.5"/>
+  </object>
+  <object id="104" x="2098.5" y="494.5">
+   <polyline points="0,0 70.5,-0.5 280,207.5 420.5,209.5"/>
+  </object>
+ </objectgroup>
+</map>

@@ -58,8 +58,8 @@ public class AnimationSystem extends IteratingSystem {
             changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_IDLE);
         } else {
             changeAnimation(aniCmp, AnimationManager.AnimationType.PLAYER_WALK);
-            aniCmp.flipHoricontal = velocity.x < 0;
         }
+        aniCmp.flipHoricontal = velocity.x < 0;
     }
 
     private void changeAnimation(final AnimationComponent aniCmp, final AnimationManager.AnimationType newAniType) {

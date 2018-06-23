@@ -15,7 +15,12 @@
  </layer>
  <layer name="background2" width="36" height="14">
   <data encoding="base64" compression="zlib">
-   eJxjYMAOWIGYDYfcUAHsQMyBRFNqDrHiAxV2zEAsMQD2IoOBtp8egJz4lSVRPSwcmUnUN9KBNBJ7OJRhMEBLvwyFcKK0DKcESBNWwiBDc1eQBwBoYwFL
+   eJxjYBgFwwUwA7HEALthoO0frECWRPWwcGSmtkOGOZAeaAeMgmEHiElTMjR3BXkAAJ12AL4=
+  </data>
+ </layer>
+ <layer name="clouds" width="36" height="14">
+  <data encoding="base64" compression="zlib">
+   eJxjYMAOWIGYDYfcUAHsQMyBRFNqDrHiwyHsRgFuMBq/QwMMp3iipV+GQjhRWoaPVAAA0r4Ajg==
   </data>
  </layer>
  <layer name="ground" width="36" height="14">
@@ -34,7 +39,7 @@
     <property name="userData" value="coinFlag"/>
    </properties>
   </object>
-  <object id="4" gid="2" x="280.5" y="490.333" width="70" height="70">
+  <object id="4" gid="2" x="296.5" y="450.333" width="50" height="50">
    <properties>
     <property name="userData" value="InfoBox3"/>
    </properties>
@@ -69,7 +74,7 @@
     <property name="userData" value="coin"/>
    </properties>
   </object>
-  <object id="16" gid="9" x="210.333" y="449" width="70" height="70">
+  <object id="16" gid="9" x="95.6663" y="345" width="70" height="70">
    <properties>
     <property name="userData" value="coin"/>
    </properties>

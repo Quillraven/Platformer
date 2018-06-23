@@ -54,6 +54,10 @@ class GSMenu extends GameState<MenuHUD> implements GameInputManager.GameKeyListe
         if (SoundManager.getInstance().loadSounds(assetManager)) {
             SoundManager.getInstance().playSound(SoundManager.SoundType.MENU);
             GameInputManager.getInstance().addGameKeyListener(this);
+
+            if (PreferencesManager.getInstance().getStringValue("level").isEmpty()) {
+                hud.disableContinueMenuItem();
+            }
         }
     }
 
@@ -86,9 +90,11 @@ class GSMenu extends GameState<MenuHUD> implements GameInputManager.GameKeyListe
         }
 
         if (key == GameInputManager.GameKeys.UP) {
+            SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_SELECT);
             hud.selectPreviousMenuItem();
             return true;
         } else if (key == GameInputManager.GameKeys.DOWN) {
+            SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_SELECT);
             hud.selectNextMenuItem();
             return true;
         } else if (key == GameInputManager.GameKeys.JUMP) {

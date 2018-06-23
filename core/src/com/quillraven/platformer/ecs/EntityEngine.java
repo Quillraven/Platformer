@@ -101,7 +101,7 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new AnimationSystem());
         // box2d debug
         renderSystems.add(new GameRenderSystem(this, spriteBatch, rayHandler, b2dCmpMapper, aniCmpMapper));
-//        renderSystems.add(new Box2DDebugRenderSystem(this, world));
+        //renderSystems.add(new Box2DDebugRenderSystem(this, world));
 
         // create box2d definitions
         this.bodyDef = new BodyDef();
@@ -112,8 +112,12 @@ public class EntityEngine extends PooledEngine {
         return player;
     }
 
-    public Entity createPlayer(final World world, final RayHandler rayHandler, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height) {
+    public Entity createPlayer(final World world, final RayHandler rayHandler, final float x, final float y) {
         player = this.createEntity();
+        final int width = 44;
+        final int height = 68;
+        final short categoryBits = Platformer.BIT_PLAYER;
+        final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
 
         // box2d component
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
@@ -121,7 +125,7 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.height = height / PPM;
         // body
         bodyDef.position.set(x / PPM, y / PPM);
-        bodyDef.type = bodyType;
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
         b2dCmp.body = world.createBody(bodyDef);
         b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
         b2dCmp.body.setUserData(player);
@@ -137,7 +141,7 @@ public class EntityEngine extends PooledEngine {
         player.add(b2dCmp);
         // foot sensor
         shape = new PolygonShape();
-        shape.setAsBox(width * 0.33f / PPM, 15f / PPM, new Vector2(-width * 0.17f / PPM, -height * 0.5f / PPM), 0);
+        shape.setAsBox(width * 0.3f / PPM, 15f / PPM, new Vector2(-width * 0.2f / PPM, -height * 0.5f / PPM), 0);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
         fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
@@ -145,7 +149,7 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.body.createFixture(fixtureDef).setUserData("foot-left");
         shape.dispose();
         shape = new PolygonShape();
-        shape.setAsBox(width * 0.33f / PPM, 15f / PPM, new Vector2(width * 0.17f / PPM, -height * 0.5f / PPM), 0);
+        shape.setAsBox(width * 0.3f / PPM, 15f / PPM, new Vector2(width * 0.2f / PPM, -height * 0.5f / PPM), 0);
         fixtureDef.shape = shape;
         fixtureDef.isSensor = true;
         fixtureDef.filter.maskBits = Platformer.BIT_GROUND;
@@ -166,8 +170,8 @@ public class EntityEngine extends PooledEngine {
         // animation component
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
         aniCmp.aniType = AnimationManager.AnimationType.PLAYER_WALK;
-        aniCmp.width = 72 / PPM;
-        aniCmp.height = 96 / PPM;
+        aniCmp.width = (width + 4) / PPM;
+        aniCmp.height = (height + 4) / PPM;
         player.add(aniCmp);
 
         // player component
@@ -176,7 +180,7 @@ public class EntityEngine extends PooledEngine {
         playerCmp.currentLife = playerCmp.maxLife;
         player.add(playerCmp);
 
-        final PointLight light = new PointLight(rayHandler, 128, new Color(0.2f, 1, 0.2f, 0.7f), 4f, 0, 0);
+        final PointLight light = new PointLight(rayHandler, 128, new Color(0.2f, 1, 0.2f, 0.7f), 2f, 0, 0);
         light.attachToBody(b2dCmp.body);
 
         this.addEntity(player);
