@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Vector2;
@@ -29,6 +30,9 @@ import com.quillraven.platformer.ecs.system.JumpSystem;
 import com.quillraven.platformer.ecs.system.MoveSystem;
 import com.quillraven.platformer.ecs.system.RenderSystem;
 import com.quillraven.platformer.ui.AnimationManager;
+
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -70,7 +74,7 @@ public class EntityEngine extends PooledEngine {
     private Entity player;
     private final Array<RenderSystem> renderSystems;
 
-    public EntityEngine(final World world, final SpriteBatch spriteBatch) {
+    public EntityEngine(final World world, final RayHandler rayHandler, final SpriteBatch spriteBatch) {
         super(20, 200, 10, 100);
 
         this.renderSystems = new Array<>();
@@ -96,7 +100,7 @@ public class EntityEngine extends PooledEngine {
         // animation system
         this.addSystem(new AnimationSystem());
         // box2d debug
-        renderSystems.add(new GameRenderSystem(this, spriteBatch, b2dCmpMapper, aniCmpMapper));
+        renderSystems.add(new GameRenderSystem(this, spriteBatch, rayHandler, b2dCmpMapper, aniCmpMapper));
 //        renderSystems.add(new Box2DDebugRenderSystem(this, world));
 
         // create box2d definitions
@@ -108,7 +112,7 @@ public class EntityEngine extends PooledEngine {
         return player;
     }
 
-    public Entity createPlayer(final World world, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height) {
+    public Entity createPlayer(final World world, final RayHandler rayHandler, final BodyDef.BodyType bodyType, final short maskBits, final short categoryBits, final float x, final float y, final float width, final float height) {
         player = this.createEntity();
 
         // box2d component
@@ -171,6 +175,9 @@ public class EntityEngine extends PooledEngine {
         playerCmp.maxLife = 5;
         playerCmp.currentLife = playerCmp.maxLife;
         player.add(playerCmp);
+
+        final PointLight light = new PointLight(rayHandler, 128, new Color(0.2f, 1, 0.2f, 0.7f), 4f, 0, 0);
+        light.attachToBody(b2dCmp.body);
 
         this.addEntity(player);
         return player;

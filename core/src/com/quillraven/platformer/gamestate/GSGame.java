@@ -23,6 +23,7 @@ package com.quillraven.platformer.gamestate;
  */
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -50,6 +51,9 @@ import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.ui.AnimationManager;
 import com.quillraven.platformer.ui.GameHUD;
 
+import box2dLight.DirectionalLight;
+import box2dLight.RayHandler;
+
 import static com.quillraven.platformer.Platformer.PPM;
 
 /**
@@ -58,6 +62,7 @@ import static com.quillraven.platformer.Platformer.PPM;
 
 public class GSGame extends GameState<GameHUD> implements MapManager.MapListener, GameObjectCollisionSystem.GameObjectListener, GameInputManager.GameKeyListener, GameProgressSystem.GameProgressListener {
     private final World world;
+    private final RayHandler rayHandler;
     private final EntityEngine entityEngine;
     private final Viewport gameViewport;
     private final OrthographicCamera gameCamera;
@@ -77,9 +82,15 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         Box2D.init();
         this.world = new World(new Vector2(0, -PPM), true);
         world.setContactListener(WorldContactManager.getInstance());
+        this.rayHandler = new RayHandler(world);
+        // ambient light
+        rayHandler.setAmbientLight(0, 0, 0, 0.8f);
+        rayHandler.setBlurNum(3);
+        // sun
+        new DirectionalLight(rayHandler, 512, new Color(1, 1, 1, 0.4f), 240);
 
         // init ashley entity component system
-        entityEngine = new EntityEngine(world, spriteBatch);
+        entityEngine = new EntityEngine(world, rayHandler, spriteBatch);
         entityEngine.getSystem(GameObjectCollisionSystem.class).addGameObjectListener(this);
         entityEngine.getSystem(GameProgressSystem.class).addGameProgressListener(this);
     }
@@ -112,7 +123,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             if (entityEngine.getPlayer() == null) {
                 // create player
                 final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-                entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
+                entityEngine.createPlayer(world, rayHandler, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
             } else {
                 entityEngine.getPlayer().getComponent(Box2DComponent.class).body.setTransform(playerX, playerY, 0);
             }
@@ -224,7 +235,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
         if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, entityEngine, true)) {
             final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
-            entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
+            entityEngine.createPlayer(world, rayHandler, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
         }
     }
 }

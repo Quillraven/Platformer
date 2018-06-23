@@ -42,6 +42,8 @@ import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.map.MapRenderer;
 import com.quillraven.platformer.ui.AnimationManager;
 
+import box2dLight.RayHandler;
+
 import static com.quillraven.platformer.Platformer.PPM;
 
 /**
@@ -52,13 +54,15 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     private final Family renderFamily;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
+    private final RayHandler rayHandler;
     private float mapWidth;
     private float mapHeight;
     private int[] bgdLayerIdx;
     private int[] fgdLayerIdx;
 
-    public GameRenderSystem(final EntityEngine engine, final SpriteBatch spriteBatch, final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<AnimationComponent> aniCmpMapper) {
+    public GameRenderSystem(final EntityEngine engine, final SpriteBatch spriteBatch, final RayHandler rayHandler, final ComponentMapper<Box2DComponent> b2dCmpMapper, final ComponentMapper<AnimationComponent> aniCmpMapper) {
         super(engine);
+        this.rayHandler = rayHandler;
         MapManager.getInstance().addMapListener(this);
         mapRenderer = new MapRenderer(spriteBatch);
         this.renderFamily = Family.all(AnimationComponent.class, Box2DComponent.class).get();
@@ -120,6 +124,9 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
             mapRenderer.render(fgdLayerIdx);
         }
         spriteBatch.end();
+
+        rayHandler.setCombinedMatrix((OrthographicCamera) camera);
+        rayHandler.updateAndRender();
     }
 
     @Override
@@ -140,5 +147,6 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
     @Override
     public void onDispose() {
         mapRenderer.dispose();
+        rayHandler.dispose();
     }
 }
