@@ -44,13 +44,15 @@ public class SoundManager {
         return instance;
     }
 
-    public void loadSounds(final AssetManager assetManager) {
+    public boolean loadSounds(final AssetManager assetManager) {
         if (!assetManager.isLoaded(SoundType.STAGE.filePath)) {
             this.assetManager = assetManager;
             for (final SoundType sndType : SoundType.values()) {
                 assetManager.load(sndType.filePath, sndType.soundClass);
             }
+            return false;
         }
+        return true;
     }
 
     public void playSound(final SoundType sndType) {
@@ -69,6 +71,7 @@ public class SoundManager {
 
     public enum SoundType {
         STAGE("sounds/stage.mp3", Music.class),
+        MENU("sounds/menu.mp3", Music.class),
         SFX_JUMP("sounds/jump.wav", Sound.class),
         SFX_COIN("sounds/coin.wav", Sound.class),
         SFX_ALL_COINS("sounds/all_coins.wav", Sound.class);

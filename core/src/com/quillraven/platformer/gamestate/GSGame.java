@@ -34,12 +34,15 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.quillraven.platformer.GameInputManager;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
+import com.quillraven.platformer.ecs.system.JumpSystem;
+import com.quillraven.platformer.ecs.system.MoveSystem;
 import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.ui.AnimationManager;
@@ -51,17 +54,19 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 
-public class GSGame extends GameState<GameHUD> implements MapManager.MapListener, GameObjectCollisionSystem.GameObjectListener {
+public class GSGame extends GameState<GameHUD> implements MapManager.MapListener, GameObjectCollisionSystem.GameObjectListener, GameInputManager.GameKeyListener {
     private final World world;
     private final EntityEngine entityEngine;
     private Entity player;
     private final Viewport gameViewport;
     private final OrthographicCamera gameCamera;
     private int maxCoins;
+    private boolean showMenu;
 
     public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
         super(assetManager, hud, spriteBatch);
         MapManager.getInstance().addMapListener(this);
+        showMenu = false;
 
         this.gameViewport = new FitViewport(Platformer.V_WIDTH / PPM, Platformer.V_HEIGHT / PPM);
         this.gameCamera = (OrthographicCamera) gameViewport.getCamera();
@@ -81,6 +86,10 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         AnimationManager.getInstance().loadAnimations(assetManager);
         SoundManager.getInstance().loadSounds(assetManager);
         if (MapManager.getInstance().changeMap(assetManager, MapManager.MapType.LEVEL_1, world, entityEngine)) {
+            GameInputManager.getInstance().addGameKeyListener(entityEngine.getSystem(MoveSystem.class));
+            GameInputManager.getInstance().addGameKeyListener(entityEngine.getSystem(JumpSystem.class));
+            GameInputManager.getInstance().addGameKeyListener(this);
+
             // create player
             final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_OBJECT;
             player = entityEngine.createPlayer(world, BodyDef.BodyType.DynamicBody, maskBits, Platformer.BIT_PLAYER, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY(), 48, 64);
@@ -90,10 +99,19 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
     @Override
     public void onDeactivation() {
+        GameInputManager.getInstance().removeGameKeyListener(entityEngine.getSystem(MoveSystem.class));
+        GameInputManager.getInstance().removeGameKeyListener(entityEngine.getSystem(JumpSystem.class));
+        GameInputManager.getInstance().removeGameKeyListener(this);
     }
 
     @Override
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
+        if (showMenu) {
+            gsManager.pushState(GameStateManager.GameStateType.MENU);
+            showMenu = false;
+            return;
+        }
+
         // important to update entity engine before updating the box2d world in order to store
         // the body position BEFORE the step in some components.
         // This is f.e. needed to interpolate the rendering
@@ -151,5 +169,19 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     @Override
     public void onInfoBoxActivation(final float x, final float y, final String infoBoxID) {
         hud.showInfoMessage(x, y, infoBoxID);
+    }
+
+    @Override
+    public boolean onKeyPressed(final GameInputManager.GameKeys key) {
+        if (key == GameInputManager.GameKeys.EXIT) {
+            showMenu = true;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyReleased(final GameInputManager.GameKeys key) {
+        return false;
     }
 }

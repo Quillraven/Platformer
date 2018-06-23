@@ -5,42 +5,20 @@
       "g": 1,
       "b": 1,
       "a": 1
-    },
-    "red": {
-      "r": 1,
-      "g": 0,
-      "b": 0,
-      "a": 1
-    },
-    "green": {
-      "r": 0,
-      "g": 1,
-      "b": 0,
-      "a": 1
-    },
-    "blue": {
-      "r": 0,
-      "g": 0,
-      "b": 1,
-      "a": 1
     }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
-    "white-label": {
+    "normal": {
       "font": "font_24",
       "fontColor": "white"
     },
-    "red": {
+    "small": {
       "font": "font_16",
-      "fontColor": "red"
+      "fontColor": "white"
     },
-    "green": {
-      "font": "font_24",
-      "fontColor": "green"
-    },
-    "blue": {
-      "font": "font_32",
-      "fontColor": "blue"
+    "big": {
+      "font": "font_48",
+      "fontColor": "white"
     }
   }
 }

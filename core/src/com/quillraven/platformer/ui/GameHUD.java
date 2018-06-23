@@ -50,32 +50,32 @@ public class GameHUD extends HUD {
     public GameHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18NBundle) {
         super(skin, spriteBatch, hudViewport, i18NBundle);
 
-        infoBox = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
+        infoBox = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
         infoBox.getLabel().setWrap(true);
         // it is important to set a width otherwise setWrap does not work --> info message takes up 85% of screen width
         table.add(infoBox).expand().colspan(3).top().padTop(50).width(V_WIDTH * 0.85f).row();
 
         lifeStrBuilder = new StringBuilder(10);
-        lifeInfo = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
+        lifeInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
         table.add(lifeInfo).expandX().padBottom(10).bottom();
 
-        levelInfo = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
+        levelInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
         table.add(levelInfo).expandX().padBottom(10).bottom();
 
         coinStrBuilder = new StringBuilder(14);
-        coinInfo = new TextButton("", skin.get("white-label", TextButton.TextButtonStyle.class));
+        coinInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
         table.add(coinInfo).expandX().padBottom(10).bottom();
     }
 
     public void updateCoinInfo(final int numCoins, final int maxCoins) {
         coinStrBuilder.setLength(0);
-        coinStrBuilder.append("Coins: ").append(numCoins).append("/").append(maxCoins);
+        coinStrBuilder.append(getString("coins")).append(": ").append(numCoins).append("/").append(maxCoins);
         coinInfo.getLabel().setText(coinStrBuilder);
     }
 
     public void updateLifeInfo(final int currentLife, final int maxLife) {
         lifeStrBuilder.setLength(0);
-        lifeStrBuilder.append("Life: ").append(currentLife).append("/").append(maxLife);
+        lifeStrBuilder.append(getString("lifes")).append(": ").append(currentLife).append("/").append(maxLife);
         lifeInfo.getLabel().setText(lifeStrBuilder);
     }
 

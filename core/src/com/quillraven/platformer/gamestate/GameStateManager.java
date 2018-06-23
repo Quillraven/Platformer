@@ -44,6 +44,7 @@ import com.quillraven.platformer.GameInputManager;
 import com.quillraven.platformer.ui.GameHUD;
 import com.quillraven.platformer.ui.HUD;
 import com.quillraven.platformer.ui.LoadingHUD;
+import com.quillraven.platformer.ui.MenuHUD;
 import com.quillraven.platformer.ui.Skin;
 import com.quillraven.platformer.ui.SkinLoader;
 
@@ -81,7 +82,7 @@ public class GameStateManager {
         assetManager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
         assetManager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
         assetManager.setLoader(Skin.class, new SkinLoader(resolver));
-        assetManager.load("hud/hud.json", Skin.class, new SkinLoader.SkinParameter("hud/font.ttf", 16, 24, 32));
+        assetManager.load("hud/hud.json", Skin.class, new SkinLoader.SkinParameter("hud/font.ttf", 16, 24, 48));
         assetManager.load("i18n/strings", I18NBundle.class);
         assetManager.finishLoading();
         skin = assetManager.get("hud/hud.json", Skin.class);
@@ -210,6 +211,7 @@ public class GameStateManager {
     }
 
     public enum GameStateType {
+        MENU(GSMenu.class, MenuHUD.class),
         GAME(GSGame.class, GameHUD.class),
         LOADING(GSLoading.class, LoadingHUD.class);
 

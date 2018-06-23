@@ -1,5 +1,7 @@
 package com.quillraven.platformer.ui;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Colors;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
@@ -34,6 +36,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 public class Skin extends com.badlogic.gdx.scenes.scene2d.ui.Skin {
     Skin(final TextureAtlas atlas) {
         super(atlas);
+
+        Colors.put("Highlight", new Color(0x4250f4ff));
     }
 
     @Override

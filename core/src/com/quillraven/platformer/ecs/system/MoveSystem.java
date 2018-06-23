@@ -44,8 +44,6 @@ public class MoveSystem extends IteratingSystem implements GameInputManager.Game
 
         this.b2dCmpMapper = b2dCmpMapper;
         this.moveCmpMapper = moveCmpMapper;
-
-        GameInputManager.getInstance().addGameKeyListener(this);
     }
 
     @Override

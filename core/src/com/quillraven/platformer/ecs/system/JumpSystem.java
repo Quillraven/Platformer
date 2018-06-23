@@ -48,7 +48,6 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
         this.b2dCmpMapper = b2dCmpMapper;
         this.jumpCmpMapper = jumpCmpMapper;
 
-        GameInputManager.getInstance().addGameKeyListener(this);
         WorldContactManager.getInstance().addGameContactListener(this);
     }
 

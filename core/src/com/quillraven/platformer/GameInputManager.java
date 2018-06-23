@@ -97,7 +97,9 @@ public class GameInputManager extends InputAdapter {
         JUMP(Input.Keys.SPACE),
         RIGHT(Input.Keys.D),
         LEFT(Input.Keys.A),
-        EXIT(Input.Keys.ESCAPE);
+        EXIT(Input.Keys.ESCAPE),
+        UP(Input.Keys.W),
+        DOWN(Input.Keys.S);
 
         private final int keyCode;
 
