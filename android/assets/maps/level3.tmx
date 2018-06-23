@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="14" tilewidth="70" tileheight="70" infinite="0" nextobjectid="105">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="36" height="14" tilewidth="70" tileheight="70" infinite="0" nextobjectid="112">
  <properties>
   <property name="music" value="FINAL_STAGE"/>
   <property name="name" value="level3"/>
@@ -180,6 +180,50 @@
   </object>
   <object id="104" x="2098.5" y="494.5">
    <polyline points="0,0 70.5,-0.5 280,207.5 420.5,209.5"/>
+  </object>
+ </objectgroup>
+ <objectgroup color="#00ff00" name="enemies">
+  <object id="105" x="280" y="889">
+   <properties>
+    <property name="enemyType" value="fly"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="106" x="559" y="830">
+   <properties>
+    <property name="enemyType" value="slime"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="107" x="278" y="759">
+   <properties>
+    <property name="enemyType" value="slime"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="108" x="281" y="624">
+   <properties>
+    <property name="enemyType" value="slime"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="109" x="1421" y="752">
+   <properties>
+    <property name="enemyType" value="fly"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="110" x="1593" y="753">
+   <properties>
+    <property name="enemyType" value="fly"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="111" x="1960" y="620">
+   <properties>
+    <property name="enemyType" value="fly"/>
+   </properties>
+   <point/>
   </object>
  </objectgroup>
 </map>

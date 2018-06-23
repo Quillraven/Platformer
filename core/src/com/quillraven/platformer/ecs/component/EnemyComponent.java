@@ -29,6 +29,9 @@ import com.badlogic.gdx.utils.Pool;
  * TODO add class description
  */
 public class EnemyComponent implements Component, Pool.Poolable {
+    public float spawnX;
+    public float spawnY;
+
     @Override
     public void reset() {
 

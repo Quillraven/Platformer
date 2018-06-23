@@ -34,10 +34,12 @@ public class AnimationComponent implements Component, Pool.Poolable {
     public float animationTime;
     public float width;
     public float height;
+    public float offsetY;
     public boolean flipHoricontal;
 
     @Override
     public void reset() {
+        this.offsetY = 0;
         this.aniType = null;
         this.animationTime = 0;
         this.width = 0;

@@ -23,6 +23,7 @@ import com.quillraven.platformer.ecs.component.GameObjectComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
+import com.quillraven.platformer.ecs.system.AISystem;
 import com.quillraven.platformer.ecs.system.AnimationSystem;
 import com.quillraven.platformer.ecs.system.EnemyCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
@@ -97,8 +98,9 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new JumpSystem(b2dCmpMapper, jumpCmpMapper));
         // game object collision system
         this.addSystem(new GameObjectCollisionSystem());
-        // enemy collision system
+        // enemy systems
         this.addSystem(new EnemyCollisionSystem());
+        this.addSystem(new AISystem(b2dCmpMapper, moveCmpMapper));
         // game progress system
         this.addSystem(new GameProgressSystem(b2dCmpMapper, playerCmpMapper));
         // animation system
@@ -229,12 +231,13 @@ public class EntityEngine extends PooledEngine {
     }
 
     public void createEnemy(final World world, final RayHandler rayHandler, final float x, final float y, final String enemyType) {
+        final boolean isFly = "fly".equals(enemyType);
         final Entity enemy = this.createEntity();
         final short categoryBits = Platformer.BIT_ENEMY;
         final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_PLAYER;
-        final AnimationManager.AnimationType aniType = "fly".equals(enemyType) ? AnimationManager.AnimationType.FLY_WALK : AnimationManager.AnimationType.SLIME_WALK;
+        final AnimationManager.AnimationType aniType = isFly ? AnimationManager.AnimationType.FLY_WALK : AnimationManager.AnimationType.SLIME_WALK;
         final int width = aniType.getFrameWidth();
-        final int height = aniType.getFrameHeight();
+        final int height = isFly ? aniType.getFrameHeight() + 30 : aniType.getFrameHeight();
 
         // box2d component
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
@@ -259,20 +262,24 @@ public class EntityEngine extends PooledEngine {
 
         // move component
         final MoveComponent moveCmp = this.createComponent(MoveComponent.class);
-        moveCmp.maxSpeed = 6;
+        moveCmp.maxSpeed = isFly ? 2 : 0.5f;
         enemy.add(moveCmp);
 
         // animation component
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
         aniCmp.aniType = aniType;
         aniCmp.width = (width + 4) / PPM;
-        aniCmp.height = (height + 4) / PPM;
+        aniCmp.height = (aniType.getFrameHeight() + 4) / PPM;
+        aniCmp.offsetY = isFly ? 0.6f : 0;
         enemy.add(aniCmp);
 
-        enemy.add(createComponent(EnemyComponent.class));
+        final EnemyComponent enemyCmp = createComponent(EnemyComponent.class);
+        enemyCmp.spawnX = x;
+        enemyCmp.spawnY = y;
+        enemy.add(enemyCmp);
 
         b2dCmp.light = new PointLight(rayHandler, 128, new Color(1, 0, 0, 1f), 2f, 0, 0);
-        b2dCmp.light.attachToBody(b2dCmp.body);
+        ((PointLight) b2dCmp.light).attachToBody(b2dCmp.body, 0f, isFly ? 0.6f : 0f);
 
         this.addEntity(enemy);
     }
