@@ -114,7 +114,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             playerY = PreferencesManager.getInstance().getFloatValue("playerY");
         } else {
             // no game state -> set new game values
-            currentMapType = MapManager.MapType.LEVEL_2;
+            currentMapType = MapManager.MapType.LEVEL_1;
             resetMap = true;
             playerX = playerY = -1;
         }

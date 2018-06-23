@@ -57,7 +57,7 @@ public class Platformer extends ApplicationAdapter {
         Gdx.app.setLogLevel(Gdx.app.LOG_DEBUG);
 
         this.accumulator = 0;
-        gsManager = new GameStateManager(GameStateManager.GameStateType.GAME);
+        gsManager = new GameStateManager(GameStateManager.GameStateType.MENU);
     }
 
     @Override
