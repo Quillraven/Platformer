@@ -57,14 +57,14 @@ public class GameHUD extends HUD {
 
         lifeStrBuilder = new StringBuilder(10);
         lifeInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
-        table.add(lifeInfo).expandX().padBottom(10).bottom();
+        table.add(lifeInfo).expandX().padBottom(10).padLeft(55).bottom();
 
         levelInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
         table.add(levelInfo).expandX().padBottom(10).bottom();
 
         coinStrBuilder = new StringBuilder(14);
         coinInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
-        table.add(coinInfo).expandX().padBottom(10).bottom();
+        table.add(coinInfo).expandX().padBottom(10).padRight(40).bottom();
     }
 
     public void updateCoinInfo(final int numCoins, final int maxCoins) {
