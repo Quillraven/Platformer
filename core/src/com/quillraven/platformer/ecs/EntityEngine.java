@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,8 +24,10 @@ import com.quillraven.platformer.ecs.component.GameObjectComponent;
 import com.quillraven.platformer.ecs.component.JumpComponent;
 import com.quillraven.platformer.ecs.component.MoveComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
+import com.quillraven.platformer.ecs.component.RemoveComponent;
 import com.quillraven.platformer.ecs.system.AISystem;
 import com.quillraven.platformer.ecs.system.AnimationSystem;
+import com.quillraven.platformer.ecs.system.Box2DDebugRenderSystem;
 import com.quillraven.platformer.ecs.system.EnemyCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameProgressSystem;
@@ -74,7 +77,6 @@ public class EntityEngine extends PooledEngine {
     private final ComponentMapper<AnimationComponent> aniCmpMapper;
     private final Family animationFamily;
     private final Family playerFamily;
-    private Entity player;
     private final Array<RenderSystem> renderSystems;
 
     public EntityEngine(final World world, final RayHandler rayHandler, final SpriteBatch spriteBatch) {
@@ -85,7 +87,7 @@ public class EntityEngine extends PooledEngine {
         this.b2dFamily = Family.all(Box2DComponent.class).get();
         this.aniCmpMapper = ComponentMapper.getFor(AnimationComponent.class);
         this.animationFamily = Family.all(AnimationComponent.class).get();
-        this.playerFamily = Family.all(PlayerComponent.class).get();
+        this.playerFamily = Family.all(PlayerComponent.class).exclude(RemoveComponent.class).get();
         this.playerCmpMapper = ComponentMapper.getFor(PlayerComponent.class);
 
         // add systems
@@ -107,7 +109,7 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new AnimationSystem());
         // render systems
         renderSystems.add(new GameRenderSystem(this, spriteBatch, rayHandler, b2dCmpMapper, aniCmpMapper));
-//        renderSystems.add(new Box2DDebugRenderSystem(this, world));
+        renderSystems.add(new Box2DDebugRenderSystem(this, world));
 
         // create box2d definitions
         this.bodyDef = new BodyDef();
@@ -115,11 +117,12 @@ public class EntityEngine extends PooledEngine {
     }
 
     public Entity getPlayer() {
-        return player;
+        final ImmutableArray<Entity> playerEntities = getEntitiesFor(playerFamily);
+        return playerEntities.size() > 0 ? playerEntities.first() : null;
     }
 
-    public Entity createPlayer(final World world, final RayHandler rayHandler, final float x, final float y) {
-        player = this.createEntity();
+    public void createPlayer(final World world, final RayHandler rayHandler, final float x, final float y) {
+        final Entity player = this.createEntity();
         final int width = 44;
         final int height = 68;
         final short categoryBits = Platformer.BIT_PLAYER;
@@ -190,7 +193,6 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.light.attachToBody(b2dCmp.body);
 
         this.addEntity(player);
-        return player;
     }
 
     public Entity createGameObj(final Body body, final TiledMapTileMapObject mapObj) {
@@ -220,14 +222,6 @@ public class EntityEngine extends PooledEngine {
         for (final RenderSystem renderSystem : renderSystems) {
             renderSystem.onDispose();
         }
-    }
-
-    @Override
-    public void removeEntity(final Entity entity) {
-        if (playerCmpMapper.get(entity) != null) {
-            player = null;
-        }
-        super.removeEntity(entity);
     }
 
     public void createEnemy(final World world, final RayHandler rayHandler, final float x, final float y, final String enemyType) {

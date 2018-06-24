@@ -148,8 +148,10 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         } else {
             PreferencesManager.getInstance().removeValue("level");
         }
-        PreferencesManager.getInstance().setFloatValue("playerX", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().x);
-        PreferencesManager.getInstance().setFloatValue("playerY", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().y);
+        if (entityEngine.getPlayer() != null) {
+            PreferencesManager.getInstance().setFloatValue("playerX", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().x);
+            PreferencesManager.getInstance().setFloatValue("playerY", entityEngine.getPlayer().getComponent(Box2DComponent.class).body.getPosition().y);
+        }
     }
 
     @Override
