@@ -40,7 +40,6 @@ import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.quillraven.platformer.GameInputManager;
 import com.quillraven.platformer.ui.GameHUD;
 import com.quillraven.platformer.ui.GameOverHUD;
 import com.quillraven.platformer.ui.HUD;
@@ -96,8 +95,6 @@ public class GameStateManager {
         this.gameStateCache = new ObjectMap<>();
         this.stateStack = new Array<>();
         this.popState = false;
-
-        Gdx.input.setInputProcessor(GameInputManager.getInstance());
 
         activateGameState(getState(initialGS));
     }

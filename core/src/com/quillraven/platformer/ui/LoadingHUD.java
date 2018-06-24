@@ -22,7 +22,11 @@ package com.quillraven.platformer.ui;
  * SOFTWARE.
  */
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -30,7 +34,20 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  * TODO add class description
  */
 public class LoadingHUD extends HUD {
-    public LoadingHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18NBundle) {
-        super(skin, spriteBatch, hudViewport, i18NBundle);
+    private TextureRegionDrawable background;
+
+    public LoadingHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle) {
+        super(skin, spriteBatch, hudViewport, i18nBundle);
+
+        background = null;
+        table.add(new TextButton(getString("loading"), skin.get("big", TextButton.TextButtonStyle.class))).expandX().padTop(50);
+        table.top();
+    }
+
+    public void setBackground(final Texture texture) {
+        if (background == null) {
+            background = new TextureRegionDrawable(new TextureRegion(texture));
+            table.background(background);
+        }
     }
 }

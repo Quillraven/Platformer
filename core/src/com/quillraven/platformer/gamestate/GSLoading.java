@@ -24,6 +24,7 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.quillraven.platformer.ui.LoadingHUD;
@@ -42,8 +43,15 @@ public class GSLoading extends GameState<LoadingHUD> {
 
     @Override
     public void onActivation() {
+        super.onActivation();
         timeStartLoading = TimeUtils.millis();
         Gdx.app.debug(TAG, "Loading assets");
+
+        if (!assetManager.isLoaded("hud/menu.png", Texture.class)) {
+            assetManager.load("hud/menu.png", Texture.class);
+        } else {
+            hud.setBackground(assetManager.get("hud/menu.png", Texture.class));
+        }
     }
 
     @Override

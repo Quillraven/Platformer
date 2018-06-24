@@ -41,6 +41,7 @@ public class GSVictory extends GameState<VictoryHUD> implements GameInputManager
 
     @Override
     public void onActivation() {
+        super.onActivation();
         goToMenu = false;
         if (!assetManager.isLoaded("hud/victory.png", Texture.class)) {
             SoundManager.getInstance().loadSounds(assetManager);

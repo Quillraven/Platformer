@@ -22,8 +22,11 @@ package com.quillraven.platformer.ui;
  * SOFTWARE.
  */
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -36,6 +39,7 @@ public class MenuHUD extends HUD {
     private TextButton continueItem;
     private Array<TextButton> menuItems;
     private TextButton credits;
+    private TextureRegionDrawable background;
 
     public MenuHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle) {
         super(skin, spriteBatch, hudViewport, i18nBundle);
@@ -53,7 +57,7 @@ public class MenuHUD extends HUD {
         for (int i = 0; i < menuItems.size; ++i) {
             final TextButton item = menuItems.get(i);
             item.setUserObject(item.getText().toString());
-            item.setText(getString(item.getText().toString()));
+            item.setText("[Black]" + getString(item.getText().toString()));
             item.getStyle().font.getData().markupEnabled = true;
             if (i < menuItems.size - 1) {
                 table.add(item).padBottom(55).row();
@@ -63,18 +67,23 @@ public class MenuHUD extends HUD {
         }
         // disable continue because there is no game started yet
         continueItem = menuItems.get(1);
+        continueItem.getLabel().getText().replace("[Black]", "");
         continueItem.getLabel().getText().insert(0, "[Disabled]");
         menuItems.removeValue(continueItem, true);
         selectMenuItem(currentSelection);
 
         // credits
-        credits = new TextButton(getString("credits"), skin.get("big", TextButton.TextButtonStyle.class));
+        credits = new TextButton("[Black]" + getString("credits"), skin.get("big", TextButton.TextButtonStyle.class));
+
+        background = null;
     }
 
     private void selectMenuItem(final int selection) {
         menuItems.get(currentSelection).getLabel().getText().replace("[Highlight]", "");
+        menuItems.get(currentSelection).getLabel().getText().insert(0, "[Black]");
         menuItems.get(currentSelection).getLabel().invalidateHierarchy();
         currentSelection = Math.max(0, Math.min(menuItems.size - 1, selection));
+        menuItems.get(currentSelection).getLabel().getText().replace("[Black]", "");
         menuItems.get(currentSelection).getLabel().getText().insert(0, "[Highlight]");
         menuItems.get(currentSelection).getLabel().invalidateHierarchy();
     }
@@ -98,7 +107,7 @@ public class MenuHUD extends HUD {
 
     public void enableContinueMenuItem() {
         if (!menuItems.get(1).equals(continueItem)) {
-            continueItem.getLabel().getText().replace("[Disabled]", "");
+            continueItem.getLabel().getText().replace("[Disabled]", "[Black]");
             continueItem.getLabel().invalidateHierarchy();
             menuItems.insert(1, continueItem);
         }
@@ -106,6 +115,7 @@ public class MenuHUD extends HUD {
 
     public void disableContinueMenuItem() {
         if (menuItems.get(1).equals(continueItem)) {
+            continueItem.getLabel().getText().replace("[Black]", "");
             continueItem.getLabel().getText().replace("[Highlight]", "");
             continueItem.getLabel().getText().insert(0, "[Disabled]");
             continueItem.getLabel().invalidateHierarchy();
@@ -134,6 +144,13 @@ public class MenuHUD extends HUD {
             selectMenuItem(1);
         } else {
             selectMenuItem(2);
+        }
+    }
+
+    public void setBackground(final Texture texture) {
+        if (background == null) {
+            background = new TextureRegionDrawable(new TextureRegion(texture));
+            table.background(background);
         }
     }
 }

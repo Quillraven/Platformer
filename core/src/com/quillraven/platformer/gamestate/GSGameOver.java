@@ -42,6 +42,7 @@ public class GSGameOver extends GameState<GameOverHUD> implements GameInputManag
 
     @Override
     public void onActivation() {
+        super.onActivation();
         goToMenu = false;
         if (!assetManager.isLoaded("hud/gameover.png", Texture.class)) {
             SoundManager.getInstance().loadSounds(assetManager);

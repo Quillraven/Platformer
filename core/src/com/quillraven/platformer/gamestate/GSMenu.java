@@ -24,6 +24,7 @@ package com.quillraven.platformer.gamestate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.quillraven.platformer.GameInputManager;
 import com.quillraven.platformer.PreferencesManager;
@@ -51,6 +52,14 @@ class GSMenu extends GameState<MenuHUD> implements GameInputManager.GameKeyListe
 
     @Override
     public void onActivation() {
+        super.onActivation();
+
+        if (!assetManager.isLoaded("hud/menu.png", Texture.class)) {
+            assetManager.load("hud/menu.png", Texture.class);
+        } else {
+            hud.setBackground(assetManager.get("hud/menu.png", Texture.class));
+        }
+
         if (SoundManager.getInstance().loadSounds(assetManager)) {
             SoundManager.getInstance().playSound(SoundManager.SoundType.MENU);
             GameInputManager.getInstance().addGameKeyListener(this);

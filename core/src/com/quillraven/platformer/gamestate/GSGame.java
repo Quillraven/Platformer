@@ -100,6 +100,8 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
     @Override
     public void onActivation() {
+        super.onActivation();
+
         AnimationManager.getInstance().loadAnimations(assetManager);
         SoundManager.getInstance().loadSounds(assetManager);
 

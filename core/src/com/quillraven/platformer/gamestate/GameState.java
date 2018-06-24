@@ -22,8 +22,11 @@ package com.quillraven.platformer.gamestate;
  * SOFTWARE.
  */
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.quillraven.platformer.GameInputManager;
 import com.quillraven.platformer.ui.HUD;
 
 /**
@@ -33,13 +36,17 @@ import com.quillraven.platformer.ui.HUD;
 abstract class GameState<T extends HUD> {
     final AssetManager assetManager;
     final T hud;
+    final InputMultiplexer inputMultiplexer;
 
     GameState(final AssetManager assetManager, final T hud, final SpriteBatch spriteBatch) {
         this.hud = hud;
         this.assetManager = assetManager;
+        this.inputMultiplexer = new InputMultiplexer(hud.getStage(), GameInputManager.getInstance());
     }
 
-    abstract public void onActivation();
+    public void onActivation() {
+        Gdx.input.setInputProcessor(inputMultiplexer);
+    }
 
     abstract public void onDeactivation();
 
