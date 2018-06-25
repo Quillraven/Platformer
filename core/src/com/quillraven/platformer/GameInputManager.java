@@ -50,6 +50,9 @@ public class GameInputManager extends InputAdapter {
     }
 
     public void addGameKeyListener(final GameKeyListener listener) {
+        if (gameKeyListeners.contains(listener, true)) {
+            return;
+        }
         this.gameKeyListeners.add(listener);
     }
 

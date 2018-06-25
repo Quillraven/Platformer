@@ -26,6 +26,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
@@ -40,6 +41,7 @@ import com.quillraven.platformer.ui.AnimationManager;
  * TODO add class description
  */
 public class EnemyCollisionSystem extends IteratingSystem implements WorldContactManager.GameContactListener {
+    private static final String TAG = EnemyCollisionSystem.class.getSimpleName();
     private final ComponentMapper<RemoveComponent> removeComponentComponentMapper;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private boolean killPlayer;
@@ -64,6 +66,7 @@ public class EnemyCollisionSystem extends IteratingSystem implements WorldContac
             killPlayer = false;
             final Entity player = ((EntityEngine) this.getEngine()).getPlayer();
             if (player != null) {
+                Gdx.app.debug(TAG, "Kill player!");
                 final Box2DComponent b2dCmpPlayer = b2dCmpMapper.get(player);
                 b2dCmpPlayer.body.setTransform(b2dCmpPlayer.body.getPosition().x, -2, 0);
             }

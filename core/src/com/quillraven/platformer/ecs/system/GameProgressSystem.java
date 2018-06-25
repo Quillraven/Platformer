@@ -26,6 +26,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.utils.Array;
 import com.quillraven.platformer.SoundManager;
@@ -40,6 +41,7 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 public class GameProgressSystem extends IteratingSystem implements MapManager.MapListener {
+    private static final String TAG = GameProgressSystem.class.getSimpleName();
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
     private final ComponentMapper<PlayerComponent> playerCmpMapper;
     private final Array<GameProgressListener> listeners;
@@ -74,6 +76,7 @@ public class GameProgressSystem extends IteratingSystem implements MapManager.Ma
             for (final GameProgressListener listener : listeners) {
                 listener.onPlayerDeath(playerCmp.currentLife, playerCmp.maxLife);
             }
+            Gdx.app.debug(TAG, "Kill player!");
             b2dCmp.body.setTransform(MapManager.getInstance().getCurrentMap().getStartX() / PPM, MapManager.getInstance().getCurrentMap().getStartY() / PPM, 0);
         } else if (b2dCmp.body.getPosition().x > mapWidth) {
             // level completed

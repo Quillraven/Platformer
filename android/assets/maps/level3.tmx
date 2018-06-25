@@ -207,19 +207,19 @@
    </properties>
    <point/>
   </object>
-  <object id="109" x="1421" y="752">
+  <object id="109" x="1451" y="741">
    <properties>
     <property name="enemyType" value="fly"/>
    </properties>
    <point/>
   </object>
-  <object id="110" x="1593" y="753">
+  <object id="110" x="1644" y="743">
    <properties>
     <property name="enemyType" value="fly"/>
    </properties>
    <point/>
   </object>
-  <object id="111" x="1960" y="620">
+  <object id="111" x="1996" y="591">
    <properties>
     <property name="enemyType" value="fly"/>
    </properties>

@@ -172,7 +172,7 @@
   </object>
  </objectgroup>
  <objectgroup color="#00ff00" name="enemies">
-  <object id="90" x="666.667" y="244">
+  <object id="90" x="662.667" y="224">
    <properties>
     <property name="enemyType" value="fly"/>
    </properties>

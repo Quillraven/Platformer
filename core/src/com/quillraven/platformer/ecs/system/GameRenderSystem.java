@@ -26,6 +26,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -50,6 +51,7 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description and use SortedIteratingSystem
  */
 public class GameRenderSystem extends RenderSystem implements MapManager.MapListener {
+    private final static String TAG = GameRenderSystem.class.getSimpleName();
     private final MapRenderer mapRenderer;
     private final Family renderFamily;
     private final ComponentMapper<Box2DComponent> b2dCmpMapper;
@@ -145,6 +147,7 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
 
     @Override
     public void onMapChanged(final Map map, final TiledMap tiledMap) {
+        Gdx.app.debug(TAG, "Changing map for MapRenderer: " + map.getMapType());
         mapWidth = map.getWidth();
         mapHeight = map.getHeight();
         bgdLayerIdx = new int[map.getBackgroundLayerIndex().length];

@@ -62,7 +62,6 @@ public class MapManager {
     private final ObjectMap<MapType, Map> mapCache;
     private final Array<MapListener> mapListeners;
     private Map currentMap;
-    private TiledMap currentTiledMap;
     private final BodyDef bodyDef;
     private final FixtureDef fixtureDef;
     private final Array<Body> worldBodies;
@@ -71,7 +70,6 @@ public class MapManager {
     private MapManager() {
         this.mapListeners = new Array<>();
         this.currentMap = null;
-        this.currentTiledMap = null;
         this.mapCache = new ObjectMap<>();
         this.bodyDef = new BodyDef();
         this.fixtureDef = new FixtureDef();
@@ -94,33 +92,32 @@ public class MapManager {
         if (assetManager.isLoaded(mapType.filePath)) {
             if (!resetMap && currentMap != null && mapType.equals(currentMap.getMapType())) {
                 // map already loaded
-                SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentTiledMap.getProperties().get("music", String.class)));
+                SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentMap.getTiledMap().getProperties().get("music", String.class)));
                 return true;
             }
 
             // map loaded -> change it
             Gdx.app.debug(TAG, "Changing map to " + mapType);
             Map map = mapCache.get(mapType);
-            currentTiledMap = assetManager.get(mapType.filePath, TiledMap.class);
-            final MapLayers mapLayers = currentTiledMap.getLayers();
             if (map == null) {
                 Gdx.app.debug(TAG, "Creating new map " + mapType);
-                map = new Map(mapType, currentTiledMap);
+                map = new Map(mapType, assetManager.get(mapType.filePath, TiledMap.class));
                 mapCache.put(mapType, map);
             }
 
             if (currentMap != null) {
+                Gdx.app.debug(TAG, "Removing current bodies and entities");
                 removeMapBodies(world, entityEngine);
             }
 
             currentMap = map;
             currentMap.setMaxCoins(0);
-            createMapBodies(mapLayers, world, rayHandler, entityEngine);
+            createMapBodies(currentMap.getTiledMap().getLayers(), world, rayHandler, entityEngine);
 
-            SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentTiledMap.getProperties().get("music", String.class)));
+            SoundManager.getInstance().playSound(SoundManager.SoundType.valueOf(currentMap.getTiledMap().getProperties().get("music", String.class)));
 
             for (final MapListener listener : mapListeners) {
-                listener.onMapChanged(currentMap, currentTiledMap);
+                listener.onMapChanged(currentMap, currentMap.getTiledMap());
             }
 
             return true;
@@ -140,10 +137,8 @@ public class MapManager {
         world.getBodies(worldBodies);
         for (final Body body : worldBodies) {
             final Object userData = body.getUserData();
-            if (userData instanceof Entity) {
+            if (!(userData instanceof Entity)) {
                 // entities are linked to the box2d body and they will destroy it themselves
-                entityEngine.removeEntity((Entity) userData);
-            } else {
                 world.destroyBody(body);
             }
         }

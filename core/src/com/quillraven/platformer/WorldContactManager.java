@@ -85,7 +85,7 @@ public class WorldContactManager implements ContactListener {
             }
         } else if (otherFixture.getFilterData().categoryBits == Platformer.BIT_ENEMY) {
             for (GameContactListener listener : listeners) {
-                listener.onBeginEnemyContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), playerFixture.getBody().getPosition().y > otherFixture.getBody().getPosition().y + 0.3f);
+                listener.onBeginEnemyContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), playerFixture.getBody().getLinearVelocity().y < -2f);
             }
         }
     }
@@ -118,7 +118,7 @@ public class WorldContactManager implements ContactListener {
             }
         } else if (otherFixture.getFilterData().categoryBits == Platformer.BIT_ENEMY) {
             for (GameContactListener listener : listeners) {
-                listener.onEndEnemyContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), playerFixture.getBody().getPosition().y > otherFixture.getBody().getPosition().y + 0.3f);
+                listener.onEndEnemyContact((Entity) playerFixture.getBody().getUserData(), (Entity) otherFixture.getBody().getUserData(), playerFixture.getBody().getLinearVelocity().y < -2f);
             }
         }
     }

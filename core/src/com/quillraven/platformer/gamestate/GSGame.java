@@ -22,6 +22,8 @@ package com.quillraven.platformer.gamestate;
  * SOFTWARE.
  */
 
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -60,6 +62,7 @@ import static com.quillraven.platformer.Platformer.PPM;
  */
 
 public class GSGame extends GameState<GameHUD> implements MapManager.MapListener, GameObjectCollisionSystem.GameObjectListener, GameInputManager.GameKeyListener, GameProgressSystem.GameProgressListener {
+    private static final String TAG = GSGame.class.getSimpleName();
     private final World world;
     private final RayHandler rayHandler;
     private final EntityEngine entityEngine;
@@ -70,6 +73,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     private MapManager.MapType currentMapType;
     private boolean showVictory;
     private boolean showGameOver;
+    private boolean changeLevel;
 
     public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
         super(assetManager, hud, spriteBatch);
@@ -77,6 +81,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         showMenu = false;
         showVictory = false;
         showGameOver = false;
+        changeLevel = false;
 
         this.gameViewport = new FitViewport(Platformer.V_WIDTH / PPM, Platformer.V_HEIGHT / PPM);
         this.gameCamera = (OrthographicCamera) gameViewport.getCamera();
@@ -100,15 +105,20 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
     @Override
     public void onActivation() {
+        Gdx.app.debug(TAG, "Activating GSGame");
         super.onActivation();
 
         AnimationManager.getInstance().loadAnimations(assetManager);
         SoundManager.getInstance().loadSounds(assetManager);
 
+        changeLevel();
+    }
+
+    private void changeLevel() {
         final String level = PreferencesManager.getInstance().getStringValue("level");
         final boolean resetMap;
-        final float playerX;
-        final float playerY;
+        float playerX = 0;
+        float playerY = 0;
         if (!level.isEmpty()) {
             currentMapType = MapManager.MapType.valueOf(level);
             resetMap = false;
@@ -118,7 +128,6 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             // no game state -> set new game values
             currentMapType = MapManager.MapType.LEVEL_1;
             resetMap = true;
-            playerX = playerY = -1;
         }
 
         if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, rayHandler, entityEngine, resetMap)) {
@@ -126,19 +135,30 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             GameInputManager.getInstance().addGameKeyListener(entityEngine.getSystem(JumpSystem.class));
             GameInputManager.getInstance().addGameKeyListener(this);
 
+            if (playerX == 0 && playerY == 0) {
+                playerX = MapManager.getInstance().getCurrentMap().getStartX() / PPM;
+                playerY = MapManager.getInstance().getCurrentMap().getStartY() / PPM;
+            }
+
             if (entityEngine.getPlayer() == null) {
                 // create player
-                entityEngine.createPlayer(world, rayHandler, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY());
+                Gdx.app.debug(TAG, "Creating new player instance at: " + MapManager.getInstance().getCurrentMap().getStartX() / PPM + "/" + MapManager.getInstance().getCurrentMap().getStartY() / PPM);
+                final Entity player = entityEngine.createPlayer(world, rayHandler, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY());
+                final PlayerComponent playerCmp = player.getComponent(PlayerComponent.class);
+                hud.updateLifeInfo(playerCmp.currentLife, playerCmp.maxLife);
             } else {
+                Gdx.app.debug(TAG, "Setting player position to: " + playerX + "/" + playerY);
                 entityEngine.getPlayer().getComponent(Box2DComponent.class).body.setTransform(playerX, playerY, 0);
+                final PlayerComponent playerCmp = entityEngine.getPlayer().getComponent(PlayerComponent.class);
+                hud.updateLifeInfo(playerCmp.currentLife, playerCmp.maxLife);
             }
-            final PlayerComponent playerCmp = entityEngine.getPlayer().getComponent(PlayerComponent.class);
-            hud.updateLifeInfo(playerCmp.currentLife, playerCmp.maxLife);
+
         }
     }
 
     @Override
     public void onDeactivation() {
+        Gdx.app.debug(TAG, "Deactivating GSGame");
         GameInputManager.getInstance().removeGameKeyListener(entityEngine.getSystem(MoveSystem.class));
         GameInputManager.getInstance().removeGameKeyListener(entityEngine.getSystem(JumpSystem.class));
         GameInputManager.getInstance().removeGameKeyListener(this);
@@ -169,6 +189,13 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             currentMapType = null;
             gsManager.setState(GameStateManager.GameStateType.GAME_OVER);
             showGameOver = false;
+            return;
+        } else if (changeLevel) {
+            changeLevel = false;
+            PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
+            PreferencesManager.getInstance().removeValue("playerX");
+            PreferencesManager.getInstance().removeValue("playerY");
+            changeLevel();
             return;
         }
 
@@ -262,10 +289,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             // victory -> no more levels!
             showVictory = true;
         } else {
-            PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
-            if (MapManager.getInstance().changeMap(assetManager, currentMapType, world, rayHandler, entityEngine, true)) {
-                entityEngine.createPlayer(world, rayHandler, MapManager.getInstance().getCurrentMap().getStartX(), MapManager.getInstance().getCurrentMap().getStartY());
-            }
+            changeLevel = true;
         }
     }
 }

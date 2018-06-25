@@ -49,10 +49,11 @@ public class Map {
     private float startY;
     private int maxCoins;
     private TiledMapTileMapObject coinFlagObject;
+    private final TiledMap tiledMap;
 
     Map(final MapManager.MapType mapType, final TiledMap tiledMap) {
         this.mapType = mapType;
-
+        this.tiledMap = tiledMap;
         this.bgdLayerIdx = new Array<>();
         this.fgdLayerIdx = new Array<>();
         this.cloudsIdx = new Array<>();
@@ -82,6 +83,10 @@ public class Map {
 
         this.startX = mapProperties.get("startX", Integer.class) * PPM;
         this.startY = mapProperties.get("startY", Integer.class) * PPM;
+    }
+
+    TiledMap getTiledMap() {
+        return tiledMap;
     }
 
     public MapManager.MapType getNextLevel() {

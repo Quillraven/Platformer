@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -27,6 +28,7 @@ import com.quillraven.platformer.ecs.component.PlayerComponent;
 import com.quillraven.platformer.ecs.component.RemoveComponent;
 import com.quillraven.platformer.ecs.system.AISystem;
 import com.quillraven.platformer.ecs.system.AnimationSystem;
+import com.quillraven.platformer.ecs.system.Box2DDebugRenderSystem;
 import com.quillraven.platformer.ecs.system.EnemyCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameObjectCollisionSystem;
 import com.quillraven.platformer.ecs.system.GameProgressSystem;
@@ -68,6 +70,8 @@ import static com.quillraven.platformer.Platformer.PPM;
  * TODO add class description
  */
 public class EntityEngine extends PooledEngine {
+    private static final String TAG = EntityEngine.class.getSimpleName();
+
     private final BodyDef bodyDef;
     private final FixtureDef fixtureDef;
     private final ComponentMapper<PlayerComponent> playerCmpMapper;
@@ -108,7 +112,7 @@ public class EntityEngine extends PooledEngine {
         this.addSystem(new AnimationSystem());
         // render systems
         renderSystems.add(new GameRenderSystem(this, spriteBatch, rayHandler, b2dCmpMapper, aniCmpMapper));
-//        renderSystems.add(new Box2DDebugRenderSystem(this, world));
+        renderSystems.add(new Box2DDebugRenderSystem(this, world));
 
         // create box2d definitions
         this.bodyDef = new BodyDef();
@@ -117,10 +121,13 @@ public class EntityEngine extends PooledEngine {
 
     public Entity getPlayer() {
         final ImmutableArray<Entity> playerEntities = getEntitiesFor(playerFamily);
-        return playerEntities.size() > 0 ? playerEntities.first() : null;
+        if (playerEntities != null && playerEntities.size() > 1) {
+            Gdx.app.error(TAG, "There are more than one player instances: " + playerEntities.size());
+        }
+        return playerEntities == null || playerEntities.size() < 1 || playerEntities.first().isScheduledForRemoval() ? null : playerEntities.first();
     }
 
-    public void createPlayer(final World world, final RayHandler rayHandler, final float x, final float y) {
+    public Entity createPlayer(final World world, final RayHandler rayHandler, final float x, final float y) {
         final Entity player = this.createEntity();
         final int width = 44;
         final int height = 68;
@@ -132,6 +139,7 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.width = width / PPM;
         b2dCmp.height = height / PPM;
         // body
+        bodyDef.gravityScale = 1;
         bodyDef.position.set(x / PPM, y / PPM);
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         b2dCmp.body = world.createBody(bodyDef);
@@ -192,6 +200,7 @@ public class EntityEngine extends PooledEngine {
         b2dCmp.light.attachToBody(b2dCmp.body);
 
         this.addEntity(player);
+        return player;
     }
 
     public Entity createGameObj(final Body body, final TiledMapTileMapObject mapObj) {
@@ -229,8 +238,8 @@ public class EntityEngine extends PooledEngine {
         final short categoryBits = Platformer.BIT_ENEMY;
         final short maskBits = Platformer.BIT_GROUND | Platformer.BIT_PLAYER;
         final AnimationManager.AnimationType aniType = isFly ? AnimationManager.AnimationType.FLY_WALK : AnimationManager.AnimationType.SLIME_WALK;
-        final int width = aniType.getFrameWidth();
-        final int height = isFly ? aniType.getFrameHeight() + 30 : aniType.getFrameHeight();
+        final int width = aniType.getFrameWidth() - 8;
+        final int height = aniType.getFrameHeight() - 8;
 
         // box2d component
         final Box2DComponent b2dCmp = this.createComponent(Box2DComponent.class);
@@ -239,6 +248,7 @@ public class EntityEngine extends PooledEngine {
         // body
         bodyDef.position.set(x, y);
         bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.gravityScale = isFly ? 0 : 1;
         b2dCmp.body = world.createBody(bodyDef);
         b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
         b2dCmp.body.setUserData(enemy);
@@ -261,9 +271,9 @@ public class EntityEngine extends PooledEngine {
         // animation component
         final AnimationComponent aniCmp = this.createComponent(AnimationComponent.class);
         aniCmp.aniType = aniType;
-        aniCmp.width = (width + 4) / PPM;
-        aniCmp.height = (aniType.getFrameHeight() + 4) / PPM;
-        aniCmp.offsetY = isFly ? 0.6f : 0;
+        aniCmp.width = (width + 8) / PPM;
+        aniCmp.height = (height + 8) / PPM;
+        aniCmp.offsetY = isFly ? 0.1f : 0;
         enemy.add(aniCmp);
 
         final EnemyComponent enemyCmp = createComponent(EnemyComponent.class);
@@ -272,7 +282,7 @@ public class EntityEngine extends PooledEngine {
         enemy.add(enemyCmp);
 
         b2dCmp.light = new PointLight(rayHandler, 128, new Color(1, 0, 0, 1f), 2f, 0, 0);
-        ((PointLight) b2dCmp.light).attachToBody(b2dCmp.body, 0f, isFly ? 0.6f : 0f);
+        ((PointLight) b2dCmp.light).attachToBody(b2dCmp.body, 0f, aniCmp.offsetY);
 
         this.addEntity(enemy);
     }
