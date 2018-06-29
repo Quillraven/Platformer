@@ -36,8 +36,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameOverHUD extends HUD {
     private TextureRegionDrawable background;
 
-    public GameOverHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle) {
-        super(skin, spriteBatch, hudViewport, i18nBundle);
+    public GameOverHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle, final Texture transitionTexture) {
+        super(skin, spriteBatch, hudViewport, i18nBundle, transitionTexture);
 
         background = null;
         table.add(new TextButton(getString("gameover"), skin.get("big", TextButton.TextButtonStyle.class))).expandX().padTop(50);

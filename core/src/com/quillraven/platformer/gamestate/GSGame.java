@@ -73,6 +73,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     private MapManager.MapType currentMapType;
     private boolean showVictory;
     private boolean showGameOver;
+    private float changeLevelDelay;
     private boolean changeLevel;
 
     public GSGame(final AssetManager assetManager, final GameHUD hud, final SpriteBatch spriteBatch) {
@@ -82,6 +83,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         showVictory = false;
         showGameOver = false;
         changeLevel = false;
+        this.changeLevelDelay = 0f;
 
         this.gameViewport = new FitViewport(Platformer.V_WIDTH / PPM, Platformer.V_HEIGHT / PPM);
         this.gameCamera = (OrthographicCamera) gameViewport.getCamera();
@@ -152,7 +154,6 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
                 final PlayerComponent playerCmp = entityEngine.getPlayer().getComponent(PlayerComponent.class);
                 hud.updateLifeInfo(playerCmp.currentLife, playerCmp.maxLife);
             }
-
         }
     }
 
@@ -176,21 +177,8 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
     @Override
     public void onUpdate(final GameStateManager gsManager, final float fixedTimeStep) {
-        if (showMenu) {
-            gsManager.setState(GameStateManager.GameStateType.MENU);
-            showMenu = false;
-            return;
-        } else if (showVictory) {
-            currentMapType = null;
-            gsManager.setState(GameStateManager.GameStateType.VICTORY);
-            showVictory = false;
-            return;
-        } else if (showGameOver) {
-            currentMapType = null;
-            gsManager.setState(GameStateManager.GameStateType.GAME_OVER);
-            showGameOver = false;
-            return;
-        } else if (changeLevel) {
+        changeLevelDelay -= fixedTimeStep;
+        if (changeLevel && changeLevelDelay <= 0) {
             changeLevel = false;
             PreferencesManager.getInstance().setStringValue("level", currentMapType.name());
             PreferencesManager.getInstance().removeValue("playerX");
@@ -199,11 +187,29 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             return;
         }
 
-        // important to update entity engine before updating the box2d world in order to store
-        // the body position BEFORE the step in some components.
-        // This is f.e. needed to interpolate the rendering
-        entityEngine.update(fixedTimeStep);
-        world.step(fixedTimeStep, 6, 2);
+        if (!hud.isFading()) {
+            if (showMenu) {
+                gsManager.setState(GameStateManager.GameStateType.MENU);
+                showMenu = false;
+                return;
+            } else if (showVictory) {
+                currentMapType = null;
+                gsManager.setState(GameStateManager.GameStateType.VICTORY);
+                showVictory = false;
+                return;
+            } else if (showGameOver) {
+                currentMapType = null;
+                gsManager.setState(GameStateManager.GameStateType.GAME_OVER);
+                showGameOver = false;
+                return;
+            }
+
+            // important to update entity engine before updating the box2d world in order to store
+            // the body position BEFORE the step in some components.
+            // This is f.e. needed to interpolate the rendering
+            entityEngine.update(fixedTimeStep);
+            world.step(fixedTimeStep, 6, 2);
+        }
 
         super.onUpdate(gsManager, fixedTimeStep);
     }
@@ -278,6 +284,8 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
         hud.updateLifeInfo(remainingLife, maxLife);
         if (remainingLife <= 0) {
             showGameOver = true;
+        } else {
+            hud.doFadeOutAndIn(0.5f);
         }
     }
 
@@ -290,6 +298,8 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
             showVictory = true;
         } else {
             changeLevel = true;
+            changeLevelDelay = 1.25f;
+            hud.doFadeOutAndIn(changeLevelDelay);
         }
     }
 }

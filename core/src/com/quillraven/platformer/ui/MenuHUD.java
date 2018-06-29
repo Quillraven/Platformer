@@ -41,8 +41,8 @@ public class MenuHUD extends HUD {
     private TextButton credits;
     private TextureRegionDrawable background;
 
-    public MenuHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle) {
-        super(skin, spriteBatch, hudViewport, i18nBundle);
+    public MenuHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle, final Texture transitionTexture) {
+        super(skin, spriteBatch, hudViewport, i18nBundle, transitionTexture);
 
         currentSelection = 0;
         menuItems = new Array<>();

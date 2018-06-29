@@ -78,6 +78,7 @@ public class GameProgressSystem extends IteratingSystem implements MapManager.Ma
             }
             Gdx.app.debug(TAG, "Kill player!");
             b2dCmp.body.setTransform(MapManager.getInstance().getCurrentMap().getStartX() / PPM, MapManager.getInstance().getCurrentMap().getStartY() / PPM, 0);
+            b2dCmp.positionBeforeUpdate.set(b2dCmp.body.getPosition());
         } else if (b2dCmp.body.getPosition().x > mapWidth) {
             // level completed
             playerCmp.coinsCollected = 0;

@@ -27,6 +27,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -68,6 +69,7 @@ public class GameStateManager {
     private final AssetManager assetManager;
     private final Skin skin;
     private final Viewport hudViewport;
+    private final Texture transitionTexture;
     private final I18NBundle i18NBundle;
 
     private final ObjectMap<GameStateType, GameState> gameStateCache;
@@ -85,9 +87,11 @@ public class GameStateManager {
         assetManager.setLoader(Skin.class, new SkinLoader(resolver));
         assetManager.load("hud/hud.json", Skin.class, new SkinLoader.SkinParameter("hud/font.ttf", 16, 24, 48));
         assetManager.load("i18n/strings", I18NBundle.class);
+        assetManager.load("hud/transition.png", Texture.class);
         assetManager.finishLoading();
         skin = assetManager.get("hud/hud.json", Skin.class);
         i18NBundle = assetManager.get("i18n/strings", I18NBundle.class);
+        transitionTexture = assetManager.get("hud/transition.png");
 
         this.spriteBatch = new SpriteBatch();
         this.hudViewport = new ScreenViewport();
@@ -105,7 +109,7 @@ public class GameStateManager {
         if (gameState == null) {
             try {
                 Gdx.app.debug(TAG, "Creating new gamestate " + gsType);
-                final HUD view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class, Viewport.class, I18NBundle.class).newInstance(skin, spriteBatch, hudViewport, i18NBundle);
+                final HUD view = gsType.viewClass.getConstructor(Skin.class, SpriteBatch.class, Viewport.class, I18NBundle.class, Texture.class).newInstance(skin, spriteBatch, hudViewport, i18NBundle, transitionTexture);
                 gameState = gsType.gsClass.getConstructor(AssetManager.class, gsType.viewClass, SpriteBatch.class).newInstance(assetManager, view, spriteBatch);
                 gameStateCache.put(gsType, gameState);
             } catch (Exception e) {

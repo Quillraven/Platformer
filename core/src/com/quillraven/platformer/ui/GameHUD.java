@@ -22,6 +22,7 @@ package com.quillraven.platformer.ui;
  * SOFTWARE.
  */
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -47,8 +48,8 @@ public class GameHUD extends HUD {
 
     private final TextButton infoBox;
 
-    public GameHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18NBundle) {
-        super(skin, spriteBatch, hudViewport, i18NBundle);
+    public GameHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18NBundle, final Texture transitionTexture) {
+        super(skin, spriteBatch, hudViewport, i18NBundle, transitionTexture);
 
         infoBox = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
         infoBox.getLabel().setWrap(true);

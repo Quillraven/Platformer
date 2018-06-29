@@ -22,13 +22,20 @@ package com.quillraven.platformer.ui;
  * SOFTWARE.
  */
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputManager;
+
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 /**
  * TODO add class description
@@ -40,12 +47,14 @@ public abstract class HUD implements GameInputManager.GameKeyListener {
     private final Stage stage;
     private final I18NBundle i18nBundle;
 
+    private final Table transitionTable;
+
     // on screen UI
     private final GamePad gamePad;
     private final Button btnBack;
     private final Button btnSelect;
 
-    HUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle) {
+    HUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18nBundle, final Texture transitionTexture) {
         this.skin = skin;
         this.hudViewport = hudViewport;
         this.stage = new Stage(hudViewport, spriteBatch);
@@ -67,6 +76,13 @@ public abstract class HUD implements GameInputManager.GameKeyListener {
 
         btnSelect = new Button(skin, "select");
         onScreenUITable.add(btnSelect).expandX().bottom().right().padBottom(5).padRight(5);
+
+        transitionTable = new Table();
+        transitionTable.setFillParent(true);
+        transitionTable.background(new TextureRegionDrawable(new TextureRegion(transitionTexture)));
+        transitionTable.setScale(0, 1);
+        transitionTable.setTransform(true);
+        stage.addActor(transitionTable);
 
         GameInputManager.getInstance().addGameKeyListener(this);
     }
@@ -90,6 +106,14 @@ public abstract class HUD implements GameInputManager.GameKeyListener {
 
     public void onResize(final int width, final int height) {
         hudViewport.update(width, height, true);
+    }
+
+    public void doFadeOutAndIn(final float fadeOutTime) {
+        transitionTable.addAction(sequence(scaleTo(2, 1, fadeOutTime), delay(0.2f), scaleTo(0, 1, fadeOutTime * 0.6f)));
+    }
+
+    public boolean isFading() {
+        return transitionTable.getActions().size > 0;
     }
 
     @Override
