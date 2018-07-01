@@ -4,6 +4,13 @@ size: 814,200
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+asteroid
+  rotate: false
+  xy: 499, 37
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
 flyDead
   rotate: false
   xy: 0, 0
@@ -62,7 +69,7 @@ playerWalk
   index: -1
 slimeDead
   rotate: false
-  xy: 499, 89
+  xy: 499, 23
   size: 59, 12
   orig: 59, 12
   offset: 0, 0

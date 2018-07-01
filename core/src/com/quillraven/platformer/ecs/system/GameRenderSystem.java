@@ -29,12 +29,16 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.quillraven.platformer.ParticleEffectManager;
 import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.AnimationComponent;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
@@ -139,6 +143,18 @@ public class GameRenderSystem extends RenderSystem implements MapManager.MapList
         if (mapRenderer.getMap() != null) {
             mapRenderer.render(fgdLayerIdx);
         }
+
+        // render particle effects
+        final Array<ParticleEffectPool.PooledEffect> effects = ParticleEffectManager.getInstance().getEffects();
+        for (int i = effects.size - 1; i >= 0; --i) {
+            final ParticleEffectPool.PooledEffect effect = effects.get(i);
+            effect.draw(spriteBatch, Gdx.graphics.getDeltaTime());
+            if (effect.isComplete()) {
+                effect.free();
+                effects.removeIndex(i);
+            }
+        }
+        spriteBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         spriteBatch.end();
 
         rayHandler.setCombinedMatrix((OrthographicCamera) camera);

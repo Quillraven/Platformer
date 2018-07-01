@@ -36,6 +36,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputManager;
+import com.quillraven.platformer.ParticleEffectManager;
 import com.quillraven.platformer.Platformer;
 import com.quillraven.platformer.PreferencesManager;
 import com.quillraven.platformer.SoundManager;
@@ -112,6 +113,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
 
         AnimationManager.getInstance().loadAnimations(assetManager);
         SoundManager.getInstance().loadSounds(assetManager);
+        ParticleEffectManager.getInstance().loadEffects(assetManager);
 
         changeLevel();
     }

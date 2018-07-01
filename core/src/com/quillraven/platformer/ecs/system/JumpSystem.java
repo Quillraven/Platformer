@@ -28,6 +28,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.quillraven.platformer.GameInputManager;
+import com.quillraven.platformer.ParticleEffectManager;
 import com.quillraven.platformer.SoundManager;
 import com.quillraven.platformer.WorldContactManager;
 import com.quillraven.platformer.ecs.EntityEngine;
@@ -65,6 +66,7 @@ public class JumpSystem extends IteratingSystem implements WorldContactManager.G
             // impulse = 5 - velocity.x * mass <-- the - velocity.x will adjust the impulse so that the result velocity.x will be 5
             b2dCmp.body.applyLinearImpulse(0, (jumpCmp.jumpSpeed - b2dCmp.body.getLinearVelocity().y) * b2dCmp.body.getMass(), worldCenter.x, worldCenter.y, true);
             SoundManager.getInstance().playSound(SoundManager.SoundType.SFX_JUMP);
+            ParticleEffectManager.getInstance().spawnDustEffect(b2dCmp.body.getPosition().x, b2dCmp.body.getPosition().y - b2dCmp.height * 0.5f);
         }
 
         jumpCmp.jump = false;
