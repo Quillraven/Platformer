@@ -74,6 +74,7 @@ public class MenuHUD extends HUD {
 
         // credits
         credits = new TextButton("[Black]" + getString("credits"), skin.get("big", TextButton.TextButtonStyle.class));
+        credits.getLabel().setWrap(true);
 
         background = null;
     }
@@ -102,7 +103,7 @@ public class MenuHUD extends HUD {
 
     public void showCredits() {
         table.clear();
-        table.add(credits);
+        table.add(credits).expand().fill();
     }
 
     public void enableContinueMenuItem() {

@@ -32,7 +32,6 @@ import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
-import static com.quillraven.platformer.Platformer.V_WIDTH;
 
 /**
  * TODO add class description
@@ -51,21 +50,20 @@ public class GameHUD extends HUD {
     public GameHUD(final Skin skin, final SpriteBatch spriteBatch, final Viewport hudViewport, final I18NBundle i18NBundle, final Texture transitionTexture) {
         super(skin, spriteBatch, hudViewport, i18NBundle, transitionTexture);
 
-        infoBox = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
+        infoBox = new TextButton("", skin.get("small", TextButton.TextButtonStyle.class));
         infoBox.getLabel().setWrap(true);
-        // it is important to set a width otherwise setWrap does not work --> info message takes up 85% of screen width
-        table.add(infoBox).expand().colspan(3).top().padTop(50).width(V_WIDTH * 0.85f).row();
+        table.add(infoBox).expand().fill().colspan(2).top().padBottom(50).row();
 
         lifeStrBuilder = new StringBuilder(10);
-        lifeInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
-        table.add(lifeInfo).expandX().padBottom(10).padLeft(55).bottom();
-
-        levelInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
-        table.add(levelInfo).expandX().padBottom(10).bottom();
+        lifeInfo = new TextButton("", skin.get("small", TextButton.TextButtonStyle.class));
+        table.add(lifeInfo).expandX().padBottom(10).padLeft(125).bottom();
 
         coinStrBuilder = new StringBuilder(14);
-        coinInfo = new TextButton("", skin.get("normal", TextButton.TextButtonStyle.class));
-        table.add(coinInfo).expandX().padBottom(10).padRight(40).bottom();
+        coinInfo = new TextButton("", skin.get("small", TextButton.TextButtonStyle.class));
+        table.add(coinInfo).expandX().padBottom(10).left().row();
+
+        levelInfo = new TextButton("", skin.get("small", TextButton.TextButtonStyle.class));
+        table.add(levelInfo).expandX().padBottom(10).bottom().colspan(2);
     }
 
     public void updateCoinInfo(final int numCoins, final int maxCoins) {

@@ -39,16 +39,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.quillraven.platformer.ui.GameHUD;
-import com.quillraven.platformer.ui.GameOverHUD;
-import com.quillraven.platformer.ui.HUD;
-import com.quillraven.platformer.ui.LoadingHUD;
-import com.quillraven.platformer.ui.MenuHUD;
-import com.quillraven.platformer.ui.Skin;
-import com.quillraven.platformer.ui.SkinLoader;
-import com.quillraven.platformer.ui.VictoryHUD;
+import com.quillraven.platformer.Platformer;
+import com.quillraven.platformer.ui.*;
 
 /**
  * GameStateManager is responsible to manage the states of a game like a main menu, game, game over screen, etc..
@@ -85,7 +79,7 @@ public class GameStateManager {
         assetManager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
         assetManager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
         assetManager.setLoader(Skin.class, new SkinLoader(resolver));
-        assetManager.load("hud/hud.json", Skin.class, new SkinLoader.SkinParameter("hud/font.ttf", 16, 24, 48));
+        assetManager.load("hud/hud.json", Skin.class, new SkinLoader.SkinParameter("hud/font.ttf", 16, 24, 32));
         assetManager.load("i18n/strings", I18NBundle.class);
         assetManager.load("hud/transition.png", Texture.class);
         assetManager.finishLoading();
@@ -94,7 +88,7 @@ public class GameStateManager {
         transitionTexture = assetManager.get("hud/transition.png");
 
         this.spriteBatch = new SpriteBatch();
-        this.hudViewport = new ScreenViewport();
+        this.hudViewport = new FitViewport(Platformer.V_WIDTH, Platformer.V_HEIGHT);
 
         this.gameStateCache = new ObjectMap<>();
         this.stateStack = new Array<>();

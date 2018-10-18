@@ -22,6 +22,8 @@ package com.quillraven.platformer.gamestate;
  * SOFTWARE.
  */
 
+import box2dLight.DirectionalLight;
+import box2dLight.RayHandler;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
@@ -35,12 +37,7 @@ import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.quillraven.platformer.GameInputManager;
-import com.quillraven.platformer.ParticleEffectManager;
-import com.quillraven.platformer.Platformer;
-import com.quillraven.platformer.PreferencesManager;
-import com.quillraven.platformer.SoundManager;
-import com.quillraven.platformer.WorldContactManager;
+import com.quillraven.platformer.*;
 import com.quillraven.platformer.ecs.EntityEngine;
 import com.quillraven.platformer.ecs.component.Box2DComponent;
 import com.quillraven.platformer.ecs.component.PlayerComponent;
@@ -52,9 +49,6 @@ import com.quillraven.platformer.map.Map;
 import com.quillraven.platformer.map.MapManager;
 import com.quillraven.platformer.ui.AnimationManager;
 import com.quillraven.platformer.ui.GameHUD;
-
-import box2dLight.DirectionalLight;
-import box2dLight.RayHandler;
 
 import static com.quillraven.platformer.Platformer.PPM;
 
@@ -235,6 +229,7 @@ public class GSGame extends GameState<GameHUD> implements MapManager.MapListener
     public void onResize(final int width, final int height) {
         super.onResize(width, height);
         gameViewport.update(width, height);
+        rayHandler.useCustomViewport(gameViewport.getScreenX(), gameViewport.getScreenY(), gameViewport.getScreenWidth(), gameViewport.getScreenHeight());
     }
 
     @Override
