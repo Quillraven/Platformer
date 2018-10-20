@@ -109,6 +109,10 @@ public class GameInputManager extends InputAdapter {
         GameKeys(final int keyCode) {
             this.keyCode = keyCode;
         }
+
+        public int getKeyCode() {
+            return keyCode;
+        }
     }
 
     public interface GameKeyListener {

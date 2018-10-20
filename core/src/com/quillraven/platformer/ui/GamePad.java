@@ -23,8 +23,10 @@ package com.quillraven.platformer.ui;
  */
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
+import com.quillraven.platformer.GameInputManager;
 
 /**
  * TODO add class description
@@ -54,6 +56,14 @@ public class GamePad extends WidgetGroup {
         addActor(btn);
     }
 
+    @Override
+    public boolean addListener(final EventListener listener) {
+        for (final Actor btn : getChildren()) {
+            btn.addListener(listener);
+        }
+        return true;
+    }
+
     public boolean contains(Actor actor) {
         for (final Actor btn : this.getChildren()) {
             if (btn.equals(actor)) {
@@ -66,6 +76,23 @@ public class GamePad extends WidgetGroup {
 
     public void setChecked(final GamePadDirection direction, final boolean checked) {
         ((Button) getChildren().get(direction.ordinal())).setChecked(checked);
+    }
+
+    public GameInputManager.GameKeys getRelatedKey(final Actor target) {
+        for (final Actor btn : this.getChildren()) {
+            if (btn.equals(target)) {
+                if (btn.getUserObject().equals(GamePadDirection.UP)) {
+                    return GameInputManager.GameKeys.UP;
+                } else if (btn.getUserObject().equals(GamePadDirection.LEFT)) {
+                    return GameInputManager.GameKeys.LEFT;
+                } else if (btn.getUserObject().equals(GamePadDirection.RIGHT)) {
+                    return GameInputManager.GameKeys.RIGHT;
+                } else if (btn.getUserObject().equals(GamePadDirection.DOWN)) {
+                    return GameInputManager.GameKeys.DOWN;
+                }
+            }
+        }
+        return null;
     }
 
     public enum GamePadDirection {

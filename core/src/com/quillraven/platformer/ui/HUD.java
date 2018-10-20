@@ -25,6 +25,8 @@ package com.quillraven.platformer.ui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -33,14 +35,12 @@ import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.quillraven.platformer.GameInputManager;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 
 /**
  * TODO add class description
  */
-public abstract class HUD implements GameInputManager.GameKeyListener {
+public abstract class HUD extends InputListener implements GameInputManager.GameKeyListener {
     final Skin skin;
     final Table table;
     private final Viewport hudViewport;
@@ -70,12 +70,15 @@ public abstract class HUD implements GameInputManager.GameKeyListener {
 
         btnBack = new Button(skin, "back");
         onScreenUITable.add(btnBack).expand().left().top().padTop(5).padLeft(5).row();
+        btnBack.addListener(this);
 
         gamePad = new GamePad(skin);
         onScreenUITable.add(gamePad).left().bottom().padLeft(5).padBottom(5);
+        gamePad.addListener(this);
 
         btnSelect = new Button(skin, "select");
         onScreenUITable.add(btnSelect).expandX().bottom().right().padBottom(5).padRight(5);
+        btnSelect.addListener(this);
 
         transitionTable = new Table();
         transitionTable.setFillParent(true);
@@ -85,6 +88,7 @@ public abstract class HUD implements GameInputManager.GameKeyListener {
         stage.addActor(transitionTable);
 
         GameInputManager.getInstance().addGameKeyListener(this);
+        stage.addListener(this);
     }
 
     public Stage getStage() {
@@ -114,6 +118,34 @@ public abstract class HUD implements GameInputManager.GameKeyListener {
 
     public boolean isFading() {
         return transitionTable.getActions().size > 0;
+    }
+
+    @Override
+    public boolean touchDown(final InputEvent event, final float x, final float y, final int pointer, final int button) {
+        final GameInputManager.GameKeys relatedKey = gamePad.getRelatedKey(event.getListenerActor());
+        if (relatedKey != null) {
+            GameInputManager.getInstance().keyDown(relatedKey.getKeyCode());
+            return true;
+        } else if (event.getListenerActor().equals(btnBack)) {
+            GameInputManager.getInstance().keyDown(GameInputManager.GameKeys.EXIT.getKeyCode());
+            return true;
+        } else if (event.getListenerActor().equals(btnSelect)) {
+            GameInputManager.getInstance().keyDown(GameInputManager.GameKeys.JUMP.getKeyCode());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void touchUp(final InputEvent event, final float x, final float y, final int pointer, final int button) {
+        final GameInputManager.GameKeys relatedKey = gamePad.getRelatedKey(event.getListenerActor());
+        if (relatedKey != null) {
+            GameInputManager.getInstance().keyUp(relatedKey.getKeyCode());
+        } else if (event.getListenerActor().equals(btnBack)) {
+            GameInputManager.getInstance().keyUp(GameInputManager.GameKeys.EXIT.getKeyCode());
+        } else if (event.getListenerActor().equals(btnSelect)) {
+            GameInputManager.getInstance().keyUp(GameInputManager.GameKeys.JUMP.getKeyCode());
+        }
     }
 
     @Override
